@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaaS Tycoon</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .section { margin-bottom: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 5px; margin-top: 5px; }
+    #log { margin-top: 20px; white-space: pre-line; background: #f0f0f0; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>SaaS Tycoon Game Client</h1>
+  <div class="section">
+    <h2>Create or Join Game</h2>
+    <label>Player Name: <input id="playerName" /></label>
+    <label>Game ID (leave blank to create new): <input id="gameId" /></label>
+    <label>Player Limit (if creating new): <input id="playerLimit" value="5" /></label>
+    <button onclick="joinGame()">Start/Join Game</button>
+  </div>
+  <div class="section">
+    <h2>Submit Action</h2>
+    <label>Turn: <input id="turn" type="number" /></label>
+    <label>Action (text): <input id="actionText" /></label>
+    <button onclick="submitAction()">Submit Action</button>
+  </div>
+  <div class="section">
+    <h2>View Game State</h2>
+    <button onclick="fetchGameState()">View All Players</button>
+    <button onclick="fetchPlayerState()">View My Stats</button>
+    <button onclick="fetchEvent()">Get Current Event</button>
+  </div>
+  <pre id="state"></pre>
+  <pre id="log"></pre>
+  <script>
+    let gameId = '';
+    let playerId = '';
+    let currentTurn = 1;
+    let SERVER = 'http://localhost:3000';
+    const gameSateIntervalId = setInterval(refreshGameState, 3000);
+
+    function log(msg) {
+      document.getElementById('log').textContent += msg + '\n';
+    }
+    function showState(msg) {
+      document.getElementById('state').textContent = msg + '\n';
+    }
+    async function joinGame() {
+      const name = document.getElementById('playerName').value;
+      const inputGameId = document.getElementById('gameId').value;
+      const playerLimit = parseInt(document.getElementById('playerLimit').value);
+
+      if (!inputGameId) {
+        const res = await fetch(`${SERVER}/api/game`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerLimit })
+        });
+        const data = await res.json();
+        gameId = data.gameId;
+        log('Game created: ' + gameId);
+      } else {
+        gameId = inputGameId;
+      }
+
+      const res = await fetch(SERVER+`/api/game/${gameId}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: name })
+      });
+      const data = await res.json();
+      playerId = data.playerId;
+      log('Joined game as: ' + data.playerName + ' (ID: ' + playerId + ')');
+    }
+
+    async function submitAction() {
+      //const turn = parseInt(document.getElementById('turn').value);
+      const turn = currentTurn;
+      const action = document.getElementById('actionText').value;
+      const res = await fetch(SERVER+`/api/game/${gameId}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, turn, action })
+      });
+      const data = await res.json();
+      log(JSON.stringify(data, null, 2));
+    }
+
+    async function fetchGameState() {
+      const res = await fetch(SERVER+`/api/game/${gameId}`);
+      const data = await res.json();
+      log(JSON.stringify(data, null, 2));
+    }
+
+    async function refreshGameState() {
+      const res = await fetch(SERVER+`/api/game/${gameId}`);
+      const data = await res.json();
+      currentTurn = data.currentTurn;
+      showState(JSON.stringify(data, null, 2));
+    }
+
+    async function fetchPlayerState() {
+      const res = await fetch(SERVER+`/api/game/${gameId}?playerId=${playerId}`);
+      const data = await res.json();
+      log(JSON.stringify(data, null, 2));
+    }
+
+    async function fetchEvent() {
+      const res = await fetch(SERVER+`/api/game/${gameId}/event`);
+      const data = await res.json();
+      log('Current Turn: ' + data.currentTurn);
+      if (data.event) {
+        log('Event: ' + data.event.title + ' - ' + data.event.description);
+      } else {
+        log('No event yet.');
+      }
+    }
+  </script>
+</body>
+</html>
