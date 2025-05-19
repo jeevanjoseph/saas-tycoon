@@ -1,4 +1,4 @@
-const { createGameSession, canStartGame , processTurn} = require('../models/gameSession');
+const { createGameSession, canStartGame, processTurn } = require('../models/gameSession');
 const createPlayer = require('../models/player');
 
 const sessions = {};
@@ -32,13 +32,19 @@ function joinSession(req, res) {
   const session = sessions[req.params.id];
   const playerName = req.body.playerName;
   if (!session) return res.status(404).json({ error: 'Game not found' });
-  if (session.started) return res.status(400).json({ error: 'Game has already started' });
-  if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
+  const existingPlayer = session.players.find(p => p.name === playerName);
+  if (existingPlayer) {
+    return res.json({ gameId: session.id, playerId: existingPlayer.id, playerName: existingPlayer.name });
+  } else {
+    if (session.started) return res.status(400).json({ error: 'Game has already started' });
+    if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
 
-  const player = createPlayer(playerName);
-  session.players.push(player);
-  res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
+    const player = createPlayer(playerName);
+    session.players.push(player);
+    return res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
+  }
 }
+
 
 // Function to set a player as ready
 // It checks if the session exists and if the player is part of the session

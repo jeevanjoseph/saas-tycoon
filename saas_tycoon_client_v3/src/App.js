@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import JoinGamePage from './JoinGamePage';
+import GamePage from './GamePage';
 
 const API = 'http://localhost:3000/api/game';
 
@@ -31,7 +33,6 @@ function App() {
     try {
       const res = await axios.post(API, { playerLimit: 5 });
       setGameId(res.data.gameId);
-      console.log('Game created: ' + res.data.gameId);
       joinGame(res.data.gameId);
     } catch (err) {
       console.error('Error creating game:', err);
@@ -58,55 +59,17 @@ function App() {
 
   if (!gameId) {
     return (
-      <div className="container">
-        <h1>SaaS Tycoon</h1>
-        <input
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          placeholder="Enter name"
-        />
-        <button onClick={createGame} disabled={!playerName}>
-          Create Game
-        </button>
-        <h2>Available Games</h2>
-        <ul>
-          {sessions
-            .filter((s) => !s.started)
-            .map((s) => (
-              <li key={s.id}>
-                {s.id} ({s.playerCount}/{s.playerLimit})
-                <button onClick={() => joinGame(s.id)}>Join</button>
-              </li>
-            ))}
-        </ul>
-      </div>
+      <JoinGamePage
+        playerName={playerName}
+        setPlayerName={setPlayerName}
+        sessions={sessions}
+        createGame={createGame}
+        joinGame={joinGame}
+      />
     );
   }
 
-  return (
-    <div className="container">
-      <h1>Game ID: {gameId}</h1>
-      <h2>Turn: {game?.currentTurn || 'Loading...'}</h2>
-      <button onClick={setReady}>I'm Ready</button>
-      <div className="players">
-        {game?.players?.map((player) => (
-          <div key={player.id} className="player-card">
-            <h3>
-              {player.name} {player.id === playerId && '(You)'}
-            </h3>
-            <p>Cash: ${player.cash}</p>
-            <p>Customers: {player.customers}</p>
-            <p>Features: {player.features?.length || 0}</p>
-            <p>Cloud Skills: {player.skills?.cloudNative || 0}</p>
-            <p>Legacy Skills: {player.skills?.legacy || 0}</p>
-            <p>Op Maturity: {player.opMaturity || 0}</p>
-            <p>Tech Debt: {player.techDebt || 0}</p>
-            <p>Revenue: ${player.revenue || 0}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return <GamePage gameId={gameId} game={game} playerId={playerId} setReady={setReady} />;
 }
 
 export default App;
