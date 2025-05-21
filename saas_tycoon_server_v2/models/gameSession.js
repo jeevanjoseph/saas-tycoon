@@ -80,7 +80,7 @@ function getRandomEvent(events) {
 }
 // Function to create a default game session
 // It generates a unique ID for the session and sets the player limit
-function createGameSession(playerLimit = 5) {
+function createGameSession(playerLimit = 10) {
   return {
     id: uuidv4(),
     players: [],

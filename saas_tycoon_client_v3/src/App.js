@@ -10,6 +10,7 @@ function App() {
   const [gameId, setGameId] = useState(null);
   const [playerId, setPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState('');
+  const [playerType, setPlayerType] = useState('Monolith'); // Default player type
   const [game, setGame] = useState(null);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ function App() {
 
   const joinGame = async (id) => {
     try {
-      const res = await axios.post(`${API}/${id}/join`, { playerName });
+      const res = await axios.post(`${API}/${id}/join`, { playerName, playerType });
       setGameId(res.data.gameId);
       setPlayerId(res.data.playerId);
     } catch (err) {
@@ -62,6 +63,8 @@ function App() {
       <JoinGamePage
         playerName={playerName}
         setPlayerName={setPlayerName}
+        playerType={playerType}
+        setPlayerType={setPlayerType}
         sessions={sessions}
         createGame={createGame}
         joinGame={joinGame}

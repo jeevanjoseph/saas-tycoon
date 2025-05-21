@@ -30,8 +30,10 @@ function createSession(req, res) {
 // If the player is successfully added, it returns the game ID and player ID
 function joinSession(req, res) {
   const session = sessions[req.params.id];
-  const playerName = req.body.playerName;
+  const { playerName, playerType } = req.body;
+
   if (!session) return res.status(404).json({ error: 'Game not found' });
+
   const existingPlayer = session.players.find(p => p.name === playerName);
   if (existingPlayer) {
     return res.json({ gameId: session.id, playerId: existingPlayer.id, playerName: existingPlayer.name });
@@ -39,12 +41,16 @@ function joinSession(req, res) {
     if (session.started) return res.status(400).json({ error: 'Game has already started' });
     if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
 
-    const player = createPlayer(playerName);
-    session.players.push(player);
-    return res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
+    try {
+      const player = createPlayer(playerName, playerType);
+      session.players.push(player);
+      return res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
+    } catch (error) {
+      console.error('Error creating player:', error);
+      return res.status(400).json({ error: error.message });
+    }
   }
 }
-
 
 // Function to set a player as ready
 // It checks if the session exists and if the player is part of the session
@@ -116,7 +122,7 @@ function performAction(req, res) {
   }
 
   player.actions[turn] = action;
-
+  player.stats[turn] = player.applyAction(action, player.stats[turn - 1]); // Copy stats from the previous turn
   const allSubmitted = session.players.every(p => p.actions[turn]);
   if (allSubmitted) {
     processTurn(session);
