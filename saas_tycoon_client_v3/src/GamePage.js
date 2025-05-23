@@ -5,16 +5,19 @@ import axios from 'axios';
 
 const API = 'http://localhost:3000/api/game';
 const actions = [
-  { id: 1, name: "Build New Feature", code: "BUILD_NEW_FEATURE", description: "Develop a new feature to attract more customers.", cost: 1000, icon: "pi pi-cog" },
-  { id: 2, name: "Fix Bugs", code: "FIX_BUGS", description: "Address existing bugs to improve customer satisfaction.", cost: 400, icon: "pi pi-wrench" },
-  { id: 3, name: "Training", code: "TRAINING", description: "Train the team to improve operational maturity.", cost: 500, icon: "pi pi-server" },
-  { id: 4, name: "Launch Marketing Campaign", code: "LAUNCH_MARKETING_CAMPAIGN", description: "Run a marketing campaign to attract new customers.", cost: 800, icon: "pi pi-megaphone" },
-  { id: 5, name: "DevOps", code: "DEVOPS", description: "Transition to a devops model, where developers own the complete service lifecycle", cost: 800, icon: "pi pi-cloud" },
-  { id: 6, name: "Acquire Customers", code: "ACQUIRE_CUSTOMERS", description: "Focus on acquiring new customers through sales efforts.", cost: 300, icon: "pi pi-users" },
-  { id: 7, name: "Reduce Tech Debt", code: "REDUCE_TECH_DEBT", description: "Allocate resources to refactor code and reduce tech debt.", cost: 500, icon: "pi pi-chart-line" },
-  { id: 8, name: "Expand Team", code: "EXPAND_TEAM", description: "Hire more developers to increase productivity.", cost: 600, icon: "pi pi-user-plus" },
-  { id: 9, name: "Optimize Pricing", code: "OPTIMIZE_PRICING", description: "Adjust pricing strategy to maximize revenue.", cost: 700, icon: "pi pi-dollar" },
-  { id: 10, name: "Conduct Training", code: "CONDUCT_TRAINING", description: "Train the team to improve cloud-native or legacy skills.", cost: 400, icon: "pi pi-book" }
+  { code: "BUILD_CONTROL_PLANE", name: "Build Control Plane", description: "Develop a new control plane feature to attract more customers.", icon: "pi pi-cog" },
+  { code: "BUILD_MULTITENANT_FEATURE", name: "Build Multitenant Feature", description: "Develop a multitenant feature to improve scalability.", icon: "pi pi-wrench" },
+  { code: "BUILD_SINGLETENANT_FEATURE", name: "Build Singletentant Feature", description: "Develop a singletentant feature for specific customer needs.", icon: "pi pi-users" },
+  { code: "BUILD_MONOLITH_FEATURE", name: "Build Monolith Feature", description: "Develop a monolith feature for specific customer needs.", icon: "pi pi-database" },
+  { code: "FIX_BUGS", name: "Fix Bugs", description: "Fix bugs to improve product quality and stability.", icon: "pi pi-tools" },
+  { code: "TRAINING", name: "Training", description: "Train your team to improve skills and productivity.", icon: "pi pi-book" },
+  { code: "LAUNCH_MARKETING_CAMPAIGN", name: "Launch Marketing Campaign", description: "Run a marketing campaign to increase brand awareness.", icon: "pi pi-bullhorn" },
+  { code: "DEVOPS", name: "DevOps", description: "Invest in DevOps to improve deployment and reliability.", icon: "pi pi-shield" },
+  { code: "ACQUIRE_CUSTOMERS", name: "Acquire Customers", description: "Acquire new customers to grow your business.", icon: "pi pi-user-plus" },
+  { code: "REDUCE_TECH_DEBT", name: "Reduce Tech Debt", description: "Reduce technical debt to improve maintainability.", icon: "pi pi-chart-line" },
+  { code: "EXPAND_TEAM", name: "Expand Team", description: "Hire more team members to increase capacity.", icon: "pi pi-users" },
+  { code: "OPTIMIZE_PRICING", name: "Optimize Pricing", description: "Adjust pricing to maximize revenue.", icon: "pi pi-dollar" },
+  { code: "CONDUCT_TRAINING", name: "Conduct Training", description: "Conduct training sessions to upskill your team.", icon: "pi pi-book" }
 ];
 
 function GamePage({ gameId, game, playerId, setReady }) {
@@ -99,44 +102,72 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <h3>Current Turn Stats</h3>
               <p><strong>Cash:</strong> ${currentTurnStats.cash}</p>
               <p><strong>Customers:</strong> {currentTurnStats.customers}</p>
-              <p><strong>Tech Debt:</strong> {currentTurnStats.techDebt}</p>
-              <p><strong>Revenue:</strong> ${currentTurnStats.revenue}</p>
+              <p><strong>Legacy Skills:</strong> ${currentTurnStats.skills.legacy}</p>
+              <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.skills.cloudNative}</p>
               <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
               <h3>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                {currentTurnStats.features?.map((feature, index) => (
-                  <Card
-                    key={index}
-                    title={`Feature ${index + 1}`}
+              {currentTurnStats.features?.map((feature, index) => (
+                <Card
+                key={index}
+                title={
+                  <span>
+                  Feature {index + 1}
+                  {feature.architecture && (
+                    <span
                     style={{
-                      width: '200px',
-                      background: '#fff',
-                      border: '1px solid #ddd',
-                      padding: '1rem',
-                      borderRadius: '8px'
+                      marginLeft: '0.5rem',
+                      padding: '0.2em 0.7em',
+                      background: '#e0e7ff',
+                      color: '#3730a3',
+                      borderRadius: '999px',
+                      fontSize: '0.85em',
+                      fontWeight: 600,
+                      verticalAlign: 'middle'
                     }}
-                  >
-                    <p><strong>Name:</strong> {feature.name}</p>
-                    <p><strong>Cost:</strong> ${feature.cost}</p>
-                    <p><strong>Revenue:</strong> ${feature.revenue}</p>
-                    <p><strong>Status:</strong> {feature.status}</p>
-                  </Card>
-                ))}
+                    >
+                    {feature.architecture}
+                    </span>
+                  )}
+                  </span>
+                }
+                style={{
+                  width: '200px',
+                  background: '#fff',
+                  border: '1px solid #ddd',
+                  padding: '1rem',
+                  borderRadius: '8px'
+                }}
+                >
+                <p><strong>Name:</strong> {feature.name}</p>
+                <p><strong>Infra cost:</strong> ${feature.infrastructureCost}</p>
+                <p><strong>Tech Debt:</strong> {feature.techDebt}</p>
+                <p><strong>Age:</strong> {game.currentTurn - feature.createdTurn} Quarters</p>
+                {feature.revenueStats && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                  <p><strong>Feature Revenue:</strong> ${feature.revenueStats.featureRevenue}</p>
+                  <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats.infrastructureCost}</p>
+                  <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats.techDebtCost}</p>
+                  <p><strong>Net Revenue:</strong> ${feature.revenueStats.netRevenue}</p>
+                  </div>
+                )}
+                </Card>
+              ))}
               </div>
               <h3>Actions</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
-                {actions.map((action) => (
-                  <Button
-                    key={action.id}
-                    label={action.name}
-                    icon={action.icon}
-                    className="p-button-outlined p-button-info"
-                    onClick={() => handleActionSubmit(action)}
-                  />
-                ))}
+              {actions.map((action) => (
+                <Button
+                key={action.code}
+                label={action.name}
+                icon={action.icon}
+                className="p-button-outlined p-button-info"
+                onClick={() => handleActionSubmit(action)}
+                />
+              ))}
               </div>
             </Card>
-          );
+            );
         }
         return null;
       })}

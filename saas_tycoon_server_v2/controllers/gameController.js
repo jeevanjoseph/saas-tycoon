@@ -117,16 +117,23 @@ function performAction(req, res) {
   const player = session.players.find(p => p.id === playerId);
   if (!player) return res.status(404).json({ error: 'Player not found' });
 
-  if (player.actions[turn]) {
+  if (player.turns[turn]) {
     return res.status(400).json({ error: 'Action for this turn already submitted.' });
   }
 
-  player.actions[turn] = action;
-  player.stats[turn] = player.applyAction(action, player.stats[turn - 1]); // Copy stats from the previous turn
-  const allSubmitted = session.players.every(p => p.actions[turn]);
-  if (allSubmitted) {
-    processTurn(session);
+
+  try {
+    player.applyAction(action, turn);
+    player.turns[turn] = action;
+  } catch (error) {
+    console.error('Error applying action:', error);
+    return res.status(400).json({ error: error.message || 'Failed to apply action.' });
   }
+
+  const allSubmitted = session.players.every(p => p.turns[turn]);
+    if (allSubmitted) {
+      processTurn(session);
+    }
 
   res.json({ message: 'Action accepted for turn ' + turn });
 }

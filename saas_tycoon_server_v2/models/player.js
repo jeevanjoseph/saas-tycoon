@@ -3,6 +3,8 @@ const MonolithPlayer = require('./players/MonolithPlayer');
 const SingleTenantPlayer = require('./players/SingleTenantPlayer');
 const MultiTenantPlayer = require('./players/MultiTenantPlayer');
 
+const OPS_MATURITY_MAX = 10;
+
 function createPlayer(name, playerType) {
   switch (playerType) {
     case 'Monolith':

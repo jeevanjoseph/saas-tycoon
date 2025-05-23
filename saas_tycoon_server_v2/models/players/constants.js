@@ -1,0 +1,12 @@
+
+ const OPS_MATURITY_MAX = 10;
+ const LEGACY_SKILLS_MAX = 10;
+ const CLOUD_NATIVE_SKILLS_MAX = 10;
+ const TECH_DEBT_MAX = 10;
+
+ module.exports = {
+     OPS_MATURITY_MAX,
+     LEGACY_SKILLS_MAX,
+     CLOUD_NATIVE_SKILLS_MAX,
+     TECH_DEBT_MAX
+ };
