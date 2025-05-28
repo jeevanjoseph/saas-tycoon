@@ -1,4 +1,4 @@
-const generateFeatureName = require("./featureNameGenerator");
+const generateFeatureName = require("./FeatureNameGenerator")
 
 
 function MultiTenantMicroservice(price, techDebt, turn) {

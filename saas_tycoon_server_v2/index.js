@@ -12,3 +12,9 @@ app.use('/api/game', gameRoutes);
 app.listen(PORT, () => {
   console.log(`Game server running on http://localhost:${PORT}`);
 });
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT signal. Shutting down gracefully...');
+  // Perform any cleanup actions here (e.g., closing database connections)
+  process.exit(0);
+});

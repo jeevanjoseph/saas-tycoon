@@ -1,4 +1,4 @@
-const generateFeatureName = require("./featureNameGenerator");
+const generateFeatureName = require("./FeatureNameGenerator");
 
 
 function MonolithFeature(price, techDebt, turn) {

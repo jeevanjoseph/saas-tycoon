@@ -12,6 +12,7 @@ function MonolithPlayer(name) {
     this.id = uuidv4();
     this.name = name;
     this.playerClass = 'Monolith';
+    this.ready = false;
     this.stats = { 
         0: new PlayerStats(cash = 5000,
             customers = 2,

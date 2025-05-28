@@ -7,6 +7,7 @@ function MultiTenantPlayer(name) {
     this.id = uuidv4();
     this.name = name;
     this.playerClass = 'MultiTenant';
+    this.ready = false;
     this.stats = {
         0: new PlayerStats(
             (cash = 5000),
