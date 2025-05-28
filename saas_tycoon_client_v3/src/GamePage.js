@@ -59,12 +59,51 @@ function GamePage({ gameId, game, playerId, setReady }) {
     <div className="container">
       <h1>Game ID: {gameId}</h1>
       <h2>Turn: {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}</h2>
-      <Button
-        label="I'm Ready"
-        icon="pi pi-check"
-        onClick={setReady}
-        className="p-button-warning"
-      />
+
+      {/* Player Names and Ready Status Row */}
+      <div style={{
+        display: 'flex',
+        gap: '1.5rem',
+        alignItems: 'center',
+        margin: '1.5rem 0 1rem 0',
+        flexWrap: 'wrap'
+      }}>
+        {game?.players?.slice() // create a copy to avoid mutating original
+          .sort((a, b) => {
+            const aStats = a.stats?.[game.currentTurn] || {};
+            const bStats = b.stats?.[game.currentTurn] || {};
+            return (bStats.cash || 0) - (aStats.cash || 0);
+          }).map((player) => {
+            let hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
+            return (
+              <div key={player.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: player.ready ? '#e0ffe0' : '#fffbe0',
+                border: '1px solid #ddd',
+                borderRadius: '999px',
+                padding: '0.5rem 1rem',
+                fontWeight: player.id === playerId ? 700 : 400,
+                color: player.ready ? '#15803d' : '#b45309'
+              }}>
+                <span style={{ marginRight: '0.5rem' }}>
+                  {player.name} {player.id === playerId && '(You)'}
+                </span>
+                <span style={{
+                  display: 'inline-block',
+                  width: '0.75rem',
+                  height: '0.75rem',
+                  borderRadius: '50%',
+                  background: hasPlayedCurrentTurn ? '#22c55e' : '#fbbf24',
+                  marginRight: '0.5rem'
+                }} />
+                <span style={{ fontSize: '0.95em' }}>
+                  {player.ready ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting') : 'Not Ready'}
+                </span>
+              </div>
+            )
+          })}
+      </div>
 
       {/* Latest Event Card */}
       {latestEvent && (
@@ -87,6 +126,16 @@ function GamePage({ gameId, game, playerId, setReady }) {
       {game?.players?.map((player) => {
         if (player.id === playerId) {
           const currentTurnStats = player.stats[game.currentTurn];
+          if (!player.ready) {
+            return (
+              <Button
+                label="I'm Ready"
+                icon="pi pi-check"
+                onClick={setReady}
+                className="p-button-warning"
+              />
+            );
+          }
           return (
             <Card
               key={player.id}
@@ -107,67 +156,67 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
               <h3>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-              {currentTurnStats.features?.map((feature, index) => (
-                <Card
-                key={index}
-                title={
-                  <span>
-                  Feature {index + 1}
-                  {feature.architecture && (
-                    <span
+                {currentTurnStats.features?.map((feature, index) => (
+                  <Card
+                    key={index}
+                    title={
+                      <span>
+                        Feature {index + 1}
+                        {feature.architecture && (
+                          <span
+                            style={{
+                              marginLeft: '0.5rem',
+                              padding: '0.2em 0.7em',
+                              background: '#e0e7ff',
+                              color: '#3730a3',
+                              borderRadius: '999px',
+                              fontSize: '0.85em',
+                              fontWeight: 600,
+                              verticalAlign: 'middle'
+                            }}
+                          >
+                            {feature.architecture}
+                          </span>
+                        )}
+                      </span>
+                    }
                     style={{
-                      marginLeft: '0.5rem',
-                      padding: '0.2em 0.7em',
-                      background: '#e0e7ff',
-                      color: '#3730a3',
-                      borderRadius: '999px',
-                      fontSize: '0.85em',
-                      fontWeight: 600,
-                      verticalAlign: 'middle'
+                      width: '200px',
+                      background: '#fff',
+                      border: '1px solid #ddd',
+                      padding: '1rem',
+                      borderRadius: '8px'
                     }}
-                    >
-                    {feature.architecture}
-                    </span>
-                  )}
-                  </span>
-                }
-                style={{
-                  width: '200px',
-                  background: '#fff',
-                  border: '1px solid #ddd',
-                  padding: '1rem',
-                  borderRadius: '8px'
-                }}
-                >
-                <p><strong>Name:</strong> {feature.name}</p>
-                <p><strong>Infra cost:</strong> ${feature.infrastructureCost}</p>
-                <p><strong>Tech Debt:</strong> {feature.techDebt}</p>
-                <p><strong>Age:</strong> {game.currentTurn - feature.createdTurn} Quarters</p>
-                {feature.revenueStats.length >0 && feature.revenueStats[feature.revenueStats.length-1] && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                  <p><strong>Feature Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length-1].featureRevenue}</p>
-                  <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats[feature.revenueStats.length-1].infrastructureCost}</p>
-                  <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats[feature.revenueStats.length-1].techDebtCost}</p>
-                  <p><strong>Net Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length-1].netRevenue}</p>
-                  </div>
-                )}
-                </Card>
-              ))}
+                  >
+                    <p><strong>Name:</strong> {feature.name}</p>
+                    <p><strong>Infra cost:</strong> ${feature.infrastructureCost}</p>
+                    <p><strong>Tech Debt:</strong> {feature.techDebt}</p>
+                    <p><strong>Age:</strong> {game.currentTurn - feature.createdTurn} Quarters</p>
+                    {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <p><strong>Feature Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</p>
+                        <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</p>
+                        <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</p>
+                        <p><strong>Net Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</p>
+                      </div>
+                    )}
+                  </Card>
+                ))}
               </div>
               <h3>Actions</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
-              {actions.map((action) => (
-                <Button
-                key={action.code}
-                label={action.name}
-                icon={action.icon}
-                className="p-button-outlined p-button-info"
-                onClick={() => handleActionSubmit(action)}
-                />
-              ))}
+                {actions.map((action) => (
+                  <Button
+                    key={action.code}
+                    label={action.name}
+                    icon={action.icon}
+                    className="p-button-outlined p-button-info"
+                    onClick={() => handleActionSubmit(action)}
+                  />
+                ))}
               </div>
             </Card>
-            );
+          );
         }
         return null;
       })}
