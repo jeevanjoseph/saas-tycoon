@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
+import { Chart } from 'primereact/chart';
 import axios from 'axios';
 
 const API = 'http://localhost:3000/api/game';
@@ -126,6 +127,15 @@ function GamePage({ gameId, game, playerId, setReady }) {
       {game?.players?.map((player) => {
         if (player.id === playerId) {
           const currentTurnStats = player.stats[game.currentTurn];
+          
+          // Prepare chart data for cash across turns
+          const cashHistory = Object.entries(player.stats)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .map(([turn, stats]) => stats.cash);
+          const turnLabels = Object.keys(player.stats)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(turn => `T${Number(turn) + 1}`);
+
           if (!player.ready) {
             return (
               <Button
@@ -154,6 +164,33 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <p><strong>Legacy Skills:</strong> ${currentTurnStats.skills.legacy}</p>
               <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.skills.cloudNative}</p>
               <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
+               {/* Cash History Chart */}
+              <div style={{ maxWidth: 500, margin: '2rem 0' }}>
+                <Chart
+                  type="line"
+                  data={{
+                    labels: turnLabels,
+                    datasets: [
+                      {
+                        label: 'Cash',
+                        data: cashHistory,
+                        fill: false,
+                        borderColor: '#42A5F5',
+                        tension: 0.3
+                      }
+                    ]
+                  }}
+                  options={{
+                    animation: false,
+                    plugins: {
+                      legend: { display: true }
+                    },
+                    scales: {
+                      y: { beginAtZero: true }
+                    }
+                  }}
+                />
+              </div>
               <h3>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 {currentTurnStats.features?.map((feature, index) => (
