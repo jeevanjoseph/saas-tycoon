@@ -1,5 +1,9 @@
 const { v4: uuidv4 } = require('uuid');
 const MonolithFeature = require('../features/MonolithFeature');
+const MultiTenantControlPlane = require('../features/MultiTenantControlPlane');
+const MultiTenantMicroservice = require('../features/MultiTenantMicroservice');
+const SingleTenantMicroservice = require('../features/SingleTenantMicroservice');
+const constants = require('./constants');
 const PlayerStats = require('./PlayerStats');
 
 // Function to create a default player
@@ -14,9 +18,8 @@ function MonolithPlayer(name) {
             infrastructureCost = 300,
             features = features = [new MonolithFeature(1000, 4, 0), 
                 new MonolithFeature(1000, 4,0), 
-                new MonolithFeature(1000, 4,0), 
                 new MonolithFeature(1000, 4,0)],
-            skills = { legacy: 1, cloudNative: 1 },
+            skills = { legacy: 1, cloudNative: 0 },
             opsMaturity = 0,
             techDebt = 4,
             revenue = 0)    

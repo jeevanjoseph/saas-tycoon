@@ -31,7 +31,7 @@ function MultiTenantPlayer(name) {
         },
         BUILD_MULTITENANT_FEATURE: (turn) => {
             const hasControlPlane = this.stats[turn].features.some(
-                feature => feature.constructor.name === 'MultiTenantControlPlane'
+                feature => feature.featurePrice === 0 && feature.architecture === 'microservice'
             );
             if (!hasControlPlane) {
                 throw new Error('You must have at least one MultiTenantControlPlane feature to build a microservice feature.');

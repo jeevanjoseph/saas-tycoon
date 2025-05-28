@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const createPlayer = require('./player');
+const PlayerStats = require('./players/PlayerStats');
 
 const events = [
   {
@@ -121,13 +122,20 @@ function processTurn(session) {
       player.eventHandlers[event.type](turn);
       } else {
       console.log('Unknown event type:', event);
-      player.stats[turn] = player.stats[turn - 1];
       }
     }
     // update the cash on hand for the player
     player.finishTurn(turn);
     //start the next turn stats from the previous turn
-    player.stats[turn + 1] = player.stats[turn];
+    let previousStats = player.stats[turn];
+    player.stats[turn + 1] = new PlayerStats(previousStats.cash, 
+                                              previousStats.customers, 
+                                              previousStats.infrastructureCost,
+                                              previousStats.features, 
+                                              previousStats.skills,
+                                              previousStats.opsMaturity, 
+                                              previousStats.techDebt,
+                                              previousStats.revenue);
 
   });
 

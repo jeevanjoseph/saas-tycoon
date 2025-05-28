@@ -143,12 +143,12 @@ function GamePage({ gameId, game, playerId, setReady }) {
                 <p><strong>Infra cost:</strong> ${feature.infrastructureCost}</p>
                 <p><strong>Tech Debt:</strong> {feature.techDebt}</p>
                 <p><strong>Age:</strong> {game.currentTurn - feature.createdTurn} Quarters</p>
-                {feature.revenueStats && (
+                {feature.revenueStats.length >0 && feature.revenueStats[feature.revenueStats.length-1] && (
                   <div style={{ marginTop: '0.5rem' }}>
-                  <p><strong>Feature Revenue:</strong> ${feature.revenueStats.featureRevenue}</p>
-                  <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats.infrastructureCost}</p>
-                  <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats.techDebtCost}</p>
-                  <p><strong>Net Revenue:</strong> ${feature.revenueStats.netRevenue}</p>
+                  <p><strong>Feature Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length-1].featureRevenue}</p>
+                  <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats[feature.revenueStats.length-1].infrastructureCost}</p>
+                  <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats[feature.revenueStats.length-1].techDebtCost}</p>
+                  <p><strong>Net Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length-1].netRevenue}</p>
                   </div>
                 )}
                 </Card>
