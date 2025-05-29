@@ -17,7 +17,7 @@ function MonolithPlayer(name) {
         0: new PlayerStats(cash = 5000,
             customers = 2,
             infrastructureCost = 300,
-            features = features = [new MonolithFeature(1000, 4, 0), 
+            features = [new MonolithFeature(1000, 4, 0), 
                 new MonolithFeature(1000, 4,0), 
                 new MonolithFeature(1000, 4,0)],
             skills = { legacy: 1, cloudNative: 0 },
