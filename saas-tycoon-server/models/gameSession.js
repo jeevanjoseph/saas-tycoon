@@ -130,12 +130,9 @@ function processTurn(session) {
     let previousStats = player.stats[turn];
     player.stats[turn + 1] = new PlayerStats(previousStats.cash, 
                                               previousStats.customers, 
-                                              previousStats.infrastructureCost,
-                                              previousStats.features, 
-                                              previousStats.skills,
-                                              previousStats.opsMaturity, 
-                                              previousStats.techDebt,
-                                              previousStats.revenue);
+                                              previousStats.legacySkills,
+                                              previousStats.cloudNativeSkills,
+                                              previousStats.opsMaturity);
 
   });
 

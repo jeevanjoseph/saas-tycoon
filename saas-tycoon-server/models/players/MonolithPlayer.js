@@ -13,117 +13,127 @@ function MonolithPlayer(name) {
     this.name = name;
     this.playerClass = 'Monolith';
     this.ready = false;
-    this.stats = { 
+    this.features = [new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
+    new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
+    new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)];
+    this.stats = {
         0: new PlayerStats(cash = 5000,
             customers = 2,
-            infrastructureCost = 300,
-            features = [new MonolithFeature(1000, 4, 0), 
-                new MonolithFeature(1000, 4,0), 
-                new MonolithFeature(1000, 4,0)],
-            skills = { legacy: 1, cloudNative: 0 },
-            opsMaturity = 0,
-            techDebt = 4,
-            revenue = 0)    
+            legacySkills = 4,
+            cloudNativeSkills = 0,
+            // Initial skills and maturity
+            opsMaturity = 0)
     };
     this.turns = {}
-     // Define available actions
-     this.actions = {
-        
+    // Define available actions
+    this.actions = {
+
         BUILD_MONOLITH_FEATURE: (turn) => {
-            this.stats[turn].cash -= 1000; // Example cost
-            this.stats[turn].features.push(new MonolithFeature(1000, 0, turn)); // Example feature
+            this.stats[turn].cash -= constants.DEV_COST_MONOLITH; 
+            this.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 0, turn)); 
         },
         BUILD_CONTROL_PLANE: (turn) => {
-            if (this.stats[turn].skills.cloudNative < 2) {
+            if (this.stats[turn].cloudNativeSkills < 4) {
                 throw new Error('Cloud Native skill must be 2 or more to build control plane.');
             }
-            this.stats[turn].cash -= 2000; // Example cost
-            this.stats[turn].features.push(new MultiTenantControlPlane(2000, 0, turn)); // Example feature
+            this.stats[turn].cash -= constants.DEV_COST_CONTROL_PLANE; 
+            this.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, constants.DEV_COST_CONTROL_PLANE, 0, turn)); 
         },
         BUILD_MULTITENANT_FEATURE: (turn) => {
-            const hasControlPlane = this.stats[turn].features.some(
-                feature => feature.constructor.name === 'MultiTenantControlPlane'
+            const hasControlPlane = this.features.some(
+                feature => feature.architecture === 'control-plane'
             );
             if (!hasControlPlane) {
                 throw new Error('You must have at least one MultiTenantControlPlane feature to build a microservice feature.');
             }
-            this.stats[turn].cash -= 1000; // Example cost
-            this.stats[turn].features.push(new MultiTenantMicroservice(1000, 0, turn)); // Example feature
+            this.stats[turn].cash -= constants.DEV_COST_MULTI_TENANT; 
+            this.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, constants.DEV_COST_MULTI_TENANT, 0, turn)); // Example feature
         },
         BUILD_SINGLETENANT_FEATURE: (turn) => {
-            if (this.stats[turn].skills.cloudNative < 1) {
+            if (this.stats[turn].cloudNativeSkills < 1) {
                 throw new Error('Cloud Native skill must be 1 or more to build single tenant feature.');
             }
-            this.stats[turn].cash -= 1000; // Example cost
-            this.stats[turn].features.push(new SingleTenantMicroservice(1000, 0, turn)); // Example feature
+            this.stats[turn].cash -= constants.DEV_COST_SINGLE_TENANT; 
+            this.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 0, turn)); // Example feature
         },
         FIX_BUGS: (turn) => {
-            this.stats[turn].cash -= 500; // Example cost
-            this.stats[turn].techDebt = Math.max(0, this.stats[turn].techDebt - 2); // Reduce tech debt
+            const buggyFeatures = this.features.filter(feature => feature.techDebt > 2);
+            this.stats[turn].cash -= 200*buggyFeatures.length; 
+            buggyFeatures.forEach(feature => {
+                feature.techDebt = Math.max(0, feature.techDebt - 2); // Reduce tech debt
+            });
+            
         },
         TRAINING: (turn) => {
-            this.stats[turn].cash -= 500; // Example cost
-            this.stats[turn].skills.cloudNative += 1; // Increase cloud-native skills
+            this.stats[turn].cash -= constants.TRAINING_COST_CLOUD; 
+            this.stats[turn].cloudNativeSkills += 1; // Increase cloud-native skills
+        },
+        TRAINING_LEGACY: (turn) => {
+            this.stats[turn].cash -= constants.TRAINING_COST_LEGACY; 
+            this.stats[turn].legacySkills += 1; // Increase legacy skills
         },
         LAUNCH_MARKETING_CAMPAIGN: (turn) => {
-            this.stats[turn].cash -= 800; // Example cost
+            this.stats[turn].cash -= constants.MARKETING_COST; 
             this.stats[turn].customers += 2; // Example new customers
         },
         DEVOPS: (turn) => {
-            this.stats[turn].cash -= 800; // Example cost
+            this.stats[turn].cash -= 800; 
             this.stats[turn].opsMaturity += 1; // Increase operational maturity
         },
         ACQUIRE_CUSTOMERS: (turn) => {
-            this.stats[turn].cash -= 300; // Example cost
+            this.stats[turn].cash -= 300; 
             this.stats[turn].customers += 3; // Example new customers
         },
         REDUCE_TECH_DEBT: (turn) => {
-            this.stats[turn].cash -= 500; // Example cost
-            this.stats[turn].techDebt = Math.max(0, this.stats[turn - 1 < 0 ? 0 : turn - 1].techDebt - 2); // Reduce tech debt
+            const buggyFeatures = this.features.filter(feature => feature.techDebt > 2);
+            this.stats[turn].cash -= 200*buggyFeatures.length; 
+            buggyFeatures.forEach(feature => {
+                feature.techDebt = Math.max(0, feature.techDebt - 2); // Reduce tech debt
+            });
         },
         EXPAND_TEAM: (turn) => {
-            this.stats[turn].cash -= 600; // Example cost
-            this.stats[turn].skills.cloudNative += 1; // Increase cloud-native skills
+            this.stats[turn].cash -= 600; 
+            this.stats[turn].cloudNativeSkills += 1; // Increase cloud-native skills
         },
         OPTIMIZE_PRICING: (turn) => {
-            this.stats[turn].cash -= 700; // Example cost
+            this.stats[turn].cash -= 700; 
             this.stats[turn].revenue += 1000; // Example revenue increase
         },
         CONDUCT_TRAINING: (turn) => {
-            this.stats[turn].cash -= 400; // Example cost
-            this.stats[turn].skills.cloudNative += 1; // Increase cloud-native skills
+            this.stats[turn].cash -= 400; 
+            this.stats[turn].cloudNativeSkills += 1; // Increase cloud-native skills
         }
     };
 
     this.eventHandlers = {
         TECH_DEBT_REDUCTION: (turn) => {
-          this.stats[turn].features.forEach((feature) => {
-              feature.techDebt = Math.max(0, feature.techDebt - 1);
-          });
+            this.features.forEach((feature) => {
+                feature.techDebt = Math.max(0, feature.techDebt - 1);
+            });
         },
         REVENUE_BOOST: (turn) => {
-            this.stats[turn].features.forEach((feature) => {
+            this.features.forEach((feature) => {
                 feature.featurePrice += 300;
             });
         },
         INFRA_UPGRADE: (turn) => {
-          this.stats[turn].opsMaturity += 1;
+            this.stats[turn].opsMaturity += 1;
         },
         CUSTOMER_CHURN: (turn) => {
             this.stats[turn].customers = Math.max(0, this.stats[turn].customers - 1);
         },
         CLOUD_MIGRATION: (turn) => {
-          if (this.stats[turn].features.some(f => f.architecture === 'microservice')) {
-            this.stats[turn].customers += 1;
-          }
+            if (this.features.some(f => f.architecture === 'microservice')) {
+                this.stats[turn].customers += 1;
+            }
         },
         MARKET_DISRUPTION: (turn) => {
-            this.stats[turn].features.forEach((feature) => {
+            this.features.forEach((feature) => {
                 if (feature.architecture === 'monolith') {
                     feature.featurePrice = Math.max(0, feature.featurePrice - 500);
-                  }
+                }
             });
-          
+
         },
         DOWNTIME: (turn) => {
             this.stats[turn].cash = Math.max(0, this.stats[turn].cash - (100 * (constants.OPS_MATURITY_MAX - this.stats[turn].opsMaturity)));
@@ -136,7 +146,7 @@ function MonolithPlayer(name) {
     // Update cash based on feature revenue
     this.finishTurn = function (turn) {
         let featureRevenue = 0;
-        this.stats[turn].features.forEach((feature) => {
+        this.features.forEach((feature) => {
             featureRevenue += feature.calculateRevenue(turn, this.stats[turn].customers);  // Calculate net revenue for each feature
             feature.updateTechDebt(turn);  // Update tech debt for each feature based on age
         });

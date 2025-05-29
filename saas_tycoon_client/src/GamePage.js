@@ -161,8 +161,8 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <h3>Current Turn Stats</h3>
               <p><strong>Cash:</strong> ${currentTurnStats.cash}</p>
               <p><strong>Customers:</strong> {currentTurnStats.customers}</p>
-              <p><strong>Legacy Skills:</strong> ${currentTurnStats.skills.legacy}</p>
-              <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.skills.cloudNative}</p>
+              <p><strong>Legacy Skills:</strong> ${currentTurnStats.legacySkills}</p>
+              <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.cloudNativeSkills}</p>
               <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
                {/* Cash History Chart */}
               <div style={{ maxWidth: 500, margin: '2rem 0' }}>
@@ -193,7 +193,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
               </div>
               <h3>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                {currentTurnStats.features?.map((feature, index) => (
+                {player.features?.map((feature, index) => (
                   <Card
                     key={index}
                     title={

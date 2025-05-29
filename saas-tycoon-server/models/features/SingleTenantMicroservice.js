@@ -1,17 +1,17 @@
 const generateFeatureName = require("./FeatureNameGenerator");
 
 
-function SingleTenantMicroservice(price, techDebt, turn) {
+function SingleTenantMicroservice(price,featureDevCost, techDebt, turn) {
     this.architecture = 'microservice';
     this.name = generateFeatureName();
-    this.featureDevCost = 1000;
+    this.featureDevCost = featureDevCost;
     this.techDebt = techDebt;
     this.featurePrice = price;
-    this.infrastructureCost = 200;
+    this.infrastructureCost = 250;
     this.createdTurn = turn;
     this.revenueStats = [];
     this.calculateRevenue = function (turn, customers) {
-        let techDebtCost = this.techDebt * 100;  // techDebt affects total revenue
+        let techDebtCost = Math.min(800,this.techDebt * 100);  // techDebt affects total revenue
         let featureRevenue = this.featurePrice * customers; // total feature revenue
         let infrastructureCost = this.infrastructureCost * customers; // infrastructure cost is per customer, since it's monolith
         let netRevenue = featureRevenue - infrastructureCost - techDebtCost;
