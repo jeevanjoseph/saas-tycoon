@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { Chart } from 'primereact/chart';
+import { MeterGroup } from 'primereact/metergroup';
+import { Dialog } from 'primereact/dialog';
+import { Toast } from 'primereact/toast';
+
+
 import axios from 'axios';
 
 const API = 'http://localhost:3000/api/game';
@@ -23,19 +28,27 @@ const actions = [
 
 function GamePage({ gameId, game, playerId, setReady }) {
   const [latestEvent, setLatestEvent] = useState(null);
+  const [eventDialogVisible, setEventDialogVisible] = useState(false);
+  const lastEventIdRef = useRef(null);
+  const toast = useRef(null);
 
   // Fetch the latest event
   useEffect(() => {
     const fetchLatestEvent = async () => {
       try {
         const response = await axios.get(`${API}/${gameId}/event`);
-        setLatestEvent(response.data.event);
+         const newEvent = response.data.event;
+        if (newEvent && newEvent.id !== lastEventIdRef.current) {
+          setLatestEvent(newEvent);
+          setEventDialogVisible(true);
+          lastEventIdRef.current = newEvent.id;
+        }
       } catch (error) {
         console.error("Error fetching the latest event:", error);
       }
     };
 
-    const interval = setInterval(fetchLatestEvent, 2000);
+    const interval = setInterval(fetchLatestEvent, 5000);
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
@@ -49,15 +62,30 @@ function GamePage({ gameId, game, playerId, setReady }) {
         turn: game?.currentTurn
       });
       console.log("Action submitted successfully:", response.data);
-      alert(`Action "${action.name}" submitted successfully!`);
+      if (toast.current) {
+        toast.current.show({
+          severity: 'success',
+          summary: `Turn ${game?.currentTurn} complete`,
+          detail: `${action.name} completed`,
+          life: 6000
+        });
+      }
     } catch (error) {
       console.error("Error submitting action:", error);
-      alert("Failed to submit action. Please try again.");
+     if (toast.current) {
+        toast.current.show({
+          severity: 'error',
+          summary: `${action.name} Failed`,
+          detail: `${error.response.data.error || ''}`,
+          life: 6000
+        });
+      }
     }
   };
 
   return (
     <div className="container">
+      <Toast ref={toast} />
       <h1>Game ID: {gameId}</h1>
       <h2>Turn: {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}</h2>
 
@@ -108,26 +136,28 @@ function GamePage({ gameId, game, playerId, setReady }) {
 
       {/* Latest Event Card */}
       {latestEvent && (
-        <Card
-          title="Latest Event"
-          style={{
-            marginTop: '2rem',
-            background: '#f4f4f4',
-            border: '1px solid #ddd',
-            padding: '1rem',
-            borderRadius: '8px'
-          }}
+        <Dialog
+          header="Latest Event"
+          visible={!!latestEvent && eventDialogVisible}
+          style={{ width: '30vw', minWidth: 300 }}
+          onHide={() => setEventDialogVisible(false)}
+          closable
+          modal
         >
-          <h3>{latestEvent.title}</h3>
-          <p>{latestEvent.description}</p>
-        </Card>
+          {latestEvent && (
+            <>
+              <h3>{latestEvent.title}</h3>
+              <p>{latestEvent.description}</p>
+            </>
+          )}
+        </Dialog>
       )}
 
       {/* Current Player Card */}
       {game?.players?.map((player) => {
         if (player.id === playerId) {
           const currentTurnStats = player.stats[game.currentTurn];
-          
+
           // Prepare chart data for cash across turns
           const cashHistory = Object.entries(player.stats)
             .sort(([a], [b]) => Number(a) - Number(b))
@@ -164,33 +194,77 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <p><strong>Legacy Skills:</strong> ${currentTurnStats.legacySkills}</p>
               <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.cloudNativeSkills}</p>
               <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
-               {/* Cash History Chart */}
-              <div style={{ maxWidth: 500, margin: '2rem 0' }}>
-                <Chart
-                  type="line"
-                  data={{
-                    labels: turnLabels,
-                    datasets: [
-                      {
-                        label: 'Cash',
-                        data: cashHistory,
-                        fill: false,
-                        borderColor: '#42A5F5',
-                        tension: 0.3
+              {/* Charts */}
+              <div style={{ display: 'flex', gap: '2rem', margin: '2rem 0', flexWrap: 'wrap' }}>
+                <div style={{ maxWidth: 500, flex: '1 1 300px' }}>
+                  <Chart
+                    type="line"
+                    data={{
+                      labels: turnLabels,
+                      datasets: [
+                        {
+                          label: 'Cash',
+                          data: cashHistory,
+                          fill: false,
+                          borderColor: '#42A5F5',
+                          tension: 0.3
+                        }
+                      ]
+                    }}
+                    options={{
+                      animation: false,
+                      plugins: {
+                        legend: { display: true }
+                      },
+                      scales: {
+                        y: { beginAtZero: true }
                       }
-                    ]
-                  }}
-                  options={{
-                    animation: false,
-                    plugins: {
-                      legend: { display: true }
-                    },
-                    scales: {
-                      y: { beginAtZero: true }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                </div>
+                <div style={{ maxWidth: 400, flex: '1 1 250px' }}>
+                  <Chart
+                    type="radar"
+                    data={{
+                      labels: ['Customers', 'Legacy Skills', 'Cloud Native Skills', 'Operational Maturity'],
+                      datasets: [
+                        {
+                          label: 'Current Stats',
+                          data: [
+                            currentTurnStats.customers,
+                            currentTurnStats.legacySkills,
+                            currentTurnStats.cloudNativeSkills,
+                            currentTurnStats.opsMaturity
+                          ],
+                          backgroundColor: 'rgba(66,165,245,0.2)',
+                          borderColor: '#42A5F5',
+                          pointBackgroundColor: '#42A5F5'
+                        }
+                      ]
+                    }}
+                    options={{
+                      animation: false,
+                      responsive: true,
+                      elements: {
+                        line: {
+                          tension: .3
+                        }
+                      },
+                      plugins: {
+                        legend: { display: false }
+                      },
+                      scales: {
+                        r: {
+                          beginAtZero: true,
+                          min: 0
+                        }
+                      }
+                    }}
+                  />
+                </div>
               </div>
+
+              { /* Features Section */}
               <h3>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 {player.features?.map((feature, index) => (
@@ -207,7 +281,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                               background: '#e0e7ff',
                               color: '#3730a3',
                               borderRadius: '999px',
-                              fontSize: '0.85em',
+                              fontSize: '0.55em',
                               fontWeight: 600,
                               verticalAlign: 'middle'
                             }}
@@ -235,6 +309,27 @@ function GamePage({ gameId, game, playerId, setReady }) {
                         <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</p>
                         <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</p>
                         <p><strong>Net Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</p>
+                        <MeterGroup
+                          max={feature.revenueStats[feature.revenueStats.length - 1].netRevenue + feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost + feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}
+                          values={[
+                            {
+                              label: 'Net Revenue',
+                              value: feature.revenueStats[feature.revenueStats.length - 1].netRevenue,
+                              color: '#22c55e'
+                            },
+                            {
+                              label: 'Infra Cost',
+                              value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
+                              color: '#3b82f6'
+                            },
+                            {
+                              label: 'Tech Debt Cost',
+                              value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
+                              color: '#f59e42'
+                            }
+                          ]}
+                          style={{ marginBottom: '0.5rem' }}
+                        />
                       </div>
                     )}
                   </Card>
