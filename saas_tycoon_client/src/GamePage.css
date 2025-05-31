@@ -130,7 +130,7 @@
 }
 
 .current-player-charts {
-  display: flex;
+  
   gap: 2.5rem;         /* Slightly more gap for larger cards */
   flex-wrap: wrap;
   margin: 2.5rem 0 1.5rem 0;
@@ -257,6 +257,31 @@
 .full-width-tab-panel {
   width: 100%;
   box-sizing: border-box;
+}
+
+.latest-event-dialog-content {
+  padding: 2rem 2.5rem !important;
+  background: #f8fafc;
+  font-size: 1.1rem;
+  color: #22223b;
+}
+
+.latest-event-dialog-content h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: #2563eb;
+}
+
+.latest-event-dialog-content p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+.p-dialog .p-dialog-header {
+  background: linear-gradient(90deg, #dbdbdb 0%, #dbdbdb 100%);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  border-bottom: 1px solid #d1d5db;
 }
 
 @media (max-width: 900px) {

@@ -29,6 +29,8 @@ const actions = [
 function GamePage({ gameId, game, playerId, setReady }) {
   const [latestEvent, setLatestEvent] = useState(null);
   const [eventDialogVisible, setEventDialogVisible] = useState(false);
+  const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
   const lastEventIdRef = useRef(null);
   const toast = useRef(null);
 
@@ -52,18 +54,24 @@ function GamePage({ gameId, game, playerId, setReady }) {
     return () => clearInterval(interval);
   }, [gameId]);
 
-  const handleActionSubmit = async (action) => {
+  const handleActionClick = (action) => {
+    setPendingAction(action);
+    setConfirmDialogVisible(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!pendingAction) return;
     try {
       const response = await axios.post(`${API}/${gameId}/action`, {
         playerId,
-        action: action.code,
+        action: pendingAction.code,
         turn: game?.currentTurn
       });
       if (toast.current) {
         toast.current.show({
           severity: 'success',
           summary: `Turn ${game?.currentTurn} complete`,
-          detail: `${action.name} completed`,
+          detail: `${pendingAction.name} completed`,
           life: 6000
         });
       }
@@ -71,12 +79,19 @@ function GamePage({ gameId, game, playerId, setReady }) {
       if (toast.current) {
         toast.current.show({
           severity: 'error',
-          summary: `${action.name} Failed`,
+          summary: `${pendingAction.name} Failed`,
           detail: `${error.response?.data?.error || ''}`,
           life: 6000
         });
       }
     }
+    setConfirmDialogVisible(false);
+    setPendingAction(null);
+  };
+
+  const handleCancelAction = () => {
+    setConfirmDialogVisible(false);
+    setPendingAction(null);
   };
 
   return (
@@ -84,18 +99,20 @@ function GamePage({ gameId, game, playerId, setReady }) {
       <Toast ref={toast} />
       <h1 className="gamepage-title">Game ID: {gameId}</h1>
       <h2 className="gamepage-turn">
-        Turn: {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
+        <i className="pi pi-calendar" style={{ marginRight: '0.5rem', color: '#2563eb', fontSize: '1em' }} />
+        {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
       </h2>
 
       {/* Latest Event Dialog */}
       {latestEvent && (
         <Dialog
-          header="Latest Event"
+          header="News Update"
           visible={!!latestEvent && eventDialogVisible}
           style={{ width: '30vw', minWidth: 300 }}
           onHide={() => setEventDialogVisible(false)}
           closable
           modal
+          contentClassName="latest-event-dialog-content"
         >
           {latestEvent && (
             <>
@@ -105,6 +122,30 @@ function GamePage({ gameId, game, playerId, setReady }) {
           )}
         </Dialog>
       )}
+
+      {/* Action Confirmation Dialog */}
+      <Dialog
+        header={pendingAction ? pendingAction.name : ''}
+        visible={confirmDialogVisible}
+        style={{ width: '350px' }}
+        onHide={handleCancelAction}
+        closable
+        modal
+        footer={
+          <div>
+            <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={handleCancelAction} />
+            <Button label="Confirm" icon="pi pi-check" className="p-button-success" onClick={handleConfirmAction} autoFocus />
+          </div>
+        }
+        contentClassName="latest-event-dialog-content"
+      >
+        {pendingAction && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <i className={`${pendingAction.icon}`} style={{ fontSize: '2rem', color: '#2563eb' }} />
+            <span>{pendingAction.description}</span>
+          </div>
+        )}
+      </Dialog>
 
       <div className="gamepage-main three-column-layout">
         {/* Left Column: Player Status */}
@@ -148,7 +189,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                 .map(([turn, stats]) => stats.cash);
               const turnLabels = Object.keys(player.stats)
                 .sort((a, b) => Number(a) - Number(b))
-                .map(turn => `T${Number(turn) + 1}`);
+                .map(turn => `'${25 + Math.floor(Number(turn) / 4) + 'Q' + (Number(turn) % 4 + 1)}`);
 
               if (!player.ready) {
                 return (
@@ -161,13 +202,13 @@ function GamePage({ gameId, game, playerId, setReady }) {
                 );
               }
               return (
-             
+
                 <Card
                   key={player.id}
                   title={player.name}
                   className="current-player-card"
-                > 
-                <span className="player-class-badge">{player.playerClass}</span>
+                >
+                  <span className="player-class-badge">{player.playerClass}</span>
                   <div className="current-player-stats-row">
                     <div className="stat-card">
                       <i className="pi pi-dollar stat-icon" />
@@ -197,7 +238,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   </div>
                   <div className="current-player-charts">
                     <TabView>
-                      <TabPanel header="Cash History" className="full-width-tab-panel">
+                      <TabPanel header="Quarterly Earnings" className="full-width-tab-panel">
                         <div className="current-player-chart-card">
                           <Chart
                             type="line"
@@ -227,12 +268,12 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           />
                         </div>
                       </TabPanel>
-                      <TabPanel header="Stats Radar" className="full-width-tab-panel">
+                      <TabPanel header="Organization Health" className="full-width-tab-panel">
                         <div className="current-player-chart-card radar-chart-panel">
                           <Chart
                             type="radar"
                             data={{
-                              labels: ['Customers', 'Legacy', 'Cloud Native', 'Maturity'],
+                              labels: ['Customers', 'Legacy Skills', 'Cloud Native Skills', 'Ops Maturity'],
                               datasets: [
                                 {
                                   label: 'Current Stats',
@@ -314,8 +355,12 @@ function GamePage({ gameId, game, playerId, setReady }) {
                               style={{ margin: '0.5rem 0' }}
                             />
                             <div style={{ fontSize: '0.95em', color: '#444' }}>
-                              <span>Feature Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</span>
-                              <span style={{ marginLeft: 12 }}>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
+                              <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.3rem' }}>
+                                <span>Feature Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</span>
+                                <span>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
+                                <span>Infra Cost: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</span>
+                                <span>Tech Debt Cost: ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</span>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -340,7 +385,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                     label={action.name}
                     icon={action.icon}
                     className="p-button-outlined p-button-info"
-                    onClick={() => handleActionSubmit(action)}
+                    onClick={() => handleActionClick(action)}
                   />
                 ))}
               </div>
@@ -360,7 +405,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
       </div>
 
       {/* Other Players' Stats */}
-      <div className="players-list">
+      <div className="players-lis t">
         {game?.players?.map((player) => {
           if (player.id !== playerId) {
             const currentTurnStats = player.stats[game.currentTurn];
