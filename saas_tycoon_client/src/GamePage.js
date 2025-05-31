@@ -5,9 +5,9 @@ import { Chart } from 'primereact/chart';
 import { MeterGroup } from 'primereact/metergroup';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
-
-
+import { TabView, TabPanel } from 'primereact/tabview';
 import axios from 'axios';
+import './GamePage.css'; // Add this import for your new styles
 
 const API = 'http://localhost:3000/api/game';
 const actions = [
@@ -37,7 +37,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
     const fetchLatestEvent = async () => {
       try {
         const response = await axios.get(`${API}/${gameId}/event`);
-         const newEvent = response.data.event;
+        const newEvent = response.data.event;
         if (newEvent && newEvent.id !== lastEventIdRef.current) {
           setLatestEvent(newEvent);
           setEventDialogVisible(true);
@@ -49,8 +49,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
     };
 
     const interval = setInterval(fetchLatestEvent, 5000);
-
-    // Cleanup interval on component unmount
     return () => clearInterval(interval);
   }, [gameId]);
 
@@ -61,7 +59,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
         action: action.code,
         turn: game?.currentTurn
       });
-      console.log("Action submitted successfully:", response.data);
       if (toast.current) {
         toast.current.show({
           severity: 'success',
@@ -71,12 +68,11 @@ function GamePage({ gameId, game, playerId, setReady }) {
         });
       }
     } catch (error) {
-      console.error("Error submitting action:", error);
-     if (toast.current) {
+      if (toast.current) {
         toast.current.show({
           severity: 'error',
           summary: `${action.name} Failed`,
-          detail: `${error.response.data.error || ''}`,
+          detail: `${error.response?.data?.error || ''}`,
           life: 6000
         });
       }
@@ -84,57 +80,14 @@ function GamePage({ gameId, game, playerId, setReady }) {
   };
 
   return (
-    <div className="container">
+    <div className="gamepage-root">
       <Toast ref={toast} />
-      <h1>Game ID: {gameId}</h1>
-      <h2>Turn: {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}</h2>
+      <h1 className="gamepage-title">Game ID: {gameId}</h1>
+      <h2 className="gamepage-turn">
+        Turn: {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
+      </h2>
 
-      {/* Player Names and Ready Status Row */}
-      <div style={{
-        display: 'flex',
-        gap: '1.5rem',
-        alignItems: 'center',
-        margin: '1.5rem 0 1rem 0',
-        flexWrap: 'wrap'
-      }}>
-        {game?.players?.slice() // create a copy to avoid mutating original
-          .sort((a, b) => {
-            const aStats = a.stats?.[game.currentTurn] || {};
-            const bStats = b.stats?.[game.currentTurn] || {};
-            return (bStats.cash || 0) - (aStats.cash || 0);
-          }).map((player) => {
-            let hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
-            return (
-              <div key={player.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                background: player.ready ? '#e0ffe0' : '#fffbe0',
-                border: '1px solid #ddd',
-                borderRadius: '999px',
-                padding: '0.5rem 1rem',
-                fontWeight: player.id === playerId ? 700 : 400,
-                color: player.ready ? '#15803d' : '#b45309'
-              }}>
-                <span style={{ marginRight: '0.5rem' }}>
-                  {player.name} {player.id === playerId && '(You)'}
-                </span>
-                <span style={{
-                  display: 'inline-block',
-                  width: '0.75rem',
-                  height: '0.75rem',
-                  borderRadius: '50%',
-                  background: hasPlayedCurrentTurn ? '#22c55e' : '#fbbf24',
-                  marginRight: '0.5rem'
-                }} />
-                <span style={{ fontSize: '0.95em' }}>
-                  {player.ready ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting') : 'Not Ready'}
-                </span>
-              </div>
-            )
-          })}
-      </div>
-
-      {/* Latest Event Card */}
+      {/* Latest Event Dialog */}
       {latestEvent && (
         <Dialog
           header="Latest Event"
@@ -153,190 +106,234 @@ function GamePage({ gameId, game, playerId, setReady }) {
         </Dialog>
       )}
 
-      {/* Current Player Card */}
-      {game?.players?.map((player) => {
-        if (player.id === playerId) {
-          const currentTurnStats = player.stats[game.currentTurn];
-
-          // Prepare chart data for cash across turns
-          const cashHistory = Object.entries(player.stats)
-            .sort(([a], [b]) => Number(a) - Number(b))
-            .map(([turn, stats]) => stats.cash);
-          const turnLabels = Object.keys(player.stats)
-            .sort((a, b) => Number(a) - Number(b))
-            .map(turn => `T${Number(turn) + 1}`);
-
-          if (!player.ready) {
-            return (
-              <Button
-                label="I'm Ready"
-                icon="pi pi-check"
-                onClick={setReady}
-                className="p-button-warning"
-              />
-            );
-          }
-          return (
-            <Card
-              key={player.id}
-              title={`${player.name} (You) - ${player.playerClass}`}
-              style={{
-                marginTop: '2rem',
-                background: '#f9f9f9',
-                border: '1px solid #ddd',
-                padding: '1rem',
-                borderRadius: '8px'
-              }}
-            >
-              <h3>Current Turn Stats</h3>
-              <p><strong>Cash:</strong> ${currentTurnStats.cash}</p>
-              <p><strong>Customers:</strong> {currentTurnStats.customers}</p>
-              <p><strong>Legacy Skills:</strong> ${currentTurnStats.legacySkills}</p>
-              <p><strong>Cloud Native Skills:</strong> ${currentTurnStats.cloudNativeSkills}</p>
-              <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
-              {/* Charts */}
-              <div style={{ display: 'flex', gap: '2rem', margin: '2rem 0', flexWrap: 'wrap' }}>
-                <div style={{ maxWidth: 500, flex: '1 1 300px' }}>
-                  <Chart
-                    type="line"
-                    data={{
-                      labels: turnLabels,
-                      datasets: [
-                        {
-                          label: 'Cash',
-                          data: cashHistory,
-                          fill: false,
-                          borderColor: '#42A5F5',
-                          tension: 0.3
-                        }
-                      ]
-                    }}
-                    options={{
-                      animation: false,
-                      plugins: {
-                        legend: { display: true }
-                      },
-                      scales: {
-                        y: { beginAtZero: true }
-                      }
-                    }}
-                  />
-                </div>
-                <div style={{ maxWidth: 400, flex: '1 1 250px' }}>
-                  <Chart
-                    type="radar"
-                    data={{
-                      labels: ['Customers', 'Legacy Skills', 'Cloud Native Skills', 'Operational Maturity'],
-                      datasets: [
-                        {
-                          label: 'Current Stats',
-                          data: [
-                            currentTurnStats.customers,
-                            currentTurnStats.legacySkills,
-                            currentTurnStats.cloudNativeSkills,
-                            currentTurnStats.opsMaturity
-                          ],
-                          backgroundColor: 'rgba(66,165,245,0.2)',
-                          borderColor: '#42A5F5',
-                          pointBackgroundColor: '#42A5F5'
-                        }
-                      ]
-                    }}
-                    options={{
-                      animation: false,
-                      responsive: true,
-                      elements: {
-                        line: {
-                          tension: .3
-                        }
-                      },
-                      plugins: {
-                        legend: { display: false }
-                      },
-                      scales: {
-                        r: {
-                          beginAtZero: true,
-                          min: 0
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-
-              { /* Features Section */}
-              <h3>Features</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                {player.features?.map((feature, index) => (
-                  <Card
-                    key={index}
-                    title={
-                      <span>
-                        Feature {index + 1}
-                        {feature.architecture && (
-                          <span
-                            style={{
-                              marginLeft: '0.5rem',
-                              padding: '0.2em 0.7em',
-                              background: '#e0e7ff',
-                              color: '#3730a3',
-                              borderRadius: '999px',
-                              fontSize: '0.55em',
-                              fontWeight: 600,
-                              verticalAlign: 'middle'
-                            }}
-                          >
-                            {feature.architecture}
-                          </span>
-                        )}
-                      </span>
-                    }
-                    style={{
-                      width: '200px',
-                      background: '#fff',
-                      border: '1px solid #ddd',
-                      padding: '1rem',
-                      borderRadius: '8px'
-                    }}
+      <div className="gamepage-main three-column-layout">
+        {/* Left Column: Player Status */}
+        <div className="left-column-status">
+          <div className="player-status-row">
+            {game?.players?.slice()
+              .sort((a, b) => {
+                const aStats = a.stats?.[game.currentTurn] || {};
+                const bStats = b.stats?.[game.currentTurn] || {};
+                return (bStats.cash || 0) - (aStats.cash || 0);
+              }).map((player) => {
+                let hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
+                return (
+                  <div
+                    key={player.id}
+                    className={`player-status-pill${player.id === playerId ? ' current' : ''}${player.ready ? ' ready' : ''}`}
                   >
-                    <p><strong>Name:</strong> {feature.name}</p>
-                    <p><strong>Infra cost:</strong> ${feature.infrastructureCost}</p>
-                    <p><strong>Tech Debt:</strong> {feature.techDebt}</p>
-                    <p><strong>Age:</strong> {game.currentTurn - feature.createdTurn} Quarters</p>
-                    {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <p><strong>Feature Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</p>
-                        <p><strong>Infrastructure Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</p>
-                        <p><strong>Tech Debt Cost:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</p>
-                        <p><strong>Net Revenue:</strong> ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</p>
-                        <MeterGroup
-                          max={feature.revenueStats[feature.revenueStats.length - 1].netRevenue + feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost + feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}
-                          values={[
-                            {
-                              label: 'Net Revenue',
-                              value: feature.revenueStats[feature.revenueStats.length - 1].netRevenue,
-                              color: '#22c55e'
-                            },
-                            {
-                              label: 'Infra Cost',
-                              value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
-                              color: '#3b82f6'
-                            },
-                            {
-                              label: 'Tech Debt Cost',
-                              value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
-                              color: '#f59e42'
-                            }
-                          ]}
-                          style={{ marginBottom: '0.5rem' }}
-                        />
-                      </div>
-                    )}
-                  </Card>
-                ))}
-              </div>
-              <h3>Actions</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1rem' }}>
+                    <span className="player-status-name">
+                      {player.name} ${player.stats?.[game.currentTurn]?.cash} {player.id === playerId && '(You)'}
+                    </span>
+                    <span
+                      className="player-status-dot"
+                      style={{ background: hasPlayedCurrentTurn ? '#22c55e' : '#fbbf24' }}
+                    />
+                    <span className="player-status-state">
+                      {player.ready ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting') : 'Not Ready'}
+                    </span>
+                  </div>
+                )
+              })}
+          </div>
+        </div>
+
+        {/* Center Column: Current Player */}
+        <div className="current-player-center">
+          {game?.players?.map((player) => {
+            if (player.id === playerId) {
+              const currentTurnStats = player.stats[game.currentTurn];
+              const cashHistory = Object.entries(player.stats)
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([turn, stats]) => stats.cash);
+              const turnLabels = Object.keys(player.stats)
+                .sort((a, b) => Number(a) - Number(b))
+                .map(turn => `T${Number(turn) + 1}`);
+
+              if (!player.ready) {
+                return (
+                  <Button
+                    label="I'm Ready"
+                    icon="pi pi-check"
+                    onClick={setReady}
+                    className="p-button-warning"
+                  />
+                );
+              }
+              return (
+             
+                <Card
+                  key={player.id}
+                  title={player.name}
+                  className="current-player-card"
+                > 
+                <span className="player-class-badge">{player.playerClass}</span>
+                  <div className="current-player-stats-row">
+                    <div className="stat-card">
+                      <i className="pi pi-dollar stat-icon" />
+                      <div className="stat-value">${currentTurnStats.cash}</div>
+                      <div className="stat-label">Cash</div>
+                    </div>
+                    <div className="stat-card">
+                      <i className="pi pi-users stat-icon" />
+                      <div className="stat-value">{currentTurnStats.customers}</div>
+                      <div className="stat-label">Customers</div>
+                    </div>
+                    <div className="stat-card">
+                      <i className="pi pi-database stat-icon" />
+                      <div className="stat-value">{currentTurnStats.legacySkills}</div>
+                      <div className="stat-label">Legacy Skills</div>
+                    </div>
+                    <div className="stat-card">
+                      <i className="pi pi-cloud stat-icon" />
+                      <div className="stat-value">{currentTurnStats.cloudNativeSkills}</div>
+                      <div className="stat-label">Cloud Native Skills</div>
+                    </div>
+                    <div className="stat-card">
+                      <i className="pi pi-shield stat-icon" />
+                      <div className="stat-value">{currentTurnStats.opsMaturity}</div>
+                      <div className="stat-label">Operational Maturity</div>
+                    </div>
+                  </div>
+                  <div className="current-player-charts">
+                    <TabView>
+                      <TabPanel header="Cash History" className="full-width-tab-panel">
+                        <div className="current-player-chart-card">
+                          <Chart
+                            type="line"
+                            data={{
+                              labels: turnLabels,
+                              datasets: [
+                                {
+                                  label: 'Cash',
+                                  data: cashHistory,
+                                  fill: false,
+                                  borderColor: '#42A5F5',
+                                  tension: 0.3
+                                }
+                              ]
+                            }}
+                            options={{
+                              animation: false,
+                              responsive: true,
+                              maintainAspectRatio: true,
+                              plugins: {
+                                legend: { display: false }
+                              },
+                              scales: {
+                                y: { beginAtZero: true }
+                              }
+                            }}
+                          />
+                        </div>
+                      </TabPanel>
+                      <TabPanel header="Stats Radar" className="full-width-tab-panel">
+                        <div className="current-player-chart-card radar-chart-panel">
+                          <Chart
+                            type="radar"
+                            data={{
+                              labels: ['Customers', 'Legacy', 'Cloud Native', 'Maturity'],
+                              datasets: [
+                                {
+                                  label: 'Current Stats',
+                                  data: [
+                                    currentTurnStats.customers,
+                                    currentTurnStats.legacySkills,
+                                    currentTurnStats.cloudNativeSkills,
+                                    currentTurnStats.opsMaturity
+                                  ],
+                                  backgroundColor: 'rgba(66,165,245,0.2)',
+                                  borderColor: '#42A5F5',
+                                  pointBackgroundColor: '#42A5F5'
+                                }
+                              ]
+                            }}
+                            options={{
+                              animation: false,
+                              responsive: true,
+                              maintainAspectRatio: true,
+                              elements: {
+                                line: {
+                                  tension: .3
+                                }
+                              },
+                              plugins: {
+                                legend: { display: false }
+                              },
+                              scales: {
+                                r: {
+                                  beginAtZero: true,
+                                  min: 0
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      </TabPanel>
+                    </TabView>
+                  </div>
+                  {/* Features as a list */}
+                  <h3>Features</h3>
+                  <ul className="feature-list">
+                    {player.features?.map((feature, index) => (
+                      <li key={index} className="feature-list-item">
+                        <div>
+                          <strong>{feature.name}</strong>
+                          {feature.architecture && (
+                            <span className="feature-arch">{feature.architecture}</span>
+                          )}
+                        </div>
+                        <div>Infra cost: ${feature.infrastructureCost}</div>
+                        <div>Tech Debt: {feature.techDebt}</div>
+                        <div>Age: {game.currentTurn - feature.createdTurn} Quarters</div>
+                        {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
+                          <div>
+                            <MeterGroup
+                              max={
+                                feature.revenueStats[feature.revenueStats.length - 1].netRevenue +
+                                feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
+                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost
+                              }
+                              values={[
+                                {
+                                  label: 'Net Revenue',
+                                  value: feature.revenueStats[feature.revenueStats.length - 1].netRevenue,
+                                  color: '#22c55e'
+                                },
+                                {
+                                  label: 'Infra Cost',
+                                  value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
+                                  color: '#3b82f6'
+                                },
+                                {
+                                  label: 'Tech Debt Cost',
+                                  value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
+                                  color: '#f59e42'
+                                }
+                              ]}
+                              style={{ margin: '0.5rem 0' }}
+                            />
+                            <div style={{ fontSize: '0.95em', color: '#444' }}>
+                              <span>Feature Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</span>
+                              <span style={{ marginLeft: 12 }}>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
+                            </div>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              );
+            }
+            return null;
+          })}
+        </div>
+
+        {/* Right Column: Tabs */}
+        <div className="right-column-tabs">
+          <TabView>
+            <TabPanel header="Actions">
+              <div className="current-player-actions">
                 {actions.map((action) => (
                   <Button
                     key={action.code}
@@ -347,14 +344,23 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   />
                 ))}
               </div>
-            </Card>
-          );
-        }
-        return null;
-      })}
+            </TabPanel>
+            <TabPanel header="Upgrades">
+              <div style={{ padding: '1rem', color: '#888' }}>
+                Upgrades coming soon!
+              </div>
+            </TabPanel>
+            <TabPanel header="Info">
+              <div style={{ padding: '1rem', color: '#888' }}>
+                Game info and help will appear here.
+              </div>
+            </TabPanel>
+          </TabView>
+        </div>
+      </div>
 
       {/* Other Players' Stats */}
-      <div className="players" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '2rem' }}>
+      <div className="players-list">
         {game?.players?.map((player) => {
           if (player.id !== playerId) {
             const currentTurnStats = player.stats[game.currentTurn];
@@ -363,11 +369,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                 key={player.id}
                 title={`${player.name} - ${player.playerClass}`}
                 className="player-card"
-                style={{
-                  width: '300px',
-                  flex: '1 1 calc(33.333% - 1rem)',
-                  boxSizing: 'border-box'
-                }}
               >
                 <div>
                   <p><strong>Cash:</strong> ${currentTurnStats.cash}</p>

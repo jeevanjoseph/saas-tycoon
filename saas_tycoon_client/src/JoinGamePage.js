@@ -5,6 +5,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Card } from 'primereact/card';
 import { Dialog } from 'primereact/dialog';
+import './JoinGamePage.css';
 
 function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, sessions, createGame, joinGame }) {
   const [selectedGameId, setSelectedGameId] = useState(null);
@@ -57,7 +58,7 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
   };
 
   return (
-    <div className="container">
+    <div className="join-game-container">
       <Dialog
         header="Enter Player Name"
         visible={playerNameDialogVisible}
@@ -93,31 +94,24 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
       </Dialog>
 
       <h1>SaaS Tycoon</h1>
-      <div className="p-field">
+      <div className="p-field player-type-section">
         <label>Select Player Type</label>
-        <div style={{ display: 'flex', gap: '1rem', margin: '1rem 0' }}>
+        <div className="player-type-cards">
           {playerTypes.map((type) => (
             <Card
               key={type.value}
               onClick={() => setPlayerType(type.value)}
-              style={{
-                cursor: 'pointer',
-                border: playerType === type.value ? '2px solid #007ad9' : '1px solid #ccc',
-                background: playerType === type.value ? '#e0f2fe' : '#fff',
-                minWidth: 180,
-                maxWidth: 220,
-                flex: '1 1 180px',
-                boxShadow: playerType === type.value ? '0 0 8px #007ad9' : undefined
-              }}
+              className={
+                'player-type-card' +
+                (playerType === type.value ? ' selected' : '')
+              }
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="card-header">
                 <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
-                <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>{type.label}</span>
+                <span className="card-label">{type.label}</span>
               </div>
-              <div style={{ marginTop: 8, fontWeight: 700, color: '#222', fontSize: '1.05rem' }}>
-                {type.title}
-              </div>
-              <div style={{ marginTop: 8, fontSize: '0.95rem', color: '#555' }}>
+              <div className="card-title">{type.title}</div>
+              <div className="card-description">
                 {type.description.map((line, idx) => (
                   <div key={idx}>{line}</div>
                 ))}
