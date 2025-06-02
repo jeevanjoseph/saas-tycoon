@@ -261,7 +261,7 @@
 
 .latest-event-dialog-content {
   padding: 2rem 2.5rem !important;
-  background: #f8fafc;
+  background: #ffffff;
   font-size: 1.1rem;
   color: #22223b;
 }
@@ -276,6 +276,12 @@
 .latest-event-dialog-content p {
   margin-bottom: 0;
   line-height: 1.6;
+}
+
+.latest-event-dialog-content .p-button {
+  padding: 0.75em 2em !important;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
 }
 
 .p-dialog .p-dialog-header {

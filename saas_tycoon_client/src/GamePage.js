@@ -127,7 +127,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
       <Dialog
         header={pendingAction ? pendingAction.name : ''}
         visible={confirmDialogVisible}
-        style={{ width: '350px' }}
+        style={{ width: '600px' }}
         onHide={handleCancelAction}
         closable
         modal
@@ -360,7 +360,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                 <span>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
                                 <span>Infra Cost: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</span>
                                 <span>Tech Debt Cost: ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</span>
-                              </div>
+                              </div>  
                             </div>
                           </div>
                         )}
