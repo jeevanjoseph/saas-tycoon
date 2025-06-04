@@ -14,15 +14,14 @@ function MonolithPlayer(name) {
     this.playerClass = 'Monolith';
     this.ready = false;
     this.features = [new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
-    new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
     new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)];
     this.stats = {
         0: new PlayerStats(cash = 5000,
-            customers = 2,
+            customers = 1,
             legacySkills = 4,
             cloudNativeSkills = 0,
             // Initial skills and maturity
-            opsMaturity = 0)
+            opsMaturity = 1)
     };
     this.turns = {}
     // Define available actions

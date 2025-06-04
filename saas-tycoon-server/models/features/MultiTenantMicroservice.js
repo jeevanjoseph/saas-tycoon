@@ -1,7 +1,7 @@
 const generateFeatureName = require("./FeatureNameGenerator")
 
 
-function MultiTenantMicroservice(price,featureDevCost, techDebt, turn) {
+function MultiTenantMicroservice(price, featureDevCost, techDebt, turn) {
     this.architecture = 'mt-microservice';
     this.name = generateFeatureName
     this.featureDevCost = featureDevCost;
@@ -11,9 +11,9 @@ function MultiTenantMicroservice(price,featureDevCost, techDebt, turn) {
     this.createdTurn = turn;
     this.revenueStats = [];
     this.calculateRevenue = function (turn, customers) {
-        let techDebtCost = Math.min(800,this.techDebt * 100);  // techDebt affects total revenue
         let featureRevenue = this.featurePrice * customers; // total feature revenue
         let infrastructureCost = this.infrastructureCost; // infrastructure cost is constant, since it's multitenant
+        let techDebtCost = Math.min(900, this.techDebt * 100);  // techDebt affects total revenue
         let netRevenue = featureRevenue - infrastructureCost - techDebtCost;
         this.revenueStats.push({
             turn: turn,

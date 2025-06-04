@@ -103,13 +103,12 @@ function canStartGame(session) {
 }
 
 // Function to process a turn
-// It generates an event starting from turn 2
-// and applies the base revenue logic
-// It updates the session log and increments the turn
+// Processes events, updates player stats, and increments the turn counter
+// Handles the logic for generating random events every 3 turns
 function processTurn(session) {
   let turn = session.currentTurn;
   let event = null;
-  if (turn > 1) {
+  if (turn %3 ==0 && turn > 1) {
     event = getRandomEvent(events);
     event.turn = turn;
     session.events.push(event);

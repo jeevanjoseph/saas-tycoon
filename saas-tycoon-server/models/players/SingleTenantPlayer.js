@@ -12,8 +12,7 @@ function SingleTenantPlayer(name) {
     this.name = name;
     this.playerClass = 'SingleTenant';
     this.ready = false;
-    this.features = [new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
-    new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 1, 0)];
+    this.features = [new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 2, 0)];
     this.stats = {
         0: new PlayerStats(cash = 5000,
             customers = 2,

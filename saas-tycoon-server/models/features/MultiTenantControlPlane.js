@@ -6,7 +6,7 @@ function MultiTenantControlPlane(price,featureDevCost, techDebt, turn) {
     this.featureDevCost = featureDevCost;
     this.techDebt = techDebt;
     this.featurePrice = 0;
-    this.infrastructureCost = 300;
+    this.infrastructureCost = 400;
     this.createdTurn = turn;
     this.revenueStats = [];
     this.calculateRevenue = function (turn, customers) {
