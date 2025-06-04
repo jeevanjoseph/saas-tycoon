@@ -1,58 +1,60 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import JoinGamePage from './JoinGamePage';
 import GamePage from './GamePage';
-
-const API = 'http://localhost:3000/api/game';
+import {
+  createGame,
+  joinGame,
+  fetchSessions,
+  fetchGame,
+  setPlayerReady
+} from './services/gameService';
 
 function App() {
   const [sessions, setSessions] = useState([]);
   const [gameId, setGameId] = useState(null);
   const [playerId, setPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState('');
-  const [playerType, setPlayerType] = useState('Monolith'); // Default player type
+  const [playerType, setPlayerType] = useState('Monolith');
   const [game, setGame] = useState(null);
 
   useEffect(() => {
     if (!gameId) {
-      axios
-        .get(API)
-        .then((res) => setSessions(res.data))
+      fetchSessions()
+        .then(setSessions)
         .catch((err) => console.error('Error fetching game sessions:', err));
     } else {
       const interval = setInterval(() => {
-        axios
-          .get(`${API}/${gameId}`)
-          .then((res) => setGame(res.data))
+        fetchGame(gameId)
+          .then(setGame)
           .catch((err) => console.error('Error fetching game data:', err));
       }, 2000);
       return () => clearInterval(interval);
     }
   }, [gameId]);
 
-  const createGame = async () => {
+  const handleCreateGame = async () => {
     try {
-      const res = await axios.post(API, { playerLimit: 5 });
-      setGameId(res.data.gameId);
-      joinGame(res.data.gameId);
+      const data = await createGame(5);
+      setGameId(data.gameId);
+      handleJoinGame(data.gameId);
     } catch (err) {
       console.error('Error creating game:', err);
     }
   };
 
-  const joinGame = async (id) => {
+  const handleJoinGame = async (id) => {
     try {
-      const res = await axios.post(`${API}/${id}/join`, { playerName, playerType });
-      setGameId(res.data.gameId);
-      setPlayerId(res.data.playerId);
+      const res = await joinGame(id, playerName, playerType);
+      setGameId(res.gameId);
+      setPlayerId(res.playerId);
     } catch (err) {
       console.error('Error joining game:', err);
     }
   };
 
-  const setReady = async () => {
+  const handleSetReady = async () => {
     try {
-      await axios.post(`${API}/${gameId}/ready`, { playerId });
+      await setPlayerReady(gameId, playerId);
     } catch (err) {
       console.error('Error setting player ready:', err);
     }
@@ -66,13 +68,13 @@ function App() {
         playerType={playerType}
         setPlayerType={setPlayerType}
         sessions={sessions}
-        createGame={createGame}
-        joinGame={joinGame}
+        createGame={handleCreateGame}
+        joinGame={handleJoinGame}
       />
     );
   }
 
-  return <GamePage gameId={gameId} game={game} playerId={playerId} setReady={setReady} />;
+  return <GamePage gameId={gameId} game={game} playerId={playerId} setReady={handleSetReady} />;
 }
 
 export default App;

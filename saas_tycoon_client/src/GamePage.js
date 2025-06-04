@@ -6,10 +6,10 @@ import { MeterGroup } from 'primereact/metergroup';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
-import axios from 'axios';
-import './GamePage.css'; // Add this import for your new styles
+import './GamePage.css';
+import { fetchLatestEvent } from './services/eventService';
+import { submitPlayerAction } from './services/actionService';
 
-const API = 'http://localhost:3000/api/game';
 const actions = [
   { code: "BUILD_CONTROL_PLANE", name: "Build Control Plane", description: "Develop a new control plane feature to attract more customers.", icon: "pi pi-cog" },
   { code: "BUILD_MULTITENANT_FEATURE", name: "Build Multitenant Feature", description: "Develop a multitenant feature to improve scalability.", icon: "pi pi-wrench" },
@@ -26,7 +26,7 @@ const actions = [
   { code: "CONDUCT_TRAINING", name: "Conduct Training", description: "Conduct training sessions to upskill your team.", icon: "pi pi-book" }
 ];
 
-function GamePage({ gameId, game, playerId, setReady }) {
+function GamePage({gameId, game, playerId, setReady }) {
   const [latestEvent, setLatestEvent] = useState(null);
   const [eventDialogVisible, setEventDialogVisible] = useState(false);
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
@@ -36,21 +36,16 @@ function GamePage({ gameId, game, playerId, setReady }) {
 
   // Fetch the latest event
   useEffect(() => {
-    const fetchLatestEvent = async () => {
-      try {
-        const response = await axios.get(`${API}/${gameId}/event`);
-        const newEvent = response.data.event;
-        if (newEvent && newEvent.id !== lastEventIdRef.current) {
-          setLatestEvent(newEvent);
-          setEventDialogVisible(true);
-          lastEventIdRef.current = newEvent.id;
-        }
-      } catch (error) {
-        console.error("Error fetching the latest event:", error);
+    const pollLatestEvent = async () => {
+      const newEvent = await fetchLatestEvent(gameId);
+      if (newEvent && newEvent.id !== lastEventIdRef.current) {
+        setLatestEvent(newEvent);
+        setEventDialogVisible(true);
+        lastEventIdRef.current = newEvent.id;
       }
     };
 
-    const interval = setInterval(fetchLatestEvent, 5000);
+    const interval = setInterval(pollLatestEvent, 5000);
     return () => clearInterval(interval);
   }, [gameId]);
 
@@ -62,9 +57,10 @@ function GamePage({ gameId, game, playerId, setReady }) {
   const handleConfirmAction = async () => {
     if (!pendingAction) return;
     try {
-      const response = await axios.post(`${API}/${gameId}/action`, {
+      const response = await submitPlayerAction({
+        gameId,
         playerId,
-        action: pendingAction.code,
+        action: pendingAction,
         turn: game?.currentTurn
       });
       if (toast.current) {
