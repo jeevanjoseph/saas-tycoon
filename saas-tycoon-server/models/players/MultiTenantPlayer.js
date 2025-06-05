@@ -49,13 +49,17 @@ function MultiTenantPlayer(name) {
             this.stats[turn].cash -= constants.DEV_COST_SINGLE_TENANT;
             this.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 0, turn)); // Example feature
         },
-        FIX_BUGS: (turn) => {
+        TECH_DEBT_REDUCTION: (turn) => {
             const buggyFeatures = this.features.filter(feature => feature.techDebt > 2);
             this.stats[turn].cash -= 200 * buggyFeatures.length;
             buggyFeatures.forEach(feature => {
-                feature.techDebt = Math.max(0, feature.techDebt - 2); // Reduce tech debt
+                feature.techDebt = Math.max(0, feature.techDebt - 3); // Reduce tech debt
             });
 
+        },
+        DEVOPS: (turn) => {
+            this.stats[turn].cash -= 500; // Example cost
+            this.stats[turn].opsMaturity += 1; // Increase operational maturity
         },
         TRAINING: (turn) => {
             this.stats[turn].cash -= constants.TRAINING_COST_CLOUD;
@@ -69,32 +73,9 @@ function MultiTenantPlayer(name) {
             this.stats[turn].cash -= constants.MARKETING_COST;
             this.stats[turn].customers += 2; // Example new customers
         },
-        DEVOPS: (turn) => {
-            this.stats[turn].cash -= 500; // Example cost
-            this.stats[turn].opsMaturity += 1; // Increase operational maturity
-        },
-        ACQUIRE_CUSTOMERS: (turn) => {
-            this.stats[turn].cash -= 1500; // Example cost
-            this.stats[turn].customers += 3; // Example new customers
-        },
-        REDUCE_TECH_DEBT: (turn) => {
-            const buggyFeatures = this.features.filter(feature => feature.techDebt > 2);
-            this.stats[turn].cash -= 200*buggyFeatures.length; 
-            buggyFeatures.forEach(feature => {
-                feature.techDebt = Math.max(0, feature.techDebt - 2); // Reduce tech debt
-            });
-        },
-        EXPAND_TEAM: (turn) => {
-            this.stats[turn].cash -= 600; // Example cost
-            this.stats[turn].cloudNativeSkills += 1; // Increase cloud-native skills
-        },
         OPTIMIZE_PRICING: (turn) => {
             this.stats[turn].cash -= 700; // Example cost
             this.stats[turn].revenue += 1000; // Example revenue increase
-        },
-        CONDUCT_TRAINING: (turn) => {
-            this.stats[turn].cash -= 400; // Example cost
-            this.stats[turn].cloudNativeSkills += 1; // Increase cloud-native skills
         }
     };
 
