@@ -179,8 +179,8 @@
 
 .right-column-tabs {
   flex: 0 0 340px;
-  min-width: 300px;
-  max-width: 400px;
+  min-width: 360;
+  max-width: 420px;
   background: #f8fafc;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -222,6 +222,15 @@
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 1rem;
+}
+.current-player-actions .p-button {
+  min-width: 240px;
+  width: 100%;
+  box-sizing: border-box;
+  display: inline-flex;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+  margin-right: 0;
 }
 
 .players-list {

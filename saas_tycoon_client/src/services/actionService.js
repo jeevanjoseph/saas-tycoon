@@ -13,7 +13,7 @@ import { API } from '../constants';
 export async function submitPlayerAction({ gameId, playerId, action, turn }) {
   return axios.post(`${API}/${gameId}/action`, {
     playerId,
-    action: action.code,
+    action: action,
     turn
   });
 }

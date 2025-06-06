@@ -6,27 +6,72 @@ import { MeterGroup } from 'primereact/metergroup';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
+import { Accordion, AccordionTab } from 'primereact/accordion';
 import './GamePage.css';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
+import { DEV_COST_CONTROL_PLANE, DEV_COST_MONOLITH, DEV_COST_MULTI_TENANT, DEV_COST_SINGLE_TENANT, DEVOPS_COST, MARKETING_COST, TECH_DEBT_REDUCTION_COST, TRAINING_COST_CLOUD, TRAINING_COST_LEGACY } from './constants';
 
-const actions = [
-  { code: "BUILD_CONTROL_PLANE", name: "Build Control Plane", description: "Develop a new control plane feature to attract more customers.", icon: "pi pi-cog" },
-  { code: "BUILD_MULTITENANT_FEATURE", name: "Build Multitenant Feature", description: "Develop a multitenant feature to improve scalability.", icon: "pi pi-wrench" },
-  { code: "BUILD_SINGLETENANT_FEATURE", name: "Build Singletentant Feature", description: "Develop a singletentant feature for specific customer needs.", icon: "pi pi-users" },
-  { code: "BUILD_MONOLITH_FEATURE", name: "Build Monolith Feature", description: "Develop a monolith feature for specific customer needs.", icon: "pi pi-database" },
-  { code: "FIX_BUGS", name: "Fix Bugs", description: "Fix bugs to improve product quality and stability.", icon: "pi pi-tools" },
-  { code: "TRAINING", name: "Training", description: "Train your team to improve skills and productivity.", icon: "pi pi-book" },
-  { code: "LAUNCH_MARKETING_CAMPAIGN", name: "Launch Marketing Campaign", description: "Run a marketing campaign to increase brand awareness.", icon: "pi pi-bullhorn" },
-  { code: "DEVOPS", name: "DevOps", description: "Invest in DevOps to improve deployment and reliability.", icon: "pi pi-shield" },
-  { code: "ACQUIRE_CUSTOMERS", name: "Acquire Customers", description: "Acquire new customers to grow your business.", icon: "pi pi-user-plus" },
-  { code: "REDUCE_TECH_DEBT", name: "Reduce Tech Debt", description: "Reduce technical debt to improve maintainability.", icon: "pi pi-chart-line" },
-  { code: "EXPAND_TEAM", name: "Expand Team", description: "Hire more team members to increase capacity.", icon: "pi pi-users" },
-  { code: "OPTIMIZE_PRICING", name: "Optimize Pricing", description: "Adjust pricing to maximize revenue.", icon: "pi pi-dollar" },
-  { code: "CONDUCT_TRAINING", name: "Conduct Training", description: "Conduct training sessions to upskill your team.", icon: "pi pi-book" }
+//TODO refactor this in to 4 action groups.
+// Fist set to build features.
+// second set is a skill tree for improving ops maturity
+// third set is a skill tree for improving cloud native skills
+// fourth is a set of actions like marketing, that is a bit of a gamble.
+const actions_build = [
+  { code: "BUILD_CONTROL_PLANE", name: "Build Control Plane", description: "Develop a new control plane feature to attract more customers.", icon: "pi pi-cog", cost: DEV_COST_CONTROL_PLANE, unit: "feature", per_unit: false },
+  { code: "BUILD_MULTITENANT_FEATURE", name: "Build Multitenant Feature", description: "Develop a multitenant feature to improve scalability.", icon: "pi pi-wrench", cost: DEV_COST_MULTI_TENANT, unit: "feature", per_unit: false },
+  { code: "BUILD_SINGLETENANT_FEATURE", name: "Build Singletentant Feature", description: "Develop a singletentant feature for specific customer needs.", icon: "pi pi-users", cost: DEV_COST_SINGLE_TENANT, unit: "feature", per_unit: false },
+  { code: "BUILD_MONOLITH_FEATURE", name: "Build Monolith Feature", description: "Develop a monolith feature for specific customer needs.", icon: "pi pi-database", cost: DEV_COST_MONOLITH, unit: "feature", per_unit: false },
 ];
 
-function GamePage({gameId, game, playerId, setReady }) {
+const actions_tech_debt_reduction = [
+  { code: "TECH_DEBT_REDUCTION", name: "Modularize (Level 1)", description: "Break down large tightly coupled components. Improves maintainability and sets the stage for future refactoring.", icon: "pi pi-tools", level: 1, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Instrumentation (Level 2)", description: "Use logs, metrics, and traces to better understand bottlenecks or fragile code paths. Data-driven insights help justify debt remediation.", icon: "pi pi-tools", level: 2, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Code Audit", description: "Perform a thorough code audit and identify areas for improving and modernizing the code base.", icon: "pi pi-tools", level: 3, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Dependency Audit", description: "Audit application dependencies, evaluate newer libraries and APIs for improved performance and stability.", icon: "pi pi-tools", level: 4, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Defensive Coding", description: "Implement defensive coding practices for better resiliency, security and operational posture.", icon: "pi pi-tools", level: 5, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+];
+
+const actions_ops_maturity = [
+  { code: "DEVOPS", name: "DevOps Culture (Level 1)", description: "Create a DevOps culture in the team. Your developers build better services when they also operate the service.", icon: "pi pi-shield", level: 1, cost: DEVOPS_COST, unit: "level", per_unit: true },
+  { code: "DEVOPS", name: "Monitor and Use Metrics (Level 2)", description: "Leverage built-in dashboards and metrics to keep up to date on your service health.", icon: "pi pi-shield", level: 2, cost: DEVOPS_COST, unit: "level", per_unit: true },
+  { code: "DEVOPS", name: "Custom Metrics and Tracing (Level 3)", description: "Emit custom metrics and traces from your application, providing a high fidelity lens in to your application.", icon: "pi pi-shield", level: 3, cost: DEVOPS_COST, unit: "level", per_unit: true },
+  { code: "DEVOPS", name: "Feature Flags (Level 4)", description: "Implement a Feature Flag system to decouple deployment from release, enabling safer rollout and faster iteration while reducing release risks.", icon: "pi pi-shield", level: 4, cost: DEVOPS_COST, unit: "level", per_unit: true },
+  { code: "DEVOPS", name: "DevOps KPIs (Level 5)", description: "Implement an Ops call for developers. Pivot from shipping software to owning an always on service.", icon: "pi pi-shield", level: 5, cost: DEVOPS_COST, unit: "level", per_unit: true },
+];
+
+const actions_cloud_skills = [
+  { code: "TRAINING", name: "Container Basics (Level 1)", description: "Learn container basics and orchestration concepts.", icon: "pi pi-cloud", level: 1, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Cloud Native Patterns (Level 2)", description: "Learn cloud-native application design patterns and methodologies like the 12-factor application principles.", icon: "pi pi-cloud", level: 2, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Design for scale and resiliency (Level 3)", description: "All systems fail, but there is a difference when a failure results in service degradation vs. service outage. Learn the principles to design scalable a resilient applications.", icon: "pi pi-cloud", level: 3, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Infrastructure as Code (Level 4)", description: "Adopt Infrastructure as Code (IaC) practices. Drive toward an automation driven repeatable and ephemeral infrastructure approach", icon: "pi pi-cloud", level: 4, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Release Automation (Level 5)", description: "Enable automated canary testing and quality gates in pipelines. Deploy frequently. Decouple deployments from releases using feature flags. ", icon: "pi pi-cloud", level: 5, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Advanced monitoring and custom metrics (Level 6)", description: "Implement advanced monitoring and alerting for cloud workloads. Understand and implement custom metrics that can drive better insights in to application usage patterns and behaviors.", icon: "pi pi-cloud", level: 6, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Autoscaling & Cost Optimization (Level 7)", description: "Use the metrics and usage data to enable autoscaling and cost optimization strategies.", icon: "pi pi-cloud", level: 7, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+  { code: "TRAINING", name: "Cloud Native DevOps (Level 8)", description: "Achieve full cloud native maturity with self-healing application design.", icon: "pi pi-cloud", level: 8, cost: TRAINING_COST_CLOUD, unit: "level", per_unit: true },
+];
+
+const actions_legacy_skills = [
+  { code: "TRAINING_LEGACY", name: "Java EE Training (Level 1)", description: "Learn Java EE basics and application server concepts.", icon: "pi pi-database", level: 1, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Weblogic Basics (Level 2)", description: "Understand deployment on WebLogic and EAR/WAR packaging.", icon: "pi pi-database", level: 2, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Scaling Weblogic Apps (Level 3)", description: "Master JDBC, JNDI, and connection pooling in Java EE.", icon: "pi pi-database", level: 3, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "ADF-BC Best Practices (Level 4)", description: "Implement ADF-BC best practices.", icon: "pi pi-database", level: 4, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Clustering and Scaling WLS Apps (Level 5)", description: "Configure clustering and session replication in WebLogic.", icon: "pi pi-database", level: 5, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "JVM Tuning (Level 6)", description: "Tune JVM and WebLogic for performance and scalability.", icon: "pi pi-database", level: 6, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Integration Best Practices (Level 7)", description: "Integrate legacy systems using SOAP and JCA adapters.", icon: "pi pi-database", level: 7, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Security and IDCS integration (Level 8)", description: "Implement security and SSO in Java EE applications.", icon: "pi pi-database", level: 8, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Legacy Skills (Level 9)", description: "Automate deployments with WLST and scripting.", icon: "pi pi-database", level: 9, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true },
+  { code: "TRAINING_LEGACY", name: "Legacy Skills (Level 10)", description: "Migrate and modernize legacy Java EE applications.", icon: "pi pi-database", level: 10, cost: TRAINING_COST_LEGACY, unit: "level", per_unit: true }
+];
+
+const actions_bonus = [
+  { code: "LAUNCH_MARKETING_CAMPAIGN", name: "Launch Marketing Campaign", description: "Run a marketing campaign to increase brand awareness. Based on the number of features you have and how good your operational maturity is, you may add customers.", icon: "pi pi-bullhorn", cost: MARKETING_COST, unit: "feature", per_unit: false },
+  { code: "OPTIMIZE_PRICING", name: "Optimize Pricing", description: "Adjust pricing to maximize revenue.", icon: "pi pi-chart-line", cost: 3000, unit: "feature", per_unit: false },
+  { code: "PRICE_WAR", name: "Start a Price War", description: "Lower your feature price by 25%, forcing all players to do the same or lose 4 customers", icon: "pi pi-hammer", cost: 1000, unit: "feature", per_unit: false },
+  { code: "HOSTILE_TAKEOVER", name: "Hostile Takeover", description: "Pay 2X the market cap of one of the other players to acquire all their features, customers, and liabilities.", icon: "pi pi-dollar", cost: 100000, unit: "feature", per_unit: false },
+];
+
+function GamePage({ gameId, game, playerId, setReady }) {
   const [latestEvent, setLatestEvent] = useState(null);
   const [eventDialogVisible, setEventDialogVisible] = useState(false);
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
@@ -136,9 +181,17 @@ function GamePage({gameId, game, playerId, setReady }) {
         contentClassName="latest-event-dialog-content"
       >
         {pendingAction && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <i className={`${pendingAction.icon}`} style={{ fontSize: '2rem', color: '#2563eb' }} />
-            <span>{pendingAction.description}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <i className={`${pendingAction.icon}`} style={{ fontSize: '2rem', color: '#2563eb' }} />
+              <span>{pendingAction.description}</span>
+            </div>
+            <div style={{ marginTop: '0.5rem', color: '#444', fontWeight: 500 }}>
+              Cost: ${pendingAction.cost}
+              {pendingAction.per_unit && pendingAction.unit
+                ? ` per ${pendingAction.unit}`
+                : ''}
+            </div>
           </div>
         )}
       </Dialog>
@@ -356,7 +409,7 @@ function GamePage({gameId, game, playerId, setReady }) {
                                 <span>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
                                 <span>Infra Cost: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</span>
                                 <span>Tech Debt Cost: ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</span>
-                              </div>  
+                              </div>
                             </div>
                           </div>
                         )}
@@ -372,57 +425,123 @@ function GamePage({gameId, game, playerId, setReady }) {
 
         {/* Right Column: Tabs */}
         <div className="right-column-tabs">
-          <TabView>
-            <TabPanel header="Actions">
+          <Accordion multiple>
+            <AccordionTab header="Build Features">
               <div className="current-player-actions">
-                {actions.map((action) => (
+                {actions_build.map((action) => (
                   <Button
                     key={action.code}
                     label={action.name}
                     icon={action.icon}
-                    className="p-button-outlined p-button-info"
+                    className=" p-button-info"
                     onClick={() => handleActionClick(action)}
+                    style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
                   />
                 ))}
               </div>
-            </TabPanel>
-            <TabPanel header="Upgrades">
-              <div style={{ padding: '1rem', color: '#888' }}>
-                Upgrades coming soon!
+            </AccordionTab>
+            <AccordionTab header="Manage Tech Debt">
+              <div className="current-player-actions">
+                {actions_tech_debt_reduction.map((action) => (
+                  <Button
+                    key={action.code}
+                    label={action.name}
+                    icon={action.icon}
+                    className=" p-button-help"
+                    onClick={() => handleActionClick(action)}
+                    style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
+                  />
+                ))}
               </div>
-            </TabPanel>
-            <TabPanel header="Info">
+            </AccordionTab>
+            <AccordionTab header="Ops Maturity">
+              <div className="current-player-actions">
+                {actions_ops_maturity.map((action) => {
+                  const currentPlayer = game?.players?.find(p => p.id === playerId);
+                  // Get the current ops maturity stat for this player
+                  const currentOpsMaturity = currentPlayer?.stats?.[game.currentTurn]?.opsMaturity ?? 0;
+                  // Enable only if currentOpsMaturity === action.level - 1
+                  const enabled = currentOpsMaturity === (action.level - 1);
+
+                  return (
+                    <Button
+                      key={action.code + action.level}
+                      label={action.name}
+                      icon={action.icon}
+                      className=" p-button-help"
+                      onClick={() => handleActionClick(action)}
+                      style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
+                      disabled={!enabled}
+                    />
+                  );
+                })}
+              </div>
+            </AccordionTab>
+            <AccordionTab header="Cloud Skills">
+              <div className="current-player-actions">
+                {actions_cloud_skills.map((action) => {
+                  const currentPlayer = game?.players?.find(p => p.id === playerId);
+                  // Get the skill stat for this player
+                  const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.cloudNativeSkills ?? 0;
+                  // Enable only if currentOpsMaturity === action.level - 1
+                  const enabled = currentSkillLevel === (action.level - 1);
+                  return (
+                    <Button
+                      key={action.code + action.level}
+                      label={action.name}
+                      icon={action.icon}
+                      className=" p-button-success"
+                      onClick={() => handleActionClick(action)}
+                      style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
+                      disabled={!enabled}
+                    />
+                  );
+                })}
+              </div>
+            </AccordionTab>
+            <AccordionTab header="Legacy Skills">
+              <div className="current-player-actions">
+                {actions_legacy_skills.map((action) => {
+                  const currentPlayer = game?.players?.find(p => p.id === playerId);
+                  // Get the skill stat for this player
+                  const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.legacySkills ?? 0;
+                  // Enable only if currentOpsMaturity === action.level - 1
+                  const enabled = currentSkillLevel === (action.level - 1);
+                  return (
+                    <Button
+                      key={action.code + action.level}
+                      label={action.name}
+                      icon={action.icon}
+                      className=" p-button-success"
+                      onClick={() => handleActionClick(action)}
+                      style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
+                      disabled={!enabled}
+                    />
+                  );
+                })}
+              </div>
+            </AccordionTab>
+            <AccordionTab header="Bonus Actions">
+              <div className="current-player-actions">
+                {actions_bonus.map((action) => (
+                  <Button
+                    key={action.code}
+                    label={action.name}
+                    icon={action.icon}
+                    className=" p-button-warning"
+                    onClick={() => handleActionClick(action)}
+                    style={{ marginBottom: '0.5rem', marginRight: '0.5rem' }}
+                  />
+                ))}
+              </div>
+            </AccordionTab>
+            <AccordionTab header="Info">
               <div style={{ padding: '1rem', color: '#888' }}>
                 Game info and help will appear here.
               </div>
-            </TabPanel>
-          </TabView>
+            </AccordionTab>
+          </Accordion>
         </div>
-      </div>
-
-      {/* Other Players' Stats */}
-      <div className="players-lis t">
-        {game?.players?.map((player) => {
-          if (player.id !== playerId) {
-            const currentTurnStats = player.stats[game.currentTurn];
-            return (
-              <Card
-                key={player.id}
-                title={`${player.name} - ${player.playerClass}`}
-                className="player-card"
-              >
-                <div>
-                  <p><strong>Cash:</strong> ${currentTurnStats.cash}</p>
-                  <p><strong>Customers:</strong> {currentTurnStats.customers}</p>
-                  <p><strong>Tech Debt:</strong> {currentTurnStats.techDebt}</p>
-                  <p><strong>Revenue:</strong> ${currentTurnStats.revenue}</p>
-                  <p><strong>Operational Maturity:</strong> {currentTurnStats.opsMaturity}</p>
-                </div>
-              </Card>
-            );
-          }
-          return null;
-        })}
       </div>
     </div>
   );

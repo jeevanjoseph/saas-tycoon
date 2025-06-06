@@ -11,6 +11,8 @@ const CUSTOMER_PRICE_MULTI_TENANT = 1000;
 const CUSTOMER_PRICE_SINGLE_TENANT = 1000;   
 const CUSTOMER_PRICE_CONTROL_PLANE = 0; // Control Plane does not have a customer price
 const CUSTOMER_PRICE_MONOLITH = 1000;
+const TECH_DEBT_REDUCTION_COST = 400; // Cost to reduce tech debt per feature
+const DEVOPS_COST = 1000; // Cost for DevOps improvements per level of ops maturity
 const TRAINING_COST_CLOUD = 500; // Cost for training to increase cloud-native skills
 const TRAINING_COST_LEGACY = 250; // Cost for training to increase legacy skills
 const MARKETING_COST = 5000; // Cost for marketing campaigns
@@ -28,6 +30,8 @@ module.exports = {
     CUSTOMER_PRICE_SINGLE_TENANT,
     CUSTOMER_PRICE_CONTROL_PLANE,
     CUSTOMER_PRICE_MONOLITH,
+    TECH_DEBT_REDUCTION_COST,
+    DEVOPS_COST,
     TRAINING_COST_CLOUD,
     TRAINING_COST_LEGACY,
     MARKETING_COST
