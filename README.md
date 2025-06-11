@@ -190,3 +190,13 @@ Training
 - Level 4 - auto scaling
 - Level 5 - 
 
+- marketing tree. As you unlock skills you also unlock advanced marketing skills. 
+- unlock HPA - marketing is more successful if you have better scalability. 
+- 
+
+- Use AI to optimize the cost of running services
+    - identify area of improvement
+    - identify apps that can be improved. 
+    - remove manually coordinated steps. 
+    - robotic automation / agentic workflows
+    - 
