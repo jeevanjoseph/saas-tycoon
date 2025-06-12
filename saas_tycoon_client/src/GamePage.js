@@ -7,6 +7,7 @@ import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Accordion, AccordionTab } from 'primereact/accordion';
+import { ProgressBar } from 'primereact/progressbar';
 import './GamePage.css';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
@@ -139,10 +140,23 @@ function GamePage({ gameId, game, playerId, setReady }) {
     <div className="gamepage-root">
       <Toast ref={toast} />
       <h1 className="gamepage-title">Game ID: {gameId}</h1>
-      <h2 className="gamepage-turn">
-        <i className="pi pi-calendar" style={{ marginRight: '0.5rem', color: '#2563eb', fontSize: '1em' }} />
-        {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
-      </h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
+        <h2 className="gamepage-turn" style={{ margin: 0 }}>
+          <i className="pi pi-calendar" style={{ marginRight: '0.5rem', color: '#2563eb', fontSize: '1em' }} />
+          {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
+        </h2>
+        {game && (
+          <div style={{ minWidth: 200, flex: 1 }}>
+            <ProgressBar
+              value={Math.round((game.currentTurn / (game.total_turns || 1)) * 100)}
+              showValue
+              style={{ height: '1.5rem' }}
+            >
+              {`${game.currentTurn + 1} / ${game.total_turns} turns`}
+            </ProgressBar>
+          </div>
+        )}
+      </div>
 
       {/* Latest Event Dialog */}
       {latestEvent && (

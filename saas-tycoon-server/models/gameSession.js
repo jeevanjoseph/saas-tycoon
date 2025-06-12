@@ -12,7 +12,8 @@ function createGameSession(playerLimit = 10) {
     players: [],
     playerLimit,
     currentTurn: 0,
-    started: false,
+    total_turns: 20, // Default total turns
+    state: 'not_started', 
     events: [],
     log: [],
     createdAt: new Date().toISOString()

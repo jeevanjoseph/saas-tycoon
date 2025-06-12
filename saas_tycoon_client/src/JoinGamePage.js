@@ -5,11 +5,12 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Card } from 'primereact/card';
 import { Dialog } from 'primereact/dialog';
+import { ProgressBar } from 'primereact/progressbar';
 import './JoinGamePage.css';
 
 function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, sessions, createGame, joinGame }) {
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [playerNameDialogVisible, setPlayerNameDialogVisible] = useState(!playerName);
+  const [nameTouched, setNameTouched] = useState(false);
 
   const playerTypes = [
     {
@@ -50,50 +51,29 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
     }
   ];
 
-  // Handler for closing the player name dialog
-  const handlePlayerNameDialogClose = () => {
-    if (playerName && playerName.trim().length > 0) {
-      setPlayerNameDialogVisible(false);
-    }
-  };
+  const showNameError = nameTouched && !playerName;
 
   return (
     <div className="join-game-container">
-      <Dialog
-        header="Enter Player Name"
-        visible={playerNameDialogVisible}
-        closable={false}
-        modal
-        style={{ width: '350px' }}
-        footer={
-          <Button
-            label="OK"
-            icon="pi pi-check"
-            disabled={!playerName || playerName.trim().length === 0}
-            onClick={handlePlayerNameDialogClose}
-            autoFocus
-          />
-        }
-      >
-        <div className="p-field" style={{ marginTop: 16 }}>
-          <label htmlFor="playerName">Player Name</label>
-          <InputText
-            id="playerName"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Enter name"
-            autoFocus
-            style={{ width: '100%' }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && playerName && playerName.trim().length > 0) {
-                handlePlayerNameDialogClose();
-              }
-            }}
-          />
-        </div>
-      </Dialog>
-
       <h1>SaaS Tycoon</h1>
+      <div className="p-field" style={{ marginBottom: 24, maxWidth: 350 }}>
+        <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
+        <InputText
+          id="playerName"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          placeholder="Enter name"
+          style={{ width: '100%' }}
+          autoFocus
+          onBlur={() => setNameTouched(true)}
+          className={showNameError ? 'p-invalid' : ''}
+        />
+        {showNameError && (
+          <small className="p-error" style={{ display: 'block', marginTop: 4 }}>
+            Player name is required.
+          </small>
+        )}
+      </div>
       <div className="p-field player-type-section">
         <label>Select Player Type</label>
         <div className="player-type-cards">
@@ -121,7 +101,7 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
         </div>
       </div>
       <DataTable
-        value={sessions.filter((s) => !s.started)}
+        value={sessions} // Show all games
         header={
           <div className="flex flex-wrap align-items-center justify-content-between gap-2">
             <span className="text-xl text-900 font-bold">Available Games</span>
@@ -137,7 +117,11 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
               icon="pi pi-sign-in"
               onClick={() => joinGame(selectedGameId)}
               className="p-button-primary"
-              disabled={!playerName || !selectedGameId}
+              disabled={
+                !playerName ||
+                !selectedGameId ||
+                sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
+              }
             />
           </div>
         }
@@ -150,6 +134,24 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
         <Column field="id" header="Game ID"></Column>
         <Column field="playerCount" header="Players"></Column>
         <Column field="playerLimit" header="Player Limit"></Column>
+        <Column field="state" header="State"></Column>
+        <Column
+          header="Progress"
+          body={rowData => {
+            const percent = rowData.total_turns
+              ? Math.round((rowData.currentTurn / rowData.total_turns) * 100)
+              : 0;
+            return (
+              <ProgressBar
+                value={percent}
+                showValue
+                style={{ height: '1.5rem' }}
+              >
+                {percent}%
+              </ProgressBar>
+            );
+          }}
+        />
       </DataTable>
     </div>
   );

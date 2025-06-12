@@ -7,8 +7,8 @@ const sessions = {};
 // This function will be called when the client requests all game sessions
 // It returns a list of all sessions with their details
 function getAllSessions(req, res) {
-  const sessionList = Object.values(sessions).map(({ id, started, players, playerLimit, createdAt }) => ({
-    id, started, playerCount: players.length, playerLimit, createdAt
+  const sessionList = Object.values(sessions).map(({ id, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
+    id, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
   }));
   res.json(sessionList);
 }
@@ -38,7 +38,7 @@ function joinSession(req, res) {
   if (existingPlayer) {
     return res.json({ gameId: session.id, playerId: existingPlayer.id, playerName: existingPlayer.name });
   } else {
-    if (session.started) return res.status(400).json({ error: 'Game has already started' });
+    if (session.state != 'not_started') return res.status(400).json({ error: 'Game has already started' });
     if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
 
     try {
@@ -65,12 +65,12 @@ function setPlayerReady(req, res) {
 
   player.ready = true;
 
-  if (!session.started && canStartGame(session)) {
-    session.started = true;
+  if (session.started!='not_started' && canStartGame(session)) {
+    session.state = 'started';
     session.log.push(`Game session ${session.id} started at turn 1.`);
   }
 
-  res.json({ status: 'Player marked ready', gameStarted: session.started });
+  res.json({ status: 'Player marked ready', gameStarted: session.state });
 }
 
 // Function to get a specific game session

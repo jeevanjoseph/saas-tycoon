@@ -19,9 +19,12 @@ function App() {
 
   useEffect(() => {
     if (!gameId) {
+      const interval = setInterval(() => {
       fetchSessions()
         .then(setSessions)
         .catch((err) => console.error('Error fetching game sessions:', err));
+        }, 2000);
+      return () => clearInterval(interval);
     } else {
       const interval = setInterval(() => {
         fetchGame(gameId)
