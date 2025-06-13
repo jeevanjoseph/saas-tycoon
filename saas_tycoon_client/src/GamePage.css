@@ -23,12 +23,12 @@
   justify-content: center;
 }
 
-.player-status-pill {
+.player-status-card {
   display: flex;
   align-items: center;
   background: #fffbe0;
   border: 1px solid #ddd;
-  border-radius: 999px;
+  border-radius: 9px;
   padding: 0.5rem 1rem;
   font-weight: 400;
   color: #b45309;
@@ -36,13 +36,13 @@
   margin-bottom: 0.5rem;
 }
 
-.player-status-pill.ready {
+.player-status-card.ready {
   background: #e0ffe0;
   color: #15803d;
 }
 
-.player-status-pill.current {
-  font-weight: 700;
+.player-status-card.current {
+  
   border: 2px solid #007ad9;
 }
 

@@ -219,25 +219,71 @@ function GamePage({ gameId, game, playerId, setReady }) {
                 const aStats = a.stats?.[game.currentTurn] || {};
                 const bStats = b.stats?.[game.currentTurn] || {};
                 return (bStats.cash || 0) - (aStats.cash || 0);
-              }).map((player) => {
-                let hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
+              }).map((player, index) => {
+                const hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
+                const currentStats = player.stats?.[game.currentTurn] || {};
+                const statusText = player.ready
+                  ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting')
+                  : 'Not Ready';
+                const statusColor = hasPlayedCurrentTurn
+                  ? '#22c55e'
+                  : '#fbbf24';
+
                 return (
-                  <div
+                  <Card
                     key={player.id}
-                    className={`player-status-pill${player.id === playerId ? ' current' : ''}${player.ready ? ' ready' : ''}`}
+                    className={`player-status-card${player.id === playerId ? ' current' : ''}${player.ready ? ' ready' : ''}`}
+                    style={{ marginBottom: '1rem', minWidth: 260, maxWidth: 320, position: 'relative' }}
                   >
-                    <span className="player-status-name">
-                      {player.name} ${player.stats?.[game.currentTurn]?.cash} {player.id === playerId && '(You)'}
-                    </span>
-                    <span
-                      className="player-status-dot"
-                      style={{ background: hasPlayedCurrentTurn ? '#22c55e' : '#fbbf24' }}
-                    />
-                    <span className="player-status-state">
-                      {player.ready ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting') : 'Not Ready'}
-                    </span>
-                  </div>
-                )
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.1em' }}>
+                        {player.name} {player.id === playerId && <span style={{ color: '#2563eb' }}>(You)</span>}
+                        {index === 0 && <i className="pi pi-crown" style={{ color: '#2563eb' }} />}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span
+                          className="player-status-dot"
+                          style={{
+                            background: statusColor,
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            display: 'inline-block',
+                            marginRight: 6
+                          }}
+                        />
+                        <span style={{ fontSize: '0.95em', color: '#666', fontWeight: 500 }}>{statusText}</span>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.95em', color: '#888', marginBottom: 8 }}>
+                      {player.playerClass}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', marginBottom: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <i className="pi pi-dollar" style={{ color: '#2563eb' }} />
+                        <span style={{ fontWeight: 600 }}>${currentStats.cash ?? 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <i className="pi pi-users" style={{ color: '#2563eb' }} />
+                        <span>{currentStats.customers ?? 0} Customers</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <i className="pi pi-database" style={{ color: '#b03a2e' }} />
+                        <span>Legacy: {currentStats.legacySkills ?? 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <i className="pi pi-cloud" style={{ color: '#42A5F5' }} />
+                        <span>Cloud: {currentStats.cloudNativeSkills ?? 0}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <i className="pi pi-shield" style={{ color: '#22c55e' }} />
+                        <span>Ops: {currentStats.opsMaturity ?? 0}</span>
+                      </div>
+                    </div>
+                  </Card>
+                );
               })}
           </div>
         </div>
@@ -397,27 +443,28 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                 feature.revenueStats[feature.revenueStats.length - 1].featureRevenue
                               }
                               values={[
-                                
+
                                 {
                                   label: 'Infra Cost',
                                   value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
-                                  color: '#3b82f6'
+                                  color: '#b03a2e'
                                 },
                                 feature.revenueStats[feature.revenueStats.length - 1].techDebtCost > 0 ?
-                                {
-                                  label: 'Tech Debt Cost',
-                                  value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
-                                  color: '#f59e42'
-                                } : null,
+                                  {
+                                    label: 'Tech Debt Cost',
+                                    value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
+                                    color: '#f59e42'
+                                  } : null,
                               ].filter((cost) => cost !== null)}
                               style={{ margin: '0.5rem 0' }}
                             />
                             <div style={{ fontSize: '0.95em', color: '#444' }}>
                               <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.3rem' }}>
                                 <span>Feature Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</span>
-                                <span>Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
-                                <span>Infra Cost: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost}</span>
-                                <span>Tech Debt Cost: ${feature.revenueStats[feature.revenueStats.length - 1].techDebtCost}</span>
+                                <span>Operational Costs: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
+                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost }</span>
+                                <span >Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
+
                               </div>
                             </div>
                           </div>
