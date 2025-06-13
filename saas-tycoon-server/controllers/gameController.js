@@ -1,49 +1,57 @@
 const { createGameSession, canStartGame, processTurn } = require('../models/gameSession');
 const createPlayer = require('../models/player');
+const mongoGameSession = require('../db/mongoGameSession');
+const PlayerActions = require('../models/players/PlayerActions');
 
-const sessions = {};
+const sessions = {}; // In-memory cache for fast access
+
+// Helper to sync in-memory and DB
+async function syncSessionToDb(session) {
+  await mongoGameSession.saveSession(session);
+  sessions[session.id] = session;
+}
 
 // Function to get all game sessions
-// This function will be called when the client requests all game sessions
-// It returns a list of all sessions with their details
-function getAllSessions(req, res) {
-  const sessionList = Object.values(sessions).map(({ id, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
-    id, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
-  }));
-  res.json(sessionList);
+async function getAllSessions(req, res) {
+  try {
+    const dbSessions = await mongoGameSession.getAllSessions();
+    // TODO: Optimize and dont load all sessions into memory.
+    // Do we even need this?
+    dbSessions.forEach(s => { sessions[s.id] = s; });
+    const sessionList = dbSessions.map(({ id, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
+      id, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
+    }));
+    res.json(sessionList);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch sessions' });
+  }
 }
 
 // Function to create a new game session
-// It generates a unique ID for the session and sets the player limit
-// It also initializes the session with an empty players array and a log
-// It returns the game ID to the client
-function createSession(req, res) {
+async function createSession(req, res) {
   const { playerLimit } = req.body;
   const session = createGameSession(playerLimit);
-  sessions[session.id] = session;
+  await syncSessionToDb(session);
   res.json({ gameId: session.id });
 }
 
 // Function to join a game session
-// It checks if the session exists and if the game has already started
-// It also checks if the game is full and creates a new player
-// If the player is successfully added, it returns the game ID and player ID
-function joinSession(req, res) {
-  const session = sessions[req.params.id];
-  const { playerName, playerType } = req.body;
-
+async function joinSession(req, res) {
+  const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
+  const { playerName, playerType } = req.body;
   const existingPlayer = session.players.find(p => p.name === playerName);
   if (existingPlayer) {
     return res.json({ gameId: session.id, playerId: existingPlayer.id, playerName: existingPlayer.name });
   } else {
-    if (session.state != 'not_started') return res.status(400).json({ error: 'Game has already started' });
+    if (session.state !== 'not_started') return res.status(400).json({ error: 'Game has already started' });
     if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
 
     try {
       const player = createPlayer(playerName, playerType);
       session.players.push(player);
+      await syncSessionToDb(session);
       return res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
     } catch (error) {
       console.error('Error creating player:', error);
@@ -53,11 +61,8 @@ function joinSession(req, res) {
 }
 
 // Function to set a player as ready
-// It checks if the session exists and if the player is part of the session
-// It also checks if the game can be started based on the number of players ready
-// If the game can be started, it sets the session as started and logs the event
-function setPlayerReady(req, res) {
-  const session = sessions[req.params.id];
+async function setPlayerReady(req, res) {
+  const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const player = session.players.find(p => p.id === req.body.playerId);
@@ -65,19 +70,18 @@ function setPlayerReady(req, res) {
 
   player.ready = true;
 
-  if (session.started!='not_started' && canStartGame(session)) {
+  if (session.state === 'not_started' && canStartGame(session)) {
     session.state = 'started';
     session.log.push(`Game session ${session.id} started at turn 1.`);
   }
 
+  await syncSessionToDb(session);
   res.json({ status: 'Player marked ready', gameStarted: session.state });
 }
 
 // Function to get a specific game session
-// It returns the session details and the players in the session
-// It checks if the session exists and if the player is part of the session
-function getGameSession(req, res) {
-  const session = sessions[req.params.id];
+async function getGameSession(req, res) {
+  const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const { playerId } = req.query;
@@ -91,10 +95,8 @@ function getGameSession(req, res) {
 }
 
 // Function to get the last event of a game session
-// It returns the last event and the current turn of the game
-// It checks if the session exists and if the player is part of the session
-function getLastEvent(req, res) {
-  const session = sessions[req.params.id];
+async function getLastEvent(req, res) {
+  const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const lastEvent = session.events.length > 0 ? session.events[session.events.length - 1] : null;
@@ -102,12 +104,9 @@ function getLastEvent(req, res) {
 }
 
 // Function to handle player actions
-// This function will be called when a player submits an action
-// It checks if the action is valid, updates the player's state,
-// and processes the turn if all players have submitted their actions
-function performAction(req, res) {
+async function performAction(req, res) {
   const { playerId, action, turn } = req.body;
-  const session = sessions[req.params.id];
+  const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   if (turn !== session.currentTurn) {
@@ -121,9 +120,8 @@ function performAction(req, res) {
     return res.status(400).json({ error: 'Action for this turn already submitted.' });
   }
 
-
   try {
-    player.applyAction(action, turn);
+    PlayerActions.applyAction(player, action, turn);
     player.turns[turn] = action;
   } catch (error) {
     console.error('Error applying action:', error);
@@ -131,13 +129,13 @@ function performAction(req, res) {
   }
 
   const allSubmitted = session.players.every(p => p.turns[turn]);
-    if (allSubmitted) {
-      processTurn(session);
-    }
+  if (allSubmitted) {
+    processTurn(session);
+  }
 
+  await syncSessionToDb(session);
   res.json({ message: 'Action accepted for turn ' + turn });
 }
-
 
 module.exports = {
   getAllSessions,
@@ -147,5 +145,5 @@ module.exports = {
   getGameSession,
   getLastEvent,
   performAction,
-  sessions
+  sessions // still available for in-memory fallback/debug
 };

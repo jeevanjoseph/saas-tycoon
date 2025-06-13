@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const createPlayer = require('./player');
 const PlayerStats = require('./players/PlayerStats');
 const events = require('./events'); // Import the events module
+const PlayerActions = require('../models/players/PlayerActions');
 
 
 // Function to create a default game session
@@ -43,14 +44,10 @@ function processTurn(session) {
 
     //process events if there are any
     if (event !== null) {
-      if (player.eventHandlers[event.type]) {
-      player.eventHandlers[event.type](turn);
-      } else {
-      console.log('Unknown event type:', event);
-      }
+      PlayerActions.applyEvent(player, event, turn);
     }
     // update the cash on hand for the player
-    player.finishTurn(turn);
+    PlayerActions.finishTurn(player, turn);
     //start the next turn stats from the previous turn
     let previousStats = player.stats[turn];
     player.stats[turn + 1] = new PlayerStats(previousStats.cash, 
