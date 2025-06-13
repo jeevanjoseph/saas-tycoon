@@ -110,7 +110,7 @@ function MultiTenantPlayer(name) {
         },
         // Teams with more cloud native features than legacy features gain 1 customer.
         CLOUD_MIGRATION: (turn) => {
-            let cloudNativeFeatures = this.features.filter(feature => feature.architecture === 'microservice');
+            let cloudNativeFeatures = this.features.filter(feature => feature.architecture === 'microservice' || feature.architecture === 'mt-microservice');
             let legacyFeatures = this.features.filter(feature => feature.architecture === 'monolith');
             if (cloudNativeFeatures.length > legacyFeatures.length) {
                 this.stats[turn].customers += 1;

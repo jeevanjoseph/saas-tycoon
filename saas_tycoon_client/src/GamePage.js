@@ -394,27 +394,22 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           <div>
                             <MeterGroup
                               max={
-                                feature.revenueStats[feature.revenueStats.length - 1].netRevenue +
-                                feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
-                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost
+                                feature.revenueStats[feature.revenueStats.length - 1].featureRevenue
                               }
                               values={[
-                                {
-                                  label: 'Net Revenue',
-                                  value: feature.revenueStats[feature.revenueStats.length - 1].netRevenue,
-                                  color: '#22c55e'
-                                },
+                                
                                 {
                                   label: 'Infra Cost',
                                   value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
                                   color: '#3b82f6'
                                 },
+                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost > 0 ?
                                 {
                                   label: 'Tech Debt Cost',
                                   value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
                                   color: '#f59e42'
-                                }
-                              ]}
+                                } : null,
+                              ].filter((cost) => cost !== null)}
                               style={{ margin: '0.5rem 0' }}
                             />
                             <div style={{ fontSize: '0.95em', color: '#444' }}>
