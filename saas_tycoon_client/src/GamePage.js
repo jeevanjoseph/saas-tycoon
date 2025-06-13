@@ -12,6 +12,8 @@ import './GamePage.css';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
 import { DEV_COST_CONTROL_PLANE, DEV_COST_MONOLITH, DEV_COST_MULTI_TENANT, DEV_COST_SINGLE_TENANT, DEVOPS_COST, MARKETING_COST, TECH_DEBT_REDUCTION_COST, TRAINING_COST_CLOUD, TRAINING_COST_LEGACY } from './constants';
+import WinnerPage from './WinnerPage';
+import { formatCurrency } from './utils/formatCurrency';
 
 //TODO refactor this in to 4 action groups.
 // Fist set to build features.
@@ -77,8 +79,15 @@ function GamePage({ gameId, game, playerId, setReady }) {
   const [eventDialogVisible, setEventDialogVisible] = useState(false);
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [showWinner, setShowWinner] = useState(false);
   const lastEventIdRef = useRef(null);
   const toast = useRef(null);
+
+  useEffect(() => {
+    if (game && game.currentTurn + 1 >= game.total_turns) {
+      setShowWinner(true);
+    }
+  }, [game]);
 
   // Fetch the latest event
   useEffect(() => {
@@ -135,6 +144,10 @@ function GamePage({ gameId, game, playerId, setReady }) {
     setConfirmDialogVisible(false);
     setPendingAction(null);
   };
+
+  if (showWinner && game) {
+    return <WinnerPage game={game} />;
+  }
 
   return (
     <div className="gamepage-root">
@@ -201,7 +214,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
               <span>{pendingAction.description}</span>
             </div>
             <div style={{ marginTop: '0.5rem', color: '#444', fontWeight: 500 }}>
-              Cost: ${pendingAction.cost}
+              Cost: {formatCurrency(pendingAction.cost)}
               {pendingAction.per_unit && pendingAction.unit
                 ? ` per ${pendingAction.unit}`
                 : ''}
@@ -261,7 +274,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', marginBottom: 4 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <i className="pi pi-dollar" style={{ color: '#2563eb' }} />
-                        <span style={{ fontWeight: 600 }}>${currentStats.cash ?? 0}</span>
+                        <span style={{ fontWeight: 600 }}>{formatCurrency(currentStats.cash ?? 0)}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <i className="pi pi-users" style={{ color: '#2563eb' }} />
@@ -321,7 +334,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   <div className="current-player-stats-row">
                     <div className="stat-card">
                       <i className="pi pi-dollar stat-icon" />
-                      <div className="stat-value">${currentTurnStats.cash}</div>
+                      <div className="stat-value">{formatCurrency(currentTurnStats.cash)}</div>
                       <div className="stat-label">Cash</div>
                     </div>
                     <div className="stat-card">
@@ -433,7 +446,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                             <span className="feature-arch">{feature.architecture}</span>
                           )}
                         </div>
-                        <div>Infra cost: ${feature.infrastructureCost}</div>
+                        <div>Infra cost: {formatCurrency(feature.infrastructureCost)}</div>
                         <div>Tech Debt: {feature.techDebt}</div>
                         <div>Age: {game.currentTurn - feature.createdTurn} Quarters</div>
                         {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
@@ -443,7 +456,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                 feature.revenueStats[feature.revenueStats.length - 1].featureRevenue
                               }
                               values={[
-
                                 {
                                   label: 'Infra Cost',
                                   value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
@@ -460,11 +472,10 @@ function GamePage({ gameId, game, playerId, setReady }) {
                             />
                             <div style={{ fontSize: '0.95em', color: '#444' }}>
                               <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.3rem' }}>
-                                <span>Feature Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}</span>
-                                <span>Operational Costs: ${feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
-                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost }</span>
-                                <span >Net Revenue: ${feature.revenueStats[feature.revenueStats.length - 1].netRevenue}</span>
-
+                                <span>Feature Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].featureRevenue)}</span>
+                                <span>Operational Costs: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
+                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost )}</span>
+                                <span >Net Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].netRevenue)}</span>
                               </div>
                             </div>
                           </div>

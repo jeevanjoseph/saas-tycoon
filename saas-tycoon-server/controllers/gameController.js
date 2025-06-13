@@ -109,6 +109,11 @@ async function performAction(req, res) {
   const session = await mongoGameSession.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
+  // Prevent actions if session is finished
+  if (session.state === 'finished' || session.currentTurn >= session.total_turns) {
+    return res.status(400).json({ error: 'Game is finished. No more actions allowed.' });
+  }
+
   if (turn !== session.currentTurn) {
     return res.status(400).json({ error: 'Invalid turn. Current turn is ' + session.currentTurn });
   }
@@ -131,6 +136,10 @@ async function performAction(req, res) {
   const allSubmitted = session.players.every(p => p.turns[turn]);
   if (allSubmitted) {
     processTurn(session);
+    // If after processing, the game is over, mark as finished
+    if (session.currentTurn + 1 >= session.total_turns) {
+      session.state = 'finished';
+    }
   }
 
   await syncSessionToDb(session);
