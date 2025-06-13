@@ -3,7 +3,7 @@ const generateFeatureName = require("./FeatureNameGenerator")
 
 function MultiTenantMicroservice(price, featureDevCost, techDebt, turn) {
     this.architecture = 'mt-microservice';
-    this.name = generateFeatureName
+    this.name = generateFeatureName();
     this.featureDevCost = featureDevCost;
     this.techDebt = techDebt;
     this.featurePrice = price;
