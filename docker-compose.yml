@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: ghcr.io/jeevanjoseph/saas-tycoon-db:latest
+    container_name: saas-tycoon-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  server:
+    image: ghcr.io/jeevanjoseph/saas-tycoon-server:latest
+    container_name: saas-tycoon-server
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://root:example@db:27017/saas-tycoon?authSource=admin
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  client:
+    image: ghcr.io/jeevanjoseph/saas-tycoon-client:latest
+    container_name: saas-tycoon-client
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
