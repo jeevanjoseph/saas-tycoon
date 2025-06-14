@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
-const PlayerStats = require('../PlayerStats');
-const constants = require('../constants');
+const PlayerStats = require('./PlayerStats');
+const constants = require('./constants');
 
 
 function MultiTenantPlayer(name) {

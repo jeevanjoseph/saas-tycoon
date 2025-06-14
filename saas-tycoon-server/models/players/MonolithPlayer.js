@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const PlayerStats = require('./PlayerStats');
-const MonolithFeature = require('./MonolithFeature');
-const constants = require('../../constants');
+const MonolithFeature = require('../features/MonolithFeature');
+const constants = require('./constants')
 
 function MonolithPlayer(name) {
     this.id = uuidv4();
