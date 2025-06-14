@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from 'primereact/card';
 import { formatCurrency } from './utils/formatCurrency';
+import Confetti from 'react-confetti';
 
 function WinnerPage({ game }) {
   if (!game) return null;
@@ -16,8 +17,20 @@ function WinnerPage({ game }) {
 
   const top3 = sortedPlayers.slice(0, 3);
 
+  // Get window size for confetti (fallback for SSR)
+  const [dimensions, setDimensions] = React.useState({ width: 800, height: 600 });
+  React.useEffect(() => {
+    function updateSize() {
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    }
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   return (
-    <div className="gamepage-root">
+    <div className="gamepage-root" style={{ position: 'relative', minHeight: '100vh' }}>
+      <Confetti width={dimensions.width} height={dimensions.height} numberOfPieces={350} recycle={false} />
       <h1 className="gamepage-title">🏆 Game Over!</h1>
       <div style={{ margin: '2rem auto', maxWidth: 900, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
         {top3.map((player, idx) => {
