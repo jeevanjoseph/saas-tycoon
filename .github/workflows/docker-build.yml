@@ -26,11 +26,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push server image
+      - name: Build and push server image (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./saas-tycoon-server
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ github.repository_owner }}/saas-tycoon-server:latest
 
   build-client:
@@ -50,9 +51,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push client image
+      - name: Build and push client image (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./saas_tycoon_client
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ github.repository_owner }}/saas-tycoon-client:latest
