@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./saas_tycoon_client
+        working-directory: ./saas-tycoon-client
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -54,7 +54,7 @@ jobs:
       - name: Build and push client image (multi-arch)
         uses: docker/build-push-action@v5
         with:
-          context: ./saas_tycoon_client
+          context: ./saas-tycoon-client
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ github.repository_owner }}/saas-tycoon-client:latest
