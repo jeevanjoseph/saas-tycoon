@@ -14,6 +14,10 @@ services:
       - mongo_data:/data/db
 
   server:
+    build:
+      context: saas-tycoon-server
+      dockerfile: Dockerfile
+
     image: ghcr.io/jeevanjoseph/saas-tycoon-server:latest
     container_name: saas-tycoon-server
     restart: unless-stopped
@@ -26,6 +30,10 @@ services:
       - db
 
   client:
+    build:
+      context: saas-tycoon-client
+      dockerfile: Dockerfile
+    
     image: ghcr.io/jeevanjoseph/saas-tycoon-client:latest
     container_name: saas-tycoon-client
     restart: unless-stopped
