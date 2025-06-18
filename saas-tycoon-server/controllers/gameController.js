@@ -1,23 +1,17 @@
 const { createGameSession, canStartGame, processTurn } = require('../models/gameSession');
 const createPlayer = require('../models/player');
-const mongoGameSession = require('../db/mongoGameSession');
+const sessionDAO = require('../db/sessionDAO');
 const PlayerActions = require('../models/players/PlayerActions');
 
-const sessions = {}; // In-memory cache for fast access
-
-// Helper to sync in-memory and DB
+// Helper to sync in-memory and DB 
 async function syncSessionToDb(session) {
-  await mongoGameSession.saveSession(session);
-  sessions[session.id] = session;
+  await sessionDAO.saveSession(session);
 }
 
 // Function to get all game sessions
 async function getAllSessions(req, res) {
   try {
-    const dbSessions = await mongoGameSession.getAllSessions();
-    // TODO: Optimize and dont load all sessions into memory.
-    // Do we even need this?
-    dbSessions.forEach(s => { sessions[s.id] = s; });
+    const dbSessions = await sessionDAO.getAllSessions();
     const sessionList = dbSessions.map(({ id, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
       id, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
     }));
@@ -37,7 +31,7 @@ async function createSession(req, res) {
 
 // Function to join a game session
 async function joinSession(req, res) {
-  const session = await mongoGameSession.getSessionById(req.params.id);
+  const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const { playerName, playerType } = req.body;
@@ -62,7 +56,7 @@ async function joinSession(req, res) {
 
 // Function to set a player as ready
 async function setPlayerReady(req, res) {
-  const session = await mongoGameSession.getSessionById(req.params.id);
+  const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const player = session.players.find(p => p.id === req.body.playerId);
@@ -81,7 +75,7 @@ async function setPlayerReady(req, res) {
 
 // Function to get a specific game session
 async function getGameSession(req, res) {
-  const session = await mongoGameSession.getSessionById(req.params.id);
+  const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const { playerId } = req.query;
@@ -96,7 +90,7 @@ async function getGameSession(req, res) {
 
 // Function to get the last event of a game session
 async function getLastEvent(req, res) {
-  const session = await mongoGameSession.getSessionById(req.params.id);
+  const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   const lastEvent = session.events.length > 0 ? session.events[session.events.length - 1] : null;
@@ -106,7 +100,7 @@ async function getLastEvent(req, res) {
 // Function to handle player actions
 async function performAction(req, res) {
   const { playerId, action, turn } = req.body;
-  const session = await mongoGameSession.getSessionById(req.params.id);
+  const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
   // Prevent actions if session is finished
@@ -153,6 +147,5 @@ module.exports = {
   setPlayerReady,
   getGameSession,
   getLastEvent,
-  performAction,
-  sessions // still available for in-memory fallback/debug
+  performAction
 };
