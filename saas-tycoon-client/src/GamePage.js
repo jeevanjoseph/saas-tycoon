@@ -165,7 +165,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
               showValue
               style={{ height: '1.5rem' }}
             >
-              {`${game.currentTurn + 1} / ${game.total_turns} turns`}
+              {`${game.currentTurn} / ${game.total_turns} turns`}
             </ProgressBar>
           </div>
         )}

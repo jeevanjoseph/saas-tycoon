@@ -6,8 +6,8 @@ import { API } from '../constants';
  * @param {number} playerLimit
  * @returns {Promise<Object>}
  */
-export async function createGame(playerLimit = 5) {
-  const res = await axios.post(API, { playerLimit });
+export async function createGame(playerLimit = 10, name) {
+  const res = await axios.post(API, { playerLimit, name });
   return res.data;
 }
 

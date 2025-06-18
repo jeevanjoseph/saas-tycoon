@@ -7,9 +7,11 @@ const PlayerActions = require('../models/players/PlayerActions');
 
 // Function to create a default game session
 // It generates a unique ID for the session and sets the player limit
-function createGameSession(playerLimit = 10) {
+function createGameSession(playerLimit, name) {
+  const id = uuidv4();
   return {
-    id: uuidv4(),
+    id,
+    name: name || id.slice(-4),
     players: [],
     playerLimit,
     currentTurn: 0,

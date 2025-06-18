@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect, useRef} from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Card } from 'primereact/card';
+import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
+import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
 import './JoinGamePage.css';
+import constants from './constants';
 
-function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, sessions, createGame, joinGame }) {
+function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, sessions, createGame, joinGame, error, setError }) {
   const [selectedGameId, setSelectedGameId] = useState(null);
+  const [sessionName, setSessionName] = useState(null);
   const [nameTouched, setNameTouched] = useState(false);
+  const [gameConfigVisible, setGameConfigVisible] = useState(false);
+  const [playerLimit, setPlayerLimit] = useState(constants.DEFAULT_PLAYER_LIMIT);
+  const [playerLimitError, setPlayerLimitError] = useState('');
+  const toast = useRef(null);
 
   const playerTypes = [
     {
@@ -51,10 +60,96 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
     }
   ];
 
+  useEffect(() => {
+    if (error) {
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: error,
+        life: 4000
+      });
+      setError(null);
+    }
+  }, [error]);
+
   const showNameError = nameTouched && !playerName;
+
+  const validatePlayerLimit = (value) => {
+    if (value < 3) {
+      setPlayerLimitError('Player limit must be at least 3.');
+      return false;
+    }
+    if (value > 16) {
+      setPlayerLimitError('Player limit can be upto 16.');
+      return false;
+    }
+    setPlayerLimitError('');
+    return true;
+  };
+
+  const handlePlayerLimitChange = (e) => {
+    const value = e.value ?? 10;
+    setPlayerLimit(value);
+    validatePlayerLimit(value);
+  };
+
+  const handleCreate = async () => {
+    if (!validatePlayerLimit(playerLimit)) return;
+    try {
+      createGame(sessionName, playerLimit);
+      setGameConfigVisible(false);
+    } catch (err) {
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.response?.data?.error || 'Failed to create game session',
+        life: 4000
+      });
+    }
+  };
 
   return (
     <div className="join-game-container">
+      <Toast ref={toast} />
+      <Dialog
+        header="Create New Game Session"
+        visible={gameConfigVisible}
+        style={{ width: '520px' }}
+        onHide={() => setGameConfigVisible(false)}
+        modal
+        footer={
+          <div style={{ padding: '1rem' }}>
+            <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setGameConfigVisible(false)} />
+            <Button label="Create" icon="pi pi-check" onClick={handleCreate} disabled={!!playerLimitError} autoFocus />
+          </div>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
+          <label htmlFor="game-name" style={{ marginRight: 8 }}>Game Name (optional):</label>
+          <InputText
+            id="game-name"
+            value={sessionName}
+            onChange={e => setSessionName(e.target.value)}
+            placeholder="Enter a name or leave blank"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
+          <label htmlFor="player-limit" style={{ marginRight: 8 }}>Number of Players:</label>
+          <InputNumber
+            id="player-limit"
+            value={playerLimit}
+            onValueChange={handlePlayerLimitChange}
+            min={3}
+            max={16}
+            showButtons
+            style={{ width: '100%' }}
+          />
+          {playerLimitError && (
+            <div style={{ color: 'red', fontSize: '0.9em', marginTop: 4 }}>{playerLimitError}</div>
+          )}
+        </div>
+      </Dialog>
       <h1>SaaS Tycoon</h1>
       <div className="p-field" style={{ marginBottom: 24, maxWidth: 350 }}>
         <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
@@ -108,7 +203,7 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
             <Button
               label="Create Game"
               icon="pi pi-plus"
-              onClick={createGame}
+              onClick={() => setGameConfigVisible(true)}
               disabled={!playerName}
               className="p-button-success"
             />
@@ -131,10 +226,37 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
         dataKey="id"
         responsiveLayout="scroll"
       >
-        <Column field="id" header="Game ID"></Column>
+        <Column field="name" header="Name"></Column>
         <Column field="playerCount" header="Players"></Column>
         <Column field="playerLimit" header="Player Limit"></Column>
-        <Column field="state" header="State"></Column>
+        <Column
+          field="state"
+          header="State"
+          body={rowData => (
+            <span>
+              <Tag
+                value={
+                  rowData.state === 'not_started'
+                    ? 'Not Started'
+                    : rowData.state === 'started'
+                      ? 'In Progress'
+                      : rowData.state === 'finished'
+                        ? 'Finished'
+                        : rowData.state
+                }
+                severity={
+                  rowData.state === 'not_started'
+                    ? 'success'
+                    : rowData.state === 'started'
+                      ? 'warning'
+                      : rowData.state === 'finished'
+                        ? 'info'
+                        : null
+                }
+              />
+            </span>
+          )}
+        ></Column>
         <Column
           header="Progress"
           body={rowData => {

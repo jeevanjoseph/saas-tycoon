@@ -18,6 +18,9 @@ const TRAINING_COST_CLOUD = 500; // Cost for training to increase cloud-native s
 const TRAINING_COST_LEGACY = 250; // Cost for training to increase legacy skills
 const MARKETING_COST = 5000; // Cost for marketing campaigns
 
+const DEFAULT_PLAYER_TYPE = 'Monolith';
+const DEFAULT_PLAYER_COUNT = 10;
+
 module.exports = {
     API,
     OPS_MATURITY_MAX,
@@ -36,5 +39,7 @@ module.exports = {
     DEVOPS_COST,
     TRAINING_COST_CLOUD,
     TRAINING_COST_LEGACY,
-    MARKETING_COST
+    MARKETING_COST,
+    DEFAULT_PLAYER_TYPE,
+    DEFAULT_PLAYER_COUNT
 };

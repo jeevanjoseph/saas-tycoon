@@ -11,9 +11,9 @@ async function syncSessionToDb(session) {
 // Function to get all game sessions
 async function getAllSessions(req, res) {
   try {
-    const dbSessions = await sessionDAO.getAllSessions();
-    const sessionList = dbSessions.map(({ id, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
-      id, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
+    const sessions = await sessionDAO.getAllSessions();
+    const sessionList = sessions.map(({ id, name, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
+      id, name, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
     }));
     res.json(sessionList);
   } catch (err) {
@@ -23,8 +23,17 @@ async function getAllSessions(req, res) {
 
 // Function to create a new game session
 async function createSession(req, res) {
-  const { playerLimit } = req.body;
-  const session = createGameSession(playerLimit);
+  const { playerLimit, name } = req.body;
+  if(name){
+  // Use DAO to check for duplicate session name
+  const existingSession = await sessionDAO.getSessionByName(name);
+  
+  if (existingSession) {
+    return res.status(400).json({ error: 'A game session with this name already exists.' });
+  }
+}
+
+  const session = createGameSession(playerLimit, name);
   await syncSessionToDb(session);
   res.json({ gameId: session.id });
 }
@@ -131,7 +140,7 @@ async function performAction(req, res) {
   if (allSubmitted) {
     processTurn(session);
     // If after processing, the game is over, mark as finished
-    if (session.currentTurn + 1 >= session.total_turns) {
+    if (session.currentTurn >= session.total_turns) {
       session.state = 'finished';
     }
   }

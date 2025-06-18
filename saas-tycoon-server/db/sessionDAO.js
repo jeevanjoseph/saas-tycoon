@@ -50,6 +50,14 @@ class SessionDAO {
     }
     return null;
   }
+
+  async getSessionByName(name) {
+    if (this.mongoAvailable) {
+      const sessions = await mongoGameSession.getAllSessions();
+      return sessions.find(session => session.name === name) || null;
+    }
+    return Object.values(this.sessions).find(session => session.name === name) || null;
+  }
 }
 
 module.exports = new SessionDAO();
