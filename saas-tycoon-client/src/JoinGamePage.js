@@ -1,4 +1,4 @@
-import React, { useState , useEffect, useRef} from 'react';
+import React, { useState , useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -12,7 +12,18 @@ import { ProgressBar } from 'primereact/progressbar';
 import './JoinGamePage.css';
 import constants from './constants';
 
-function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, sessions, createGame, joinGame, error, setError }) {
+function JoinGamePage({
+  playerName,
+  setPlayerName,
+  playerType,
+  setPlayerType,
+  sessions,
+  createGame,
+  joinGame,
+  error,
+  setError,
+  onSpectate 
+}) {
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [sessionName, setSessionName] = useState(null);
   const [nameTouched, setNameTouched] = useState(false);
@@ -196,28 +207,37 @@ function JoinGamePage({ playerName, setPlayerName, playerType, setPlayerType, se
         </div>
       </div>
       <DataTable
-        value={sessions} // Show all games
+        value={sessions}
         header={
           <div className="flex flex-wrap align-items-center justify-content-between gap-2">
             <span className="text-xl text-900 font-bold">Available Games</span>
-            <Button
-              label="Create Game"
-              icon="pi pi-plus"
-              onClick={() => setGameConfigVisible(true)}
-              disabled={!playerName}
-              className="p-button-success"
-            />
-            <Button
-              label="Join"
-              icon="pi pi-sign-in"
-              onClick={() => joinGame(selectedGameId)}
-              className="p-button-primary"
-              disabled={
-                !playerName ||
-                !selectedGameId ||
-                sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
-              }
-            />
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: 8 }}>
+              <Button
+                label="Create Game"
+                icon="pi pi-plus"
+                onClick={() => setGameConfigVisible(true)}
+                disabled={!playerName}
+                className="p-button-success"
+              />
+              <Button
+                label="Join"
+                icon="pi pi-sign-in"
+                onClick={() => joinGame(selectedGameId)}
+                className="p-button-primary"
+                disabled={
+                  !playerName ||
+                  !selectedGameId ||
+                  sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
+                }
+              />
+              <Button
+                label="Spectate"
+                icon="pi pi-eye"
+                className="p-button-info"
+                onClick={() => onSpectate && onSpectate(selectedGameId)}
+                disabled={!selectedGameId}
+              />
+            </div>
           </div>
         }
         selectionMode="single"

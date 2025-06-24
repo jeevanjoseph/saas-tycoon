@@ -84,7 +84,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
   const toast = useRef(null);
 
   useEffect(() => {
-    if (game && game.currentTurn + 1 >= game.total_turns) {
+    if (game && game.currentTurn >= game.total_turns) {
       setShowWinner(true);
     }
   }, [game]);

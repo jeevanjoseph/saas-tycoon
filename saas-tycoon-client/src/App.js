@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import JoinGamePage from './JoinGamePage';
 import GamePage from './GamePage';
+import SpectatePage from './SpectatePage'; // <-- Import SpectatePage
 import constants from './constants';
 import {
   createGame,
@@ -18,9 +19,10 @@ function App() {
   const [playerType, setPlayerType] = useState(constants.DEFAULT_PLAYER_TYPE);
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
+  const [spectateId, setSpectateId] = useState(null); // <-- Add spectate state
 
   useEffect(() => {
-    if (!gameId) {
+    if (!gameId && !spectateId) {
       const interval = setInterval(() => {
         fetchSessions()
           .then(setSessions)
@@ -28,7 +30,17 @@ function App() {
             console.error('Error fetching game sessions:', err)
             setError(err.response?.data.error || err.message || 'Unknown error');
           });
-      }, 2000+Math.floor(Math.random()*500));
+      }, 2000 + Math.floor(Math.random() * 500));
+      return () => clearInterval(interval);
+    } else if (spectateId) {
+      const interval = setInterval(() => {
+        fetchGame(spectateId)
+          .then(setGame)
+          .catch((err) => {
+            console.error('Error fetching game data:', err)
+            setError(err.response?.data.error || err.message || 'Unknown error');
+          });
+      }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
     } else {
       const interval = setInterval(() => {
@@ -38,10 +50,10 @@ function App() {
             console.error('Error fetching game data:', err)
             setError(err.response?.data.error || err.message || 'Unknown error');
           });
-      }, 2000+Math.floor(Math.random()*500));
+      }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
     }
-  }, [gameId]);
+  }, [gameId, spectateId]);
 
   const handleCreateGame = async (sessionName, playerCount) => {
     try {
@@ -74,6 +86,22 @@ function App() {
     }
   };
 
+  // Add the onSpectate handler
+  const handleSpectate = (id) => {
+    setSpectateId(id);
+    setGameId(null);
+    setPlayerId(null);
+  };
+
+  // Show SpectatePage if spectateId is set
+  if (spectateId) {
+    return (
+      <SpectatePage
+        game={game}
+      />
+    );
+  }
+
   if (!gameId) {
     return (
       <JoinGamePage
@@ -86,6 +114,7 @@ function App() {
         joinGame={handleJoinGame}
         error={error}
         setError={setError}
+        onSpectate={handleSpectate} // <-- Pass the handler
       />
     );
   }
