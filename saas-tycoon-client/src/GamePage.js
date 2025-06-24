@@ -82,6 +82,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
   const [showWinner, setShowWinner] = useState(false);
   const lastEventIdRef = useRef(null);
   const toast = useRef(null);
+  const shownEventLogIdsRef = useRef(new Set());
 
   useEffect(() => {
     if (game && game.currentTurn >= game.total_turns) {
@@ -144,6 +145,33 @@ function GamePage({ gameId, game, playerId, setReady }) {
     setConfirmDialogVisible(false);
     setPendingAction(null);
   };
+
+  useEffect(() => {
+    if (!game || !toast.current) return;
+
+    // Find the current player
+    const currentPlayer = game.players?.find(p => p.id === playerId);
+    if (!currentPlayer || !Array.isArray(currentPlayer.log)) return;
+
+    // Find the most recent event log for the current turn
+    const eventLogsThisTurn = currentPlayer.log.filter(
+      log => typeof log === 'object' && log.turn === game.currentTurn - 1 && log.type === 'event'
+    );
+    if (eventLogsThisTurn.length > 0) {
+      const lastEvent = eventLogsThisTurn[eventLogsThisTurn.length - 1];
+      // Use a unique key for the log (turn + code + details)
+      const logKey = `${lastEvent.turn}_${lastEvent.code}_${lastEvent.details}`;
+      if (!shownEventLogIdsRef.current.has(logKey)) {
+        shownEventLogIdsRef.current.add(logKey);
+        toast.current.show({
+          severity: 'info',
+          summary: lastEvent.code || 'Event',
+          detail: lastEvent.details,
+          sticky: true
+        });
+      }
+    }
+  }, [game?.currentTurn, game?.players, playerId]);
 
   if (showWinner && game) {
     return <WinnerPage game={game} />;
@@ -242,6 +270,26 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   ? '#22c55e'
                   : '#fbbf24';
 
+                // Find the most recent 'action' log for this player for the current turn or previous turn
+                let recentActionLog = null;
+                if (Array.isArray(player.log)) {
+                  // Try to find the last 'action' log for the current turn
+                  const logsThisTurn = player.log.filter(
+                    log => typeof log === 'object' && log.turn === game.currentTurn && log.type === 'action'
+                  );
+                  if (logsThisTurn.length > 0) {
+                    recentActionLog = logsThisTurn[logsThisTurn.length - 1];
+                  } else if (game.currentTurn > 0) {
+                    // If not found, try previous turn
+                    const logsPrevTurn = player.log.filter(
+                      log => typeof log === 'object' && log.turn === game.currentTurn - 1 && log.type === 'action'
+                    );
+                    if (logsPrevTurn.length > 0) {
+                      recentActionLog = logsPrevTurn[logsPrevTurn.length - 1];
+                    }
+                  }
+                }
+
                 return (
                   <Card
                     key={player.id}
@@ -295,6 +343,17 @@ function GamePage({ gameId, game, playerId, setReady }) {
                         <span>Ops: {currentStats.opsMaturity ?? 0}</span>
                       </div>
                     </div>
+                    {/* Show the most recent action for this player for this turn or previous turn */}
+                    {recentActionLog && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', marginTop: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'left', gap: 4 , fontSize: '0.7em', color: '#666'}}>
+                        <i className="pi pi-comments" style={{ color: '#22c55e' }} />
+                        <span>{recentActionLog.details}. Spent {formatCurrency(recentActionLog.cashSpent??0)}</span>
+                      
+                        
+                        </div>
+                      </div>
+                    )}
                   </Card>
                 );
               })}

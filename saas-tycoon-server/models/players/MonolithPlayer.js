@@ -12,7 +12,7 @@ function MonolithPlayer(name) {
     new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)];
     this.stats = {
         0: new PlayerStats(
-            cash = 5000,
+            cash = 10000,
             customers = 1,
             legacySkills = 4,
             cloudNativeSkills = 0,
@@ -20,6 +20,7 @@ function MonolithPlayer(name) {
         )
     };
     this.turns = {};
+    this.log = [];
 }
 
 module.exports = MonolithPlayer;

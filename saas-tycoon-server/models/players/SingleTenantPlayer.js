@@ -13,12 +13,14 @@ function SingleTenantPlayer(name) {
         0: new PlayerStats(
             5000, // cash
             1,    // customers
-            1,    // legacySkills
+            2,    // legacySkills
             1,    // cloudNativeSkills
             0     // opsMaturity
         )
     };
     this.turns = {};
+    this.log = [];
+
 }
 
 module.exports = SingleTenantPlayer;

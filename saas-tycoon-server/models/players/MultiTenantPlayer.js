@@ -12,13 +12,14 @@ function MultiTenantPlayer(name) {
     this.stats = {
         0: new PlayerStats(
             5000, // cash
-            2,    // customers
+            1,    // customers
             0,    // legacySkills
             4,    // cloudNativeSkills
-            1     // opsMaturity
+            3     // opsMaturity
         )
     };
     this.turns = {};
+    this.log = [];
 
    
 }
