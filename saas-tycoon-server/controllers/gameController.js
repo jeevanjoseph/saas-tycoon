@@ -131,6 +131,7 @@ async function performAction(req, res) {
   try {
     PlayerActions.applyAction(player, action, turn);
     player.turns[turn] = action;
+    
   } catch (error) {
     console.error('Error applying action:', error);
     return res.status(400).json({ error: error.message || 'Failed to apply action.' });

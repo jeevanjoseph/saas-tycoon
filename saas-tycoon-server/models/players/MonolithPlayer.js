@@ -8,8 +8,10 @@ function MonolithPlayer(name) {
     this.name = name;
     this.playerClass = 'Monolith';
     this.ready = false;
-    this.features = [new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
-    new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)];
+    this.features = [
+        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
+        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)
+    ];
     this.stats = {
         0: new PlayerStats(
             cash = 10000,
@@ -21,6 +23,7 @@ function MonolithPlayer(name) {
     };
     this.turns = {};
     this.log = [];
+    this.actionCooldowns = {}; // { [actionCode]: cooldownTurns }
 }
 
 module.exports = MonolithPlayer;
