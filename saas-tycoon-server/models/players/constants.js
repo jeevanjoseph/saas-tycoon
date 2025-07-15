@@ -8,7 +8,7 @@ const DEV_COST_CONTROL_PLANE = 2000;
 const DEV_COST_MULTI_TENANT = 1500;
 const DEV_COST_SINGLE_TENANT = 1200;
 const CUSTOMER_PRICE_MULTI_TENANT = 1000;
-const CUSTOMER_PRICE_SINGLE_TENANT = 1000;   
+const CUSTOMER_PRICE_SINGLE_TENANT = 1000;
 const CUSTOMER_PRICE_CONTROL_PLANE = 0; // Control Plane does not have a customer price
 const CUSTOMER_PRICE_MONOLITH = 1000;
 const TECH_DEBT_REDUCTION_COST = 400; // Cost to reduce tech debt per feature
@@ -25,23 +25,63 @@ const ACTION_COOLDOWN_PERIODS = {
   //TODO: Add more actions for marketing, price war and takeover.
 };
 
+//cost ramps for features. These are the points after  which feature development becomes more expsnsive
+// as you have to manage releases across multiple features etc. Skill counteracts this effect
+const RELEASE_RAMP_MONOLITH = 5
+const RELEASE_RAMP_SINGLE_TENANT = 4
+const RELEASE_RAMP_MULTI_TENANT = 6
+
+// Skill Ramps. These ae the points after which skills counterbalance the dev ramp cost created by having 
+// too many features
+
+const SKILL_RAMP_LEGACY = 5
+const SKILL_RAMP_CLOUD_NATIVE = 5
+
+// Customer ramps. When you have a lot of customers, managing single tenant deployments become complex
+// Each customer's tenant is handled separately, and that adds cost and complexity.
+// Ops Maturity Counteracts this effect.
+// Multi-Tenant apps are not affected (affected at level 99)
+
+const CUSTOMER_RAMP_MONOLITH = 3
+const CUSTOMER_RAMP_SINGLE_TENANT = 3
+const CUSTOMER_RAMP_MULTI_TENANT = 99
+
+//ops Maturity ramps. When you have a lot of customers, you need to invest in DevOps to manage the complexity
+
+const OPS_MATURITY_RAMP_MONOLITH = 5
+const OPS_MATURITY_RAMP_SINGLE_TENANT = 5
+const OPS_MATURITY_RAMP_MULTI_TENANT = 99
+
+
 module.exports = {
-    OPS_MATURITY_MAX,
-    LEGACY_SKILLS_MAX,
-    CLOUD_NATIVE_SKILLS_MAX,
-    TECH_DEBT_MAX,
-    DEV_COST_MONOLITH,
-    DEV_COST_CONTROL_PLANE,
-    DEV_COST_MULTI_TENANT,
-    DEV_COST_SINGLE_TENANT,
-    CUSTOMER_PRICE_MULTI_TENANT,
-    CUSTOMER_PRICE_SINGLE_TENANT,
-    CUSTOMER_PRICE_CONTROL_PLANE,
-    CUSTOMER_PRICE_MONOLITH,
-    TECH_DEBT_REDUCTION_COST,
-    DEVOPS_COST,
-    TRAINING_COST_CLOUD,
-    TRAINING_COST_LEGACY,
-    MARKETING_COST,
-    ACTION_COOLDOWN_PERIODS
+  OPS_MATURITY_MAX,
+  LEGACY_SKILLS_MAX,
+  CLOUD_NATIVE_SKILLS_MAX,
+  TECH_DEBT_MAX,
+  DEV_COST_MONOLITH,
+  DEV_COST_CONTROL_PLANE,
+  DEV_COST_MULTI_TENANT,
+  DEV_COST_SINGLE_TENANT,
+  CUSTOMER_PRICE_MULTI_TENANT,
+  CUSTOMER_PRICE_SINGLE_TENANT,
+  CUSTOMER_PRICE_CONTROL_PLANE,
+  CUSTOMER_PRICE_MONOLITH,
+  TECH_DEBT_REDUCTION_COST,
+  DEVOPS_COST,
+  TRAINING_COST_CLOUD,
+  TRAINING_COST_LEGACY,
+  MARKETING_COST,
+  ACTION_COOLDOWN_PERIODS,
+  RELEASE_RAMP_MONOLITH,
+  RELEASE_RAMP_SINGLE_TENANT,
+  RELEASE_RAMP_MULTI_TENANT,
+  SKILL_RAMP_LEGACY,
+  SKILL_RAMP_CLOUD_NATIVE,
+  CUSTOMER_RAMP_MONOLITH,
+  CUSTOMER_RAMP_SINGLE_TENANT,
+  CUSTOMER_RAMP_MULTI_TENANT,
+  OPS_MATURITY_RAMP_MONOLITH,
+  OPS_MATURITY_RAMP_SINGLE_TENANT,
+  OPS_MATURITY_RAMP_MULTI_TENANT
+
 };

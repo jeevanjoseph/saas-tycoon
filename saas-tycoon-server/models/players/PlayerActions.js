@@ -53,11 +53,17 @@ const actions = {
     BUILD_MONOLITH_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.DEV_COST_MONOLITH;
-      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 0, turn));
+      const devCost = MonolithFeature.calculateMonolithDevCost(player, turn);
+
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
-      addPlayerLog(player, turn, action, 'Built Monolith Feature. Feature rich products attract customers, but a key metric for your success - operational cost - is high and may hurt you in the long term.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MONOLITH) {
+        addPlayerLog(player, turn, action, `Monolith development cost for you have risen to ${devCost}. As you build more features, its harder for you to coordinate monolith releases. Improve your LEGACY skills to counter balance. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Built Monolith Feature. Keep track of your costs though as the stack requires more upkeep(tech debt) and you pay the infra costs for every customer you add.', cashBefore, cashAfter);
+      }
     },
     BUILD_CONTROL_PLANE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_CONTROL_PLANE');
@@ -65,8 +71,9 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 4) {
         throw new Error('Cloud Native skill must be 4 or more to build control plane.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_CONTROL_PLANE;
-      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, constants.DEV_COST_CONTROL_PLANE, 0, turn));
+      const devCost = constants.DEV_COST_CONTROL_PLANE;
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_CONTROL_PLANE');
       addPlayerLog(player, turn, action, 'Pivoting to an efficient SaaS model, and built a MultiTenant Control Plane', cashBefore, cashAfter);
@@ -80,11 +87,16 @@ const actions = {
       if (!hasControlPlane) {
         throw new Error('You must have at least one MultiTenantControlPlane feature to build a microservice feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_MULTI_TENANT;
-      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, constants.DEV_COST_MULTI_TENANT, 0, turn));
+      const devCost = MultiTenantMicroservice.calculateMultiTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MULTITENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Committed to a business transformation, and built MultiTenant Feature', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MULTI_TENANT) {
+        addPlayerLog(player, turn, action, `MultiTenant Microservice development cost for you have risen to ${devCost}. As you build more features, you need improve your CLOUD skills to keep up with managing all your features.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Committed to a business transformation, and built MultiTenant Feature', cashBefore, cashAfter);
+      }
     },
     BUILD_SINGLETENANT_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
@@ -92,11 +104,16 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 1) {
         throw new Error('Cloud Native skill must be 1 or more to build single tenant feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_SINGLE_TENANT;
-      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 0, turn));
+      const devCost = SingleTenantMicroservice.calculateSingleTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Implementing a modernization strategy by building a SingleTenant Microservice', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_SINGLE_TENANT) {
+        addPlayerLog(player, turn, action, `SingleTenant Microservice development cost for you have risen to ${devCost}.As you build more features, its harder for you to coordinate releases across your many features. Improve your CLOUD skills to counter balance this effect. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Implementing a modernization strategy by building a SingleTenant Microservice', cashBefore, cashAfter);
+      }
     },
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -115,7 +132,7 @@ const actions = {
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity+1}. `, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -165,11 +182,17 @@ const actions = {
     BUILD_MONOLITH_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.DEV_COST_MONOLITH;
-      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 0, turn));
+      const devCost = MonolithFeature.calculateMonolithDevCost(player, turn);
+
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
-      addPlayerLog(player, turn, action, 'Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MONOLITH) {
+        addPlayerLog(player, turn, action, `Monolith development cost for you have risen to ${devCost}. As you build more features, its harder for you to coordinate monolith releases. Improve your LEGACY skills to counter balance. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.', cashBefore, cashAfter);
+      }
     },
     BUILD_CONTROL_PLANE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_CONTROL_PLANE');
@@ -177,8 +200,9 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 4) {
         throw new Error('Cloud Native skill must be 4 or more to build control plane.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_CONTROL_PLANE;
-      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, constants.DEV_COST_CONTROL_PLANE, 0, turn));
+      const devCost = constants.DEV_COST_CONTROL_PLANE;
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_CONTROL_PLANE');
       addPlayerLog(player, turn, action, 'Pivoting to a higher margin model afforded by a MultiTenant model and built a Control Plane', cashBefore, cashAfter);
@@ -192,11 +216,16 @@ const actions = {
       if (!hasControlPlane) {
         throw new Error('You must have at least one MultiTenantControlPlane feature to build a microservice feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_MULTI_TENANT;
-      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, constants.DEV_COST_MULTI_TENANT, 0, turn));
+      const devCost = MultiTenantMicroservice.calculateMultiTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MULTITENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Committed to a true SaaS model and releases a new MultiTenant Microservice, with a better operational margin.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MULTI_TENANT) {
+        addPlayerLog(player, turn, action, `MultiTenant Microservice development cost for you have risen to ${devCost}. As you build more features, you need improve your CLOUD skills to keep up with managing all your features.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Committed to a true SaaS model and releases a new MultiTenant Microservice, with a better operational margin.', cashBefore, cashAfter);
+      }
     },
     BUILD_SINGLETENANT_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
@@ -204,11 +233,16 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 1) {
         throw new Error('Cloud Native skill must be 1 or more to build single tenant feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_SINGLE_TENANT;
-      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 0, turn));
+      const devCost = SingleTenantMicroservice.calculateSingleTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_SINGLE_TENANT) {
+        addPlayerLog(player, turn, action, `SingleTenant Microservice development cost for you have risen to ${devCost}.As you build more features, its harder for you to coordinate releases across your many features. Improve your CLOUD skills to counter balance this effect. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.', cashBefore, cashAfter);
+      }
     },
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -227,7 +261,7 @@ const actions = {
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity+1}. `, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -277,11 +311,17 @@ const actions = {
     BUILD_MONOLITH_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.DEV_COST_MONOLITH;
-      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 0, turn));
+      const devCost = MonolithFeature.calculateMonolithDevCost(player, turn);
+
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MONOLITH_FEATURE');
-      addPlayerLog(player, turn, action, 'Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MONOLITH) {
+        addPlayerLog(player, turn, action, `Monolith development cost for you have risen to ${devCost}. As you build more features, its harder for you to coordinate monolith releases. Improve your LEGACY skills to counter balance. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.', cashBefore, cashAfter);
+      }
     },
     BUILD_CONTROL_PLANE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_CONTROL_PLANE');
@@ -289,8 +329,9 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 4) {
         throw new Error('Cloud Native skill must be 4 or more to build control plane.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_CONTROL_PLANE;
-      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, constants.DEV_COST_CONTROL_PLANE, 0, turn));
+      const devCost = constants.DEV_COST_CONTROL_PLANE;
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_CONTROL_PLANE');
       addPlayerLog(player, turn, action, 'Laying the foundations for the business and has built a MultiTenant Control Plane', cashBefore, cashAfter);
@@ -304,11 +345,16 @@ const actions = {
       if (!hasControlPlane) {
         throw new Error('You must have at least one MultiTenantControlPlane feature to build a microservice feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_MULTI_TENANT;
-      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, constants.DEV_COST_MULTI_TENANT, 0, turn));
+      const devCost = MultiTenantMicroservice.calculateMultiTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new MultiTenantMicroservice(constants.CUSTOMER_PRICE_MULTI_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_MULTITENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Releases a new MultiTenant Microservice. The low operational overhead per customer leads to much better margins.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_MULTI_TENANT) {
+        addPlayerLog(player, turn, action, `MultiTenant Microservice development cost for you have risen to ${devCost}. As you build more features, you need improve your CLOUD skills to keep up with managing all your features.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Releases a new MultiTenant Microservice. The low operational overhead per customer leads to much better margins.', cashBefore, cashAfter);
+      }
     },
     BUILD_SINGLETENANT_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
@@ -316,11 +362,16 @@ const actions = {
       if (player.stats[turn].cloudNativeSkills < 1) {
         throw new Error('Cloud Native skill must be 1 or more to build single tenant feature.');
       }
-      player.stats[turn].cash -= constants.DEV_COST_SINGLE_TENANT;
-      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 0, turn));
+      const devCost = SingleTenantMicroservice.calculateSingleTenantMicroserviceDevCost(player, turn);
+      player.stats[turn].cash -= devCost;
+      player.features.push(new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, 'BUILD_SINGLETENANT_FEATURE');
-      addPlayerLog(player, turn, action, 'Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.', cashBefore, cashAfter);
+      if (devCost > constants.DEV_COST_SINGLE_TENANT) {
+        addPlayerLog(player, turn, action, `SingleTenant Microservice development cost for you have risen to ${devCost}.As you build more features, its harder for you to coordinate releases across your many features. Improve your CLOUD skills to counter balance this effect. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
+      } else {
+        addPlayerLog(player, turn, action, 'Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.', cashBefore, cashAfter);
+      }
     },
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -339,7 +390,7 @@ const actions = {
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity+1}. `, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -370,7 +421,7 @@ const actions = {
       if (Math.random() < successChance) {
         const gainedCustomers = 1 + Math.round(numFeatures * 0.2) + Math.round(opsMaturity * 0.5);
         player.stats[turn].customers += gainedCustomers;
-         details += ` successfully, gained ${gainedCustomers} customers.`;
+        details += ` successfully, gained ${gainedCustomers} customers.`;
       } else {
         details += ' , but due to lack of features and operational maturity, it has failed to attract new customers. Customers look for feature rich products with a proven track record for operational maturity.';
       }
@@ -533,7 +584,7 @@ const eventHandlers = {
     },
     DOWNTIME: function (player, turn) {
       let penalty = 500 * (constants.OPS_MATURITY_MAX - player.stats[turn].opsMaturity);
-      player.stats[turn].cash = Math.max(0, player.stats[turn].cash -penalty);
+      player.stats[turn].cash = Math.max(0, player.stats[turn].cash - penalty);
       addPlayerLog(player, turn, { type: 'DOWNTIME' }, `Downtime event: Having better operational maturity helps you deal with unexpected events better. Lost $${penalty} based on the current operational maturity of ${player.stats[turn].opsMaturity}.`);
     },
     RISING_COSTS: function (player, turn) {
