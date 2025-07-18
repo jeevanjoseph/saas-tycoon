@@ -28,10 +28,10 @@ const actions_build = [
 
 const actions_tech_debt_reduction = [
   { code: "TECH_DEBT_REDUCTION", name: "Modularize", description: "Break down large tightly coupled components. Improves maintainability and sets the stage for future refactoring.", icon: "pi pi-wrench", mutiplier: 1, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Instrumentation", description: "Use logs, metrics, and traces to better understand bottlenecks or fragile code paths. Data-driven insights help justify debt remediation.", icon: "pi pi-wrench", mutiplier: 2, cost: TECH_DEBT_REDUCTION_COST*1.75, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Code Audit", description: "Perform a thorough code audit and identify areas for improving and modernizing the code base.", icon: "pi pi-wrench", mutiplier: 3, cost: TECH_DEBT_REDUCTION_COST*2.5, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Dependency Audit", description: "Audit application dependencies, evaluate newer libraries and APIs for improved performance and stability.", icon: "pi pi-wrench", mutiplier: 4, cost: TECH_DEBT_REDUCTION_COST*3, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Defensive Coding", description: "Implement defensive coding practices for better resiliency, security and operational posture.", icon: "pi pi-wrench", mutiplier: 5, cost: TECH_DEBT_REDUCTION_COST*3.5, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Instrumentation", description: "Use logs, metrics, and traces to better understand bottlenecks or fragile code paths. Data-driven insights help justify debt remediation.", icon: "pi pi-wrench", mutiplier: 2, cost: TECH_DEBT_REDUCTION_COST * 1.75, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Code Audit", description: "Perform a thorough code audit and identify areas for improving and modernizing the code base.", icon: "pi pi-wrench", mutiplier: 3, cost: TECH_DEBT_REDUCTION_COST * 2.5, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Dependency Audit", description: "Audit application dependencies, evaluate newer libraries and APIs for improved performance and stability.", icon: "pi pi-wrench", mutiplier: 4, cost: TECH_DEBT_REDUCTION_COST * 3, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Defensive Coding", description: "Implement defensive coding practices for better resiliency, security and operational posture.", icon: "pi pi-wrench", mutiplier: 5, cost: TECH_DEBT_REDUCTION_COST * 3.5, unit: "feature", per_unit: true },
 ];
 
 const actions_ops_maturity = [
@@ -617,6 +617,56 @@ function GamePage({ gameId, game, playerId, setReady }) {
                             />
                           </div>
                         </TabPanel>
+                        <TabPanel header="News" className="full-width-tab-panel">
+                          <div style={{ maxHeight: 320, overflowY: 'auto', background: '#f8fafc', borderRadius: 8, padding: '1rem', border: '1px solid #e5e7eb' }}>
+                            {game?.players &&
+                              // Gather all logs, flatten, and sort by turn descending (most recent first)
+                              game.players
+                                .flatMap(player =>
+                                  (player.log || []).map(log => ({
+                                    ...log,
+                                    playerName: player.name,
+                                    playerId: player.id
+                                  }))
+                                )
+                                
+                                .sort((a, b) => (b.turn ?? 0) - (a.turn ?? 0))
+                                .map((log, idx) => (
+                                  <div key={log.playerId + '_' + log.turn + '_' + idx} style={{ marginBottom: 12, display: 'flex', alignItems: 'flex-start' }}>
+                                    <div style={{
+                                      background: '#2563eb',
+                                      color: '#fff',
+                                      borderRadius: '50%',
+                                      width: 32,
+                                      height: 32,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontWeight: 700,
+                                      fontSize: 16,
+                                      marginRight: 12
+                                    }}>
+                                      {log.playerName[0]}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontWeight: 600, color: '#2563eb', fontSize: 14 }}>
+                                        {log.playerName} <span style={{ color: '#888', fontWeight: 400, fontSize: 12 }}>Turn {log.turn}</span>
+                                      </div>
+                                      <div style={{ fontSize: 13, color: '#222', marginTop: 2 }}>{log.details}</div>
+                                      <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{log.code ? `(${log.code})` : ''}</div>
+                                    </div>
+                                  </div>
+                                ))
+                            }
+                            {(!game?.players?.some(player =>
+                              (player.log || []).some(log => typeof log === 'object' && log.type === 'event')
+                            )) && (
+                                <div style={{ color: '#888', fontStyle: 'italic', marginTop: '1rem' }}>
+                                  No news yet.
+                                </div>
+                              )}
+                          </div>
+                        </TabPanel>
                       </TabView>
                     </div>
 
@@ -667,7 +717,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                       </span>
                                     }
                                     icon={action.icon}
-                                    className={statusIcon ? currentLevel >= action.level ? "p-button-success" : currentLevel == action.level-1 ?"p-button-primary": "p-button-secondary" : "p-button-primary"}
+                                    className={statusIcon ? currentLevel >= action.level ? "p-button-success" : currentLevel == action.level - 1 ? "p-button-primary" : "p-button-secondary" : "p-button-primary"}
                                     onClick={() => setPendingAction(action)}
                                     style={{ marginBottom: '0.5rem', marginRight: '0.5rem', width: '100%', textAlign: 'left' }}
                                   />
@@ -753,55 +803,55 @@ function GamePage({ gameId, game, playerId, setReady }) {
           {/* Right Column: Scrollable Feature List */}
           <div className="right-column-features" >
             {game?.players?.find(p => p.id === playerId)?.features?.length > 0 && (
-           <div>
-            <h3>Features</h3>
-            <ul className="feature-list">
-              {game?.players?.find(p => p.id === playerId)?.features?.sort((f1, f2) => f2.createdTurn - f1.createdTurn).map((feature, index) => (
-                <Card className="feature-list-item">
-                  <div className="feature-detail-item">
-                    <strong>{feature.name}</strong>
-                    <Tag value={feature.architecture} severity="secondary" />
+              <div>
+                <h3>Features</h3>
+                <ul className="feature-list">
+                  {game?.players?.find(p => p.id === playerId)?.features?.sort((f1, f2) => f2.createdTurn - f1.createdTurn).map((feature, index) => (
+                    <Card className="feature-list-item">
+                      <div className="feature-detail-item">
+                        <strong>{feature.name}</strong>
+                        <Tag value={feature.architecture} severity="secondary" />
 
-                  </div>
-
-                  <div className="feature-detail-item">
-                    <span>Infra cost: {formatCurrency(feature.infrastructureCost)}</span>
-                    <span>Tech Debt: {feature.techDebt}</span>
-                    <span>Age: {game.currentTurn - feature.createdTurn} Quarters</span>
-                  </div>
-                  {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
-                    <div>
-                      <MeterGroup
-                        max={feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}
-                        values={[
-                          {
-                            label: 'Infrastructure',
-                            value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
-                            color: '#b03a2e'
-                          },
-                          feature.revenueStats[feature.revenueStats.length - 1].techDebtCost > 0 ?
-                            {
-                              label: 'TechDebt',
-                              value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
-                              color: '#f59e42'
-                            } : null,
-                        ].filter((cost) => cost !== null)}
-                        style={{ margin: '0.5rem 0' }}
-                      />
-                      <div style={{ fontSize: '0.95em', color: '#444' }}>
-                        <div className="feature-detail-item">
-                          <span>Feature Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].featureRevenue)}</span>
-                          <span>Operational Costs: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
-                            feature.revenueStats[feature.revenueStats.length - 1].techDebtCost)}</span>
-                          <span >Net Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].netRevenue)}</span>
-                        </div>
                       </div>
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </ul>
-            </div>
+
+                      <div className="feature-detail-item">
+                        <span>Infra cost: {formatCurrency(feature.infrastructureCost)}</span>
+                        <span>Tech Debt: {feature.techDebt}</span>
+                        <span>Age: {game.currentTurn - feature.createdTurn} Quarters</span>
+                      </div>
+                      {feature.revenueStats.length > 0 && feature.revenueStats[feature.revenueStats.length - 1] && (
+                        <div>
+                          <MeterGroup
+                            max={feature.revenueStats[feature.revenueStats.length - 1].featureRevenue}
+                            values={[
+                              {
+                                label: 'Infrastructure',
+                                value: feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost,
+                                color: '#b03a2e'
+                              },
+                              feature.revenueStats[feature.revenueStats.length - 1].techDebtCost > 0 ?
+                                {
+                                  label: 'TechDebt',
+                                  value: feature.revenueStats[feature.revenueStats.length - 1].techDebtCost,
+                                  color: '#f59e42'
+                                } : null,
+                            ].filter((cost) => cost !== null)}
+                            style={{ margin: '0.5rem 0' }}
+                          />
+                          <div style={{ fontSize: '0.95em', color: '#444' }}>
+                            <div className="feature-detail-item">
+                              <span>Feature Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].featureRevenue)}</span>
+                              <span>Operational Costs: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].infrastructureCost +
+                                feature.revenueStats[feature.revenueStats.length - 1].techDebtCost)}</span>
+                              <span >Net Revenue: {formatCurrency(feature.revenueStats[feature.revenueStats.length - 1].netRevenue)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
