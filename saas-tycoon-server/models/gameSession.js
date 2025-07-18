@@ -37,6 +37,7 @@ function canStartGame(session) {
 function processTurn(session) {
   let turn = session.currentTurn;
   let event = null;
+  //TODO: make the number of turns between events configurable
   if (turn %3 ==0 && turn > 1) {
     event = events.getRandomEvent();
     event.turn = turn;

@@ -14,11 +14,11 @@ function MonolithPlayer(name) {
     ];
     this.stats = {
         0: new PlayerStats(
-            cash = 10000,
-            customers = 1,
-            legacySkills = 4,
-            cloudNativeSkills = 0,
-            opsMaturity = 0
+            constants.MONOLITH_STARTING_STATS.cash, // cash
+            constants.MONOLITH_STARTING_STATS.customers, // customers
+            constants.MONOLITH_STARTING_STATS.legacySkills, // legacySkills
+            constants.MONOLITH_STARTING_STATS.cloudNativeSkills, // cloudNativeSkills
+            constants.MONOLITH_STARTING_STATS.opsMaturity // opsMaturity
         )
     };
     this.turns = {};

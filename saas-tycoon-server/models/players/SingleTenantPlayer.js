@@ -11,11 +11,11 @@ function SingleTenantPlayer(name) {
     this.features = [new SingleTenantMicroservice(constants.CUSTOMER_PRICE_SINGLE_TENANT, constants.DEV_COST_SINGLE_TENANT, 2, 0)];
     this.stats = {
         0: new PlayerStats(
-            5000, // cash
-            1,    // customers
-            2,    // legacySkills
-            1,    // cloudNativeSkills
-            0     // opsMaturity
+            constants.SINGLETENANT_STARTING_STATS.cash, // cash
+            constants.SINGLETENANT_STARTING_STATS.customers, // customers
+            constants.SINGLETENANT_STARTING_STATS.legacySkills, // legacySkills
+            constants.SINGLETENANT_STARTING_STATS.cloudNativeSkills, // cloudNativeSkills
+            constants.SINGLETENANT_STARTING_STATS.opsMaturity // opsMaturity    
         )
     };
     this.turns = {};

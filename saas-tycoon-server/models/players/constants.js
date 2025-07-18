@@ -27,8 +27,8 @@ const ACTION_COOLDOWN_PERIODS = {
 
 //cost ramps for features. These are the points after  which feature development becomes more expsnsive
 // as you have to manage releases across multiple features etc. Skill counteracts this effect
-const RELEASE_RAMP_MONOLITH = 5
-const RELEASE_RAMP_SINGLE_TENANT = 4
+const RELEASE_RAMP_MONOLITH = 4
+const RELEASE_RAMP_SINGLE_TENANT = 5
 const RELEASE_RAMP_MULTI_TENANT = 6
 
 // Skill Ramps. These ae the points after which skills counterbalance the dev ramp cost created by having 
@@ -51,6 +51,32 @@ const CUSTOMER_RAMP_MULTI_TENANT = 99
 const OPS_MATURITY_RAMP_MONOLITH = 5
 const OPS_MATURITY_RAMP_SINGLE_TENANT = 5
 const OPS_MATURITY_RAMP_MULTI_TENANT = 99
+
+// Starting stats for players
+
+const MONOLITH_STARTING_STATS = {
+  cash: 10000,
+  customers: 1,
+  legacySkills: 4,
+  cloudNativeSkills: 0,
+  opsMaturity: 0
+};
+
+const SINGLETENANT_STARTING_STATS = {
+  cash: 8000,
+  customers: 1,
+  legacySkills: 4,
+  cloudNativeSkills: 1,
+  opsMaturity: 0
+};
+
+const MULTITENANT_STARTING_STATS = {
+  cash: 5000,
+  customers: 1,
+  legacySkills: 0,
+  cloudNativeSkills: 4,
+  opsMaturity: 3
+};
 
 
 module.exports = {
@@ -82,6 +108,9 @@ module.exports = {
   CUSTOMER_RAMP_MULTI_TENANT,
   OPS_MATURITY_RAMP_MONOLITH,
   OPS_MATURITY_RAMP_SINGLE_TENANT,
-  OPS_MATURITY_RAMP_MULTI_TENANT
+  OPS_MATURITY_RAMP_MULTI_TENANT,
+  MONOLITH_STARTING_STATS,
+  SINGLETENANT_STARTING_STATS,
+  MULTITENANT_STARTING_STATS
 
 };
