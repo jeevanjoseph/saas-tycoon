@@ -1,4 +1,4 @@
-import React, { useState , useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -9,7 +9,6 @@ import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber';
 import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
-import './JoinGamePage.css';
 import constants from './constants';
 
 function JoinGamePage({
@@ -22,7 +21,7 @@ function JoinGamePage({
   joinGame,
   error,
   setError,
-  onSpectate 
+  onSpectate
 }) {
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [sessionName, setSessionName] = useState(null);
@@ -120,181 +119,196 @@ function JoinGamePage({
   };
 
   return (
-    <div className="join-game-container">
-      <Toast ref={toast} />
-      <Dialog
-        header="Create New Game Session"
-        visible={gameConfigVisible}
-        style={{ width: '520px' }}
-        onHide={() => setGameConfigVisible(false)}
-        modal
-        footer={
-          <div style={{ padding: '1rem' }}>
-            <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setGameConfigVisible(false)} />
-            <Button label="Create" icon="pi pi-check" onClick={handleCreate} disabled={!!playerLimitError} autoFocus />
-          </div>
-        }
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
-          <label htmlFor="game-name" style={{ marginRight: 8 }}>Game Name (optional):</label>
-          <InputText
-            id="game-name"
-            value={sessionName}
-            onChange={e => setSessionName(e.target.value)}
-            placeholder="Enter a name or leave blank"
-            style={{ width: '100%' }}
-          />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
-          <label htmlFor="player-limit" style={{ marginRight: 8 }}>Number of Players:</label>
-          <InputNumber
-            id="player-limit"
-            value={playerLimit}
-            onValueChange={handlePlayerLimitChange}
-            min={3}
-            max={16}
-            showButtons
-            style={{ width: '100%' }}
-          />
-          {playerLimitError && (
-            <div style={{ color: 'red', fontSize: '0.9em', marginTop: 4 }}>{playerLimitError}</div>
-          )}
-        </div>
-      </Dialog>
-      <h1>SaaS Tycoon</h1>
-      <div className="p-field" style={{ marginBottom: 24, maxWidth: 350 }}>
-        <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
-        <InputText
-          id="playerName"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          placeholder="Enter name"
-          style={{ width: '100%' }}
-          autoFocus
-          onBlur={() => setNameTouched(true)}
-          className={showNameError ? 'p-invalid' : ''}
-        />
-        {showNameError && (
-          <small className="p-error" style={{ display: 'block', marginTop: 4 }}>
-            Player name is required.
-          </small>
-        )}
+    <div className='gamepage-container'>
+      <div className="top-banner">
+        <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
+        <div className="game-info">
+                  <span >Current Session: </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                    <span className="gamepage-turn" style={{ margin: 0 }}>
+                      <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
+                      
+                    </span>
+                  
+                  </div>
+                </div>
       </div>
-      <div className="p-field player-type-section">
-        <label>Select Player Type</label>
-        <div className="player-type-cards">
-          {playerTypes.map((type) => (
-            <Card
-              key={type.value}
-              onClick={() => setPlayerType(type.value)}
-              className={
-                'player-type-card' +
-                (playerType === type.value ? ' selected' : '')
-              }
-            >
-              <div className="card-header">
-                <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
-                <span className="card-label">{type.label}</span>
-              </div>
-              <div className="card-title">{type.title}</div>
-              <div className="card-description">
-                {type.description.map((line, idx) => (
-                  <div key={idx}>{line}</div>
-                ))}
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-      <DataTable
-        value={sessions}
-        header={
-          <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-            <span className="text-xl text-900 font-bold">Available Games</span>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: 8 }}>
-              <Button
-                label="Create Game"
-                icon="pi pi-plus"
-                onClick={() => setGameConfigVisible(true)}
-                disabled={!playerName}
-                className="p-button-success"
-              />
-              <Button
-                label="Join"
-                icon="pi pi-sign-in"
-                onClick={() => joinGame(selectedGameId)}
-                className="p-button-primary"
-                disabled={
-                  !playerName ||
-                  !selectedGameId ||
-                  sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
-                }
-              />
-              <Button
-                label="Spectate"
-                icon="pi pi-eye"
-                className="p-button-info"
-                onClick={() => onSpectate && onSpectate(selectedGameId)}
-                disabled={!selectedGameId}
-              />
+      <div className="join-game-container">
+        <Toast ref={toast} />
+        <Dialog
+          header="Create New Game Session"
+          visible={gameConfigVisible}
+          style={{ width: '520px' }}
+          onHide={() => setGameConfigVisible(false)}
+          modal
+          footer={
+            <div style={{ padding: '1rem' }}>
+              <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setGameConfigVisible(false)} />
+              <Button label="Create" icon="pi pi-check" onClick={handleCreate} disabled={!!playerLimitError} autoFocus />
             </div>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
+            <label htmlFor="game-name" style={{ marginRight: 8 }}>Game Name (optional):</label>
+            <InputText
+              id="game-name"
+              value={sessionName}
+              onChange={e => setSessionName(e.target.value)}
+              placeholder="Enter a name or leave blank"
+              style={{ width: '100%' }}
+            />
           </div>
-        }
-        selectionMode="single"
-        selection={selectedGameId}
-        onSelectionChange={(e) => setSelectedGameId(e.value.id)}
-        dataKey="id"
-        responsiveLayout="scroll"
-      >
-        <Column field="name" header="Name"></Column>
-        <Column field="playerCount" header="Players"></Column>
-        <Column field="playerLimit" header="Player Limit"></Column>
-        <Column
-          field="state"
-          header="State"
-          body={rowData => (
-            <span>
-              <Tag
-                value={
-                  rowData.state === 'not_started'
-                    ? 'Not Started'
-                    : rowData.state === 'started'
-                      ? 'In Progress'
-                      : rowData.state === 'finished'
-                        ? 'Finished'
-                        : rowData.state
-                }
-                severity={
-                  rowData.state === 'not_started'
-                    ? 'success'
-                    : rowData.state === 'started'
-                      ? 'warning'
-                      : rowData.state === 'finished'
-                        ? 'info'
-                        : null
-                }
-              />
-            </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '1rem' }}>
+            <label htmlFor="player-limit" style={{ marginRight: 8 }}>Number of Players:</label>
+            <InputNumber
+              id="player-limit"
+              value={playerLimit}
+              onValueChange={handlePlayerLimitChange}
+              min={3}
+              max={16}
+              showButtons
+              style={{ width: '100%' }}
+            />
+            {playerLimitError && (
+              <div style={{ color: 'red', fontSize: '0.9em', marginTop: 4 }}>{playerLimitError}</div>
+            )}
+          </div>
+        </Dialog>
+        <h1>SaaS Tycoon</h1>
+        <div className="p-field" style={{ marginBottom: 24, maxWidth: 350 }}>
+          <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
+          <InputText
+            id="playerName"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            placeholder="Enter name"
+            style={{ width: '100%' }}
+            autoFocus
+            onBlur={() => setNameTouched(true)}
+            className={showNameError ? 'p-invalid' : ''}
+          />
+          {showNameError && (
+            <small className="p-error" style={{ display: 'block', marginTop: 4 }}>
+              Player name is required.
+            </small>
           )}
-        ></Column>
-        <Column
-          header="Progress"
-          body={rowData => {
-            const percent = rowData.total_turns
-              ? Math.round((rowData.currentTurn / rowData.total_turns) * 100)
-              : 0;
-            return (
-              <ProgressBar
-                value={percent}
-                showValue
-                style={{ height: '1.5rem' }}
+        </div>
+        <div className="p-field player-type-section">
+          <label>Select Player Type</label>
+          <div className="player-type-cards">
+            {playerTypes.map((type) => (
+              <Card
+                key={type.value}
+                onClick={() => setPlayerType(type.value)}
+                className={
+                  'player-type-card' +
+                  (playerType === type.value ? ' selected' : '')
+                }
               >
-                {percent}%
-              </ProgressBar>
-            );
-          }}
-        />
-      </DataTable>
+                <div className="card-header">
+                  <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
+                  <span className="card-label">{type.label}</span>
+                </div>
+                <div className="card-title">{type.title}</div>
+                <div className="card-description">
+                  {type.description.map((line, idx) => (
+                    <div key={idx}>{line}</div>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+        <DataTable
+          value={sessions}
+          header={
+            <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+              <span className="text-xl text-900 font-bold">Available Games</span>
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: 8 }}>
+                <Button
+                  label="Create Game"
+                  icon="pi pi-plus"
+                  onClick={() => setGameConfigVisible(true)}
+                  disabled={!playerName}
+                  className="p-button-success"
+                />
+                <Button
+                  label="Join"
+                  icon="pi pi-sign-in"
+                  onClick={() => joinGame(selectedGameId)}
+                  className="p-button-primary"
+                  disabled={
+                    !playerName ||
+                    !selectedGameId ||
+                    sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
+                  }
+                />
+                <Button
+                  label="Spectate"
+                  icon="pi pi-eye"
+                  className="p-button-info"
+                  onClick={() => onSpectate && onSpectate(selectedGameId)}
+                  disabled={!selectedGameId}
+                />
+              </div>
+            </div>
+          }
+          selectionMode="single"
+          selection={selectedGameId}
+          onSelectionChange={(e) => setSelectedGameId(e.value.id)}
+          dataKey="id"
+          responsiveLayout="scroll"
+        >
+          <Column field="name" header="Name"></Column>
+          <Column field="playerCount" header="Players"></Column>
+          <Column field="playerLimit" header="Player Limit"></Column>
+          <Column
+            field="state"
+            header="State"
+            body={rowData => (
+              <span>
+                <Tag
+                  value={
+                    rowData.state === 'not_started'
+                      ? 'Not Started'
+                      : rowData.state === 'started'
+                        ? 'In Progress'
+                        : rowData.state === 'finished'
+                          ? 'Finished'
+                          : rowData.state
+                  }
+                  severity={
+                    rowData.state === 'not_started'
+                      ? 'success'
+                      : rowData.state === 'started'
+                        ? 'warning'
+                        : rowData.state === 'finished'
+                          ? 'info'
+                          : null
+                  }
+                />
+              </span>
+            )}
+          ></Column>
+          <Column
+            header="Progress"
+            body={rowData => {
+              const percent = rowData.total_turns
+                ? Math.round((rowData.currentTurn / rowData.total_turns) * 100)
+                : 0;
+              return (
+                <ProgressBar
+                  value={percent}
+                  showValue
+                  style={{ height: '1.5rem' }}
+                >
+                  {percent}%
+                </ProgressBar>
+              );
+            }}
+          />
+        </DataTable>
+      </div>
     </div>
   );
 }

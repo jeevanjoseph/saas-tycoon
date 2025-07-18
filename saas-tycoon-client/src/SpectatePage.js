@@ -20,42 +20,42 @@ function SpectatePage({ game }) {
     : 0;
 
   return (
-    <div className="gamepage-root">
-      <div style={{ maxWidth: 700, margin: '2rem auto 1.5rem auto', textAlign: 'center' }}>
-        <h1 className="gamepage-title" style={{ marginBottom: 8 }}>
-          Spectate Game: <span style={{ color: '#2563eb' }}>
-            {game.name ? game.name : game.id}
-          </span>
-        </h1>
-        <div style={{ margin: '0 auto', maxWidth: 400 }}>
-          <ProgressBar
-            value={progressValue}
-            showValue
-            style={{ height: '1.5rem' }}
-          >
-            {`Turn ${game.currentTurn} / ${game.total_turns}`}
-          </ProgressBar>
+    <div className="gamepage-container">
+      <div className="top-banner">
+        <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
+        <div className="game-info">
+          <span>Spectating: {game.name ? game.name : game.id}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span className="gamepage-turn" style={{ margin: 0 }}>
+              <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
+              {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
+            </span>
+            {game && (
+              <div style={{ minWidth: 200, flex: 1 }}>
+                <ProgressBar
+                  value={Math.round((game.currentTurn / (game.total_turns || 1)) * 100)}
+                  showValue={false}
+                  style={{ height: '.3rem' }}
+                >
+                  {`${game.currentTurn} / ${game.total_turns} turns`}
+                </ProgressBar>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
-      <div style={{
-        margin: '2rem auto',
-        maxWidth: 1200,
-        textAlign: 'center',
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '2rem',
-        flexWrap: 'wrap'
-      }}>
+      <div className="gamepage-root" style={{ position: 'relative', minHeight: '100vh' }}>
         {sortedPlayers.map((player, idx) => {
           const stats = player.stats?.[lastTurn] || {};
           const hasPlayedCurrentTurn = game.currentTurn >= 0 && player.turns[game.currentTurn];
-                const currentStats = player.stats?.[game.currentTurn] || {};
-                const statusText = player.ready
-                  ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting')
-                  : 'Not Ready';
-                const statusColor = hasPlayedCurrentTurn
-                  ? '#22c55e'
-                  : '#fbbf24';
+          const currentStats = player.stats?.[game.currentTurn] || {};
+          const statusText = player.ready
+            ? (hasPlayedCurrentTurn ? 'Turn Complete' : 'Waiting')
+            : 'Not Ready';
+          const statusColor = hasPlayedCurrentTurn
+            ? '#22c55e'
+            : '#fbbf24';
           return (
             <Card
               key={player.id}
@@ -123,6 +123,7 @@ function SpectatePage({ game }) {
             </Card>
           );
         })}
+
       </div>
     </div>
   );

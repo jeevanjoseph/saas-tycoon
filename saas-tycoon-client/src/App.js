@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import JoinGamePage from './JoinGamePage';
 import GamePage from './GamePage';
-import SpectatePage from './SpectatePage'; // <-- Import SpectatePage
+import SpectatePage from './SpectatePage'; 
 import constants from './constants';
+import './static/css/saas-tycoon.css';
 import {
   createGame,
   joinGame,
