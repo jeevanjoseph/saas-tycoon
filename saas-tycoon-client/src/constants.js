@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api/game'; // or your actual API base URL
+const API = 'http://129.213.166.230:3000/api/game'; // or your actual API base URL
 
 const OPS_MATURITY_MAX = 10;
 const LEGACY_SKILLS_MAX = 10;
