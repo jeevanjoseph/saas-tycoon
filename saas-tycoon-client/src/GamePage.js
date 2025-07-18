@@ -188,7 +188,9 @@ function GamePage({ gameId, game, playerId, setReady }) {
       <div className="top-banner">
         <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
         <div className="game-info">
-          <span >Current Session: {gameId}</span>
+          {game && (game.name || game.id) && (
+            <span >Current Session: {game.name?game.name:game.id}</span>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span className="gamepage-turn" style={{ margin: 0 }}>
               <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
@@ -618,7 +620,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           </div>
                         </TabPanel>
                         <TabPanel header="News" className="full-width-tab-panel">
-                          <div style={{ maxHeight: 320, overflowY: 'auto', background: '#f8fafc', borderRadius: 8, padding: '1rem', border: '1px solid #e5e7eb' }}>
+                          <div className="current-player-chart-card player-news-container">
                             {game?.players &&
                               // Gather all logs, flatten, and sort by turn descending (most recent first)
                               game.players
@@ -629,31 +631,18 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     playerId: player.id
                                   }))
                                 )
-                                
+
                                 .sort((a, b) => (b.turn ?? 0) - (a.turn ?? 0))
                                 .map((log, idx) => (
                                   <div key={log.playerId + '_' + log.turn + '_' + idx} style={{ marginBottom: 12, display: 'flex', alignItems: 'flex-start' }}>
-                                    <div style={{
-                                      background: '#2563eb',
-                                      color: '#fff',
-                                      borderRadius: '50%',
-                                      width: 32,
-                                      height: 32,
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontWeight: 700,
-                                      fontSize: 16,
-                                      marginRight: 12
-                                    }}>
+                                    <div className="player-news-avatar">
                                       {log.playerName[0]}
                                     </div>
                                     <div>
-                                      <div style={{ fontWeight: 600, color: '#2563eb', fontSize: 14 }}>
-                                        {log.playerName} <span style={{ color: '#888', fontWeight: 400, fontSize: 12 }}>Turn {log.turn}</span>
+                                      <div className='player-news-name'>
+                                        {log.playerName} <span className='player-news-subtext'>Turn {log.turn}</span>
                                       </div>
-                                      <div style={{ fontSize: 13, color: '#222', marginTop: 2 }}>{log.details}</div>
-                                      <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{log.code ? `(${log.code})` : ''}</div>
+                                      <div className='player-news-detail'>{log.details}</div>
                                     </div>
                                   </div>
                                 ))
@@ -788,11 +777,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           </div>
                         </TabPanel>
                       ))}
-                      <TabPanel header="Info">
-                        <div style={{ padding: '1rem', color: '#888' }}>
-                          Game info and help will appear here.
-                        </div>
-                      </TabPanel>
                     </TabView>
                   </Card>
                 );
