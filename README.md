@@ -200,3 +200,11 @@ Training
     - remove manually coordinated steps. 
     - robotic automation / agentic workflows
     - 
+
+# TODOs
+
+- Initially, monoliths have alot of cash but no way to spend it. 
+- Micros can go -ve and dont really care about cash other than time pressure.
+- As you progress the amount of cash completely eclipses the cost of upgrades, everyuthis is easily attainable.
+- The Marketing campaign is too powerful and adds too many customers. 
+- 

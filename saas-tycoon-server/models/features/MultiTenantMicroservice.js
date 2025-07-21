@@ -12,22 +12,22 @@ function calculateMultiTenantMicroserviceDevCost(player, turn) {
 
     // Cost increases as more multi-tenant microservices are built
     if (featureCount > constants.RELEASE_RAMP_MULTI_TENANT) {
-        devCost += (featureCount - constants.RELEASE_RAMP_MULTI_TENANT) * 100;
+        devCost += (featureCount - constants.RELEASE_RAMP_MULTI_TENANT) * 500;
     }
 
     // Cloud skills reduce cost
     if (cloudSkills >= constants.SKILL_RAMP_CLOUD) {
-        devCost -= (cloudSkills - constants.SKILL_RAMP_CLOUD) * 100;
+        devCost -= (cloudSkills - constants.SKILL_RAMP_CLOUD) * 200;
     }
 
     // More customers increase cost
     if (customers >= constants.CUSTOMER_RAMP_MULTI_TENANT) {
-        devCost += (customers - constants.CUSTOMER_RAMP_MULTI_TENANT) * 100;
+        devCost += (customers - constants.CUSTOMER_RAMP_MULTI_TENANT) * 1000;
     }
 
     // Ops maturity reduces cost
     if (opsMaturity >= constants.OPS_MATURITY_RAMP_MULTI_TENANT) {
-        devCost -= (opsMaturity - constants.OPS_MATURITY_RAMP_MULTI_TENANT) * 100;
+        devCost -= (opsMaturity - constants.OPS_MATURITY_RAMP_MULTI_TENANT) * 400;
     }
 
     // Ensure cost does not go below a minimum threshold

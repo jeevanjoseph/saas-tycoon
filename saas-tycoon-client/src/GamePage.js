@@ -631,7 +631,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     playerId: player.id
                                   }))
                                 )
-
                                 .sort((a, b) => (b.turn ?? 0) - (a.turn ?? 0))
                                 .map((log, idx) => (
                                   <div key={log.playerId + '_' + log.turn + '_' + idx} style={{ marginBottom: 12, display: 'flex', alignItems: 'flex-start' }}>
