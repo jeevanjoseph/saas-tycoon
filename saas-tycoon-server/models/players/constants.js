@@ -27,9 +27,9 @@ const ACTION_COOLDOWN_PERIODS = {
 
 //cost ramps for features. These are the points after  which feature development becomes more expsnsive
 // as you have to manage releases across multiple features etc. Skill counteracts this effect
-const RELEASE_RAMP_MONOLITH = 4
-const RELEASE_RAMP_SINGLE_TENANT = 5
-const RELEASE_RAMP_MULTI_TENANT = 6
+const RELEASE_RAMP_MONOLITH = 3
+const RELEASE_RAMP_SINGLE_TENANT = 4
+const RELEASE_RAMP_MULTI_TENANT = 5
 
 // Skill Ramps. These ae the points after which skills counterbalance the dev ramp cost created by having 
 // too many features
@@ -43,8 +43,8 @@ const SKILL_RAMP_CLOUD_NATIVE = 5
 // Multi-Tenant apps are not affected (affected at level 99)
 
 const CUSTOMER_RAMP_MONOLITH = 3
-const CUSTOMER_RAMP_SINGLE_TENANT = 3
-const CUSTOMER_RAMP_MULTI_TENANT = 99
+const CUSTOMER_RAMP_SINGLE_TENANT = 4
+const CUSTOMER_RAMP_MULTI_TENANT = 6
 
 //ops Maturity ramps. When you have a lot of customers, you need to invest in DevOps to manage the complexity
 
