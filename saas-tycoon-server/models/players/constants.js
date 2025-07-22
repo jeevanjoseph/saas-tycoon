@@ -18,10 +18,10 @@ const TRAINING_COST_LEGACY = 250; // Cost for training to increase legacy skills
 const MARKETING_COST = 5000; // Cost for marketing campaigns
 //cooldown periods for actions
 const ACTION_COOLDOWN_PERIODS = {
-  BUILD_MONOLITH_FEATURE: 3,
-  BUILD_CONTROL_PLANE: 3,
-  BUILD_MULTITENANT_FEATURE: 3,
-  BUILD_SINGLETENANT_FEATURE: 3,
+  BUILD_MONOLITH_FEATURE: 4,
+  BUILD_CONTROL_PLANE: 4,
+  BUILD_MULTITENANT_FEATURE: 4,
+  BUILD_SINGLETENANT_FEATURE: 4,
   //TODO: Add more actions for marketing, price war and takeover.
 };
 

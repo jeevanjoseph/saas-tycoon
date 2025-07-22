@@ -33,11 +33,11 @@ const actions_build = [
 ];
 
 const actions_tech_debt_reduction = [
-  { code: "TECH_DEBT_REDUCTION", name: "Modularize", description: "Break down large tightly coupled components. Improves maintainability and sets the stage for future refactoring.", icon: "pi pi-wrench", mutiplier: 1, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Instrumentation", description: "Use logs, metrics, and traces to better understand bottlenecks or fragile code paths. Data-driven insights help justify debt remediation.", icon: "pi pi-wrench", mutiplier: 2, cost: TECH_DEBT_REDUCTION_COST * 1.8, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Code Audit", description: "Perform a thorough code audit and identify areas for improving and modernizing the code base.", icon: "pi pi-wrench", mutiplier: 3, cost: TECH_DEBT_REDUCTION_COST * 2.7, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Dependency Audit", description: "Audit application dependencies, evaluate newer libraries and APIs for improved performance and stability.", icon: "pi pi-wrench", mutiplier: 4, cost: TECH_DEBT_REDUCTION_COST * 3.6, unit: "feature", per_unit: true },
-  { code: "TECH_DEBT_REDUCTION", name: "Defensive Coding", description: "Implement defensive coding practices for better resiliency, security and operational posture.", icon: "pi pi-wrench", mutiplier: 5, cost: TECH_DEBT_REDUCTION_COST * 4.5, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Modularize", description: "Break down large tightly coupled components. Improves maintainability and sets the stage for future refactoring.", icon: "pi pi-wrench", multiplier: 1, cost: TECH_DEBT_REDUCTION_COST, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Instrumentation", description: "Use logs, metrics, and traces to better understand bottlenecks or fragile code paths. Data-driven insights help justify debt remediation.", icon: "pi pi-wrench", multiplier: 2, cost: TECH_DEBT_REDUCTION_COST * 1.8, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Code Audit", description: "Perform a thorough code audit and identify areas for improving and modernizing the code base.", icon: "pi pi-wrench", multiplier: 3, cost: TECH_DEBT_REDUCTION_COST * 2.7, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Dependency Audit", description: "Audit application dependencies, evaluate newer libraries and APIs for improved performance and stability.", icon: "pi pi-wrench", multiplier: 4, cost: TECH_DEBT_REDUCTION_COST * 3.6, unit: "feature", per_unit: true },
+  { code: "TECH_DEBT_REDUCTION", name: "Defensive Coding", description: "Implement defensive coding practices for better resiliency, security and operational posture.", icon: "pi pi-wrench", multiplier: 5, cost: TECH_DEBT_REDUCTION_COST * 4.5, unit: "feature", per_unit: true },
 ];
 
 const actions_ops_maturity = [
@@ -184,12 +184,16 @@ function GamePage({ gameId, game, playerId, setReady }) {
     // Set cost dynamically for build actions
     if (action.code === "BUILD_MONOLITH_FEATURE") {
       updatedAction.cost = calculateMonolithDevCost(player, turn);
+      updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0 : 0;
     } else if (action.code === "BUILD_SINGLETENANT_FEATURE") {
       updatedAction.cost = calculateSingleTenantMicroserviceDevCost(player, turn);
+      updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0: 0;
     } else if (action.code === "BUILD_MULTITENANT_FEATURE") {
       updatedAction.cost = calculateMultiTenantMicroserviceDevCost(player, turn);
+      updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0: 0;
     } else if (action.code === "BUILD_CONTROL_PLANE") {
       updatedAction.cost = calculateControlPlaneDevCost(player, turn);
+      updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0: 0;
     }
     // You can add similar logic for other action types if needed
 
@@ -206,7 +210,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
         <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
         <div className="game-info">
           {game && (game.name || game.id) && (
-            <span >Current Session: {game.name?game.name:game.id}</span>
+            <span >Current Session: {game.name ? game.name : game.id}</span>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span className="gamepage-turn" style={{ margin: 0 }}>
@@ -693,7 +697,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     }
                                     icon={action.icon}
                                     className={statusIcon ? currentLevel >= action.level ? "p-button-success" : currentLevel == action.level - 1 ? "p-button-primary" : "p-button-secondary" : "p-button-primary"}
-                                    onClick={() => prepareAction(action,currentPlayer, game.currentTurn)}
+                                    onClick={() => prepareAction(action, currentPlayer, game.currentTurn)}
                                     style={{ marginBottom: '0.5rem', marginRight: '0.5rem', width: '100%', textAlign: 'left' }}
                                   />
                                 );
@@ -713,6 +717,9 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     {pendingAction.per_unit && pendingAction.unit
                                       ? ` per ${pendingAction.unit}`
                                       : ''}
+                                  </div>
+                                  <div style={{ marginBottom: '1rem', color: '#555', fontWeight: 500 }}>
+                                    Available {pendingAction.cooldown > 0 ? `in ${pendingAction.cooldown} turns` : 'Now'}
                                   </div>
                                   {/* Enable confirm only if skill is 1 below pendingAction.level */}
                                   <Button

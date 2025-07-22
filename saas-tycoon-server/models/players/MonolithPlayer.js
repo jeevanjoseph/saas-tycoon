@@ -9,8 +9,8 @@ function MonolithPlayer(name) {
     this.playerClass = 'Monolith';
     this.ready = false;
     this.features = [
-        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0),
-        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 4, 0)
+        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 2, 0),
+        new MonolithFeature(constants.CUSTOMER_PRICE_MONOLITH, constants.DEV_COST_MONOLITH, 2, 0)
     ];
     this.stats = {
         0: new PlayerStats(

@@ -41,13 +41,7 @@ function checkActionCooldown(player, actionCode) {
 }
 
 // Decrement cooldowns based on training or ops maturity
-function decrementCooldownsBasedOnSkills(player, turn) {
-  let monolithCooldownPeriod = player.actionCooldowns['BUILD_MONOLITH_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_MONOLITH_FEATURE'];
-  if (player.stats[turn].legacySkills >= 7) {
-    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 2); // Reduce cooldown by 2 if legacy skills are a greater 7
-  } else if (player.stats[turn].legacySkills >= 5) {
-    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
-  }
+function decrementCloudFeatureCooldowns(player, turn) {
 
   let singleTenantCooldownPeriod = player.actionCooldowns['BUILD_SINGLETENANT_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_SINGLETENANT_FEATURE'];
   if (player.stats[turn].cloudNativeSkills >= 7) {
@@ -63,10 +57,25 @@ function decrementCooldownsBasedOnSkills(player, turn) {
     multitenantCooldownPeriod = Math.max(0, multitenantCooldownPeriod - 1); // Reduce cooldown by 1 if cloud native skills are a greater 5
   }
 
-  player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
   player.actionCooldowns['BUILD_SINGLETENANT_FEATURE'] = singleTenantCooldownPeriod;
   player.actionCooldowns['BUILD_MULTITENANT_FEATURE'] = multitenantCooldownPeriod;
-  addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}, SingleTenant ${singleTenantCooldownPeriod}, MultiTenant ${multitenantCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
+  addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills:  SingleTenant ${singleTenantCooldownPeriod}, MultiTenant ${multitenantCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
+
+}
+
+// Decrement cooldowns based on training or ops maturity
+function decrementLegacyFeatureCooldowns(player, turn) {
+  let monolithCooldownPeriod = player.actionCooldowns['BUILD_MONOLITH_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_MONOLITH_FEATURE'];
+  if (player.stats[turn].legacySkills >= 7) {
+    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 2); // Reduce cooldown by 2 if legacy skills are a greater 7
+  } else if (player.stats[turn].legacySkills >= 5) {
+    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
+  }
+
+  
+  player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
+  
+  addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
 
 }
 
@@ -176,12 +185,12 @@ const actions = {
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
-      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * buggyFeatures.length;
+      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier- action.multiplier/10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(0, feature.techDebt - 2);
+        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier+1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures} features.`, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
     },
     DEVOPS: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -191,7 +200,6 @@ const actions = {
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -201,7 +209,7 @@ const actions = {
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Cloud Native Training`, cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementCloudFeatureCooldowns(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -211,7 +219,7 @@ const actions = {
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Legacy Training`, cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementLegacyFeatureCooldowns(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -308,12 +316,12 @@ const actions = {
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
-      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * buggyFeatures.length;
+      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier- action.multiplier/10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(0, feature.techDebt - 2);
+        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier+1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures} features.`, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
     },
     DEVOPS: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -323,7 +331,7 @@ const actions = {
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+    
 
     },
     TRAINING: function (player, turn, action) {
@@ -334,7 +342,7 @@ const actions = {
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Cloud Native Training', cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementCloudFeatureCooldowns(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -344,7 +352,7 @@ const actions = {
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Legacy Training', cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementLegacyFeatureCooldowns(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -443,7 +451,7 @@ const actions = {
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
       player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier- action.multiplier/10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(0, feature.techDebt - action.multiplier+1); // +1 becassue the turn will a unit of tech debt.
+        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier+1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
@@ -456,7 +464,7 @@ const actions = {
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      
 
     },
     TRAINING: function (player, turn, action) {
@@ -467,7 +475,7 @@ const actions = {
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Cloud Native Training', cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementCloudFeatureCooldowns(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -477,7 +485,7 @@ const actions = {
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Legacy Training', cashBefore, cashAfter);
-      decrementCooldownsBasedOnSkills(player, turn);
+      decrementLegacyFeatureCooldowns(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -692,8 +700,8 @@ function applyEvent(player, event, turn) {
 function finishTurn(player, turn) {
   let featureRevenue = 0;
   player.features.forEach((feature) => {
-    featureRevenue += FeatureActions.calculateRevenue(feature, turn, player.stats[turn].customers);
     FeatureActions.updateTechDebt(feature, turn);
+    featureRevenue += FeatureActions.calculateRevenue(feature, turn, player.stats[turn].customers);
   });
   player.stats[turn].cash += featureRevenue;
   decrementActionCooldowns(player, turn);
