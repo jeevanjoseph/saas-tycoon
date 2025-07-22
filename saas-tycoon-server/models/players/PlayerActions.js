@@ -40,36 +40,66 @@ function checkActionCooldown(player, actionCode) {
   }
 }
 
+// Decrement cooldowns based on training or ops maturity
+function decrementCooldownsBasedOnSkills(player, turn) {
+  let monolithCooldownPeriod = player.actionCooldowns['BUILD_MONOLITH_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_MONOLITH_FEATURE'];
+  if (player.stats[turn].legacySkills >= 7) {
+    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 2); // Reduce cooldown by 2 if legacy skills are a greater 7
+  } else if (player.stats[turn].legacySkills >= 5) {
+    monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
+  }
+
+  let singleTenantCooldownPeriod = player.actionCooldowns['BUILD_SINGLETENANT_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_SINGLETENANT_FEATURE'];
+  if (player.stats[turn].cloudNativeSkills >= 7) {
+    singleTenantCooldownPeriod = Math.max(0, singleTenantCooldownPeriod - 2); // Reduce cooldown by 2 if cloud native skills are a greater 7  
+  } else if (player.stats[turn].cloudNativeSkills >= 5) {
+    singleTenantCooldownPeriod = Math.max(0, singleTenantCooldownPeriod - 1); // Reduce cooldown by 1 if cloud native skills are a greater 5
+  }
+
+  let multitenantCooldownPeriod = player.actionCooldowns['BUILD_MULTITENANT_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_MULTITENANT_FEATURE'];
+  if (player.stats[turn].cloudNativeSkills >= 7) {
+    multitenantCooldownPeriod = Math.max(0, multitenantCooldownPeriod - 2); // Reduce cooldown by 2 if cloud native skills are a greater 7
+  } else if (player.stats[turn].cloudNativeSkills >= 5) {
+    multitenantCooldownPeriod = Math.max(0, multitenantCooldownPeriod - 1); // Reduce cooldown by 1 if cloud native skills are a greater 5
+  }
+
+  player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
+  player.actionCooldowns['BUILD_SINGLETENANT_FEATURE'] = singleTenantCooldownPeriod;
+  player.actionCooldowns['BUILD_MULTITENANT_FEATURE'] = multitenantCooldownPeriod;
+  addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}, SingleTenant ${singleTenantCooldownPeriod}, MultiTenant ${multitenantCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
+
+}
+
 // Helper to set cooldown after executing an action
 function setActionCooldown(player, turn, actionCode) {
   if (!player.actionCooldowns) player.actionCooldowns = {};
   let cooldownPeriod = constants.ACTION_COOLDOWN_PERIODS[actionCode] || 0;
   if (actionCode === 'BUILD_MONOLITH_FEATURE') {
-    if (player.stats[turn].legacySkills >=7) {
+    if (player.stats[turn].legacySkills >= 7) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 2); // Reduce cooldown by 2 if legacy skills are a greater 7
-    } else if (player.stats[turn].legacySkills>=5) {
+    } else if (player.stats[turn].legacySkills >= 5) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
     }
   }
 
-  if (actionCode === 'BUILD_SINGLETENANT_FEATURE') { 
-    if (player.stats[turn].cloudNativeSkills >=7) {  
+  if (actionCode === 'BUILD_SINGLETENANT_FEATURE') {
+    if (player.stats[turn].cloudNativeSkills >= 7) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 2); // Reduce cooldown by 2 if cloud native skills are a greater 7  
-    } else if (player.stats[turn].cloudNativeSkills>=5) {
+    } else if (player.stats[turn].cloudNativeSkills >= 5) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 1); // Reduce cooldown by 1 if cloud native skills are a greater 5
     }
   }
 
   if (actionCode === 'BUILD_MULTITENANT_FEATURE') {
-    if (player.stats[turn].cloudNativeSkills >=7) {
+    if (player.stats[turn].cloudNativeSkills >= 7) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 2); // Reduce cooldown by 2 if cloud native skills are a greater 7
-    } else if (player.stats[turn].cloudNativeSkills>=5) {
+    } else if (player.stats[turn].cloudNativeSkills >= 5) {
       cooldownPeriod = Math.max(0, cooldownPeriod - 1); // Reduce cooldown by 1 if cloud native skills are a greater 5
     }
   }
 
-  if(cooldownPeriod < (constants.ACTION_COOLDOWN_PERIODS[actionCode] || 0)) {
-    addPlayerLog(player, turn, { code: actionCode }, `Cooldown for ${actionCode.replace(/_/g, ' ')} reduced to ${cooldownPeriod} turns due to skill level.`, player.stats[turn].cash, player.stats[turn].cash);  
+  if (cooldownPeriod < (constants.ACTION_COOLDOWN_PERIODS[actionCode] || 0)) {
+    addPlayerLog(player, turn, { code: actionCode }, `Cooldown for ${actionCode.replace(/_/g, ' ')} reduced to ${cooldownPeriod} turns due to skill level.`, player.stats[turn].cash, player.stats[turn].cash);
   }
   player.actionCooldowns[actionCode] = cooldownPeriod
 }
@@ -156,11 +186,12 @@ const actions = {
     DEVOPS: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
       const currentOpsMaturity = player.stats[turn].opsMaturity;
-      const upgradeCost = constants.DEVOPS_COST * (currentOpsMaturity - constants.MONOLITH_STARTING_STATS.opsMaturity  + 1);
+      const upgradeCost = constants.DEVOPS_COST * (currentOpsMaturity - constants.MONOLITH_STARTING_STATS.opsMaturity + 1);
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -169,7 +200,8 @@ const actions = {
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, 'Cloud Native Training', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Cloud Native Training`, cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -178,7 +210,8 @@ const actions = {
       player.stats[turn].cash -= upgradeCost;
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, 'Legacy Training', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Legacy Training`, cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -203,7 +236,7 @@ const actions = {
       player.stats[turn].cash -= 700;
       player.stats[turn].revenue += 1000;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, 'Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
   },
   SingleTenant: {
@@ -219,7 +252,7 @@ const actions = {
       if (devCost > constants.DEV_COST_MONOLITH) {
         addPlayerLog(player, turn, action, `Monolith development cost for you have risen to ${devCost}. As you build more features, its harder for you to coordinate monolith releases. Improve your LEGACY skills to counter balance. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
       } else {
-        addPlayerLog(player, turn, action, 'Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.', cashBefore, cashAfter);
+        addPlayerLog(player, turn, action, `Building a Monolith feature. They are cheap and quick to build, but they are hard to maintain and high operational costs.`, cashBefore, cashAfter);
       }
     },
     BUILD_CONTROL_PLANE: function (player, turn, action) {
@@ -233,7 +266,7 @@ const actions = {
       player.features.push(new MultiTenantControlPlane(constants.CUSTOMER_PRICE_CONTROL_PLANE, devCost, 0, turn));
       const cashAfter = player.stats[turn].cash;
       setActionCooldown(player, turn, 'BUILD_CONTROL_PLANE');
-      addPlayerLog(player, turn, action, 'Pivoting to a higher margin model afforded by a MultiTenant model and built a Control Plane', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Pivoting to a higher margin model afforded by a MultiTenant model and built a Control Plane`, cashBefore, cashAfter);
     },
     BUILD_MULTITENANT_FEATURE: function (player, turn, action) {
       checkActionCooldown(player, 'BUILD_MULTITENANT_FEATURE');
@@ -252,7 +285,7 @@ const actions = {
       if (devCost > constants.DEV_COST_MULTI_TENANT) {
         addPlayerLog(player, turn, action, `MultiTenant Microservice development cost for you have risen to ${devCost}. As you build more features, you need improve your CLOUD skills to keep up with managing all your features.`, cashBefore, cashAfter);
       } else {
-        addPlayerLog(player, turn, action, 'Committed to a true SaaS model and releases a new MultiTenant Microservice, with a better operational margin.', cashBefore, cashAfter);
+        addPlayerLog(player, turn, action, `Committed to a true SaaS model and releases a new MultiTenant Microservice, with a better operational margin.`, cashBefore, cashAfter);
       }
     },
     BUILD_SINGLETENANT_FEATURE: function (player, turn, action) {
@@ -269,7 +302,7 @@ const actions = {
       if (devCost > constants.DEV_COST_SINGLE_TENANT) {
         addPlayerLog(player, turn, action, `SingleTenant Microservice development cost for you have risen to ${devCost}.As you build more features, its harder for you to coordinate releases across your many features. Improve your CLOUD skills to counter balance this effect. As you add more customers, it difficult to keep up with your sprawling infra footprint. Improve your operational maturity to counter balance this.`, cashBefore, cashAfter);
       } else {
-        addPlayerLog(player, turn, action, 'Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.', cashBefore, cashAfter);
+        addPlayerLog(player, turn, action, `Built SingleTenant Microservice using a modern technology stack. However the single tenant model may not be as profitable in the long term.`, cashBefore, cashAfter);
       }
     },
     TECH_DEBT_REDUCTION: function (player, turn, action) {
@@ -290,6 +323,8 @@ const actions = {
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
+
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -299,6 +334,7 @@ const actions = {
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Cloud Native Training', cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -308,6 +344,7 @@ const actions = {
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Legacy Training', cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -332,7 +369,7 @@ const actions = {
       player.stats[turn].cash -= 700;
       player.stats[turn].revenue += 1000;
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, 'Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
   },
   MultiTenant: {
@@ -403,13 +440,13 @@ const actions = {
     },
     TECH_DEBT_REDUCTION: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      const buggyFeatures = player.features.filter(feature => feature.techDebt > 2);
-      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * buggyFeatures.length;
+      const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
+      player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier- action.multiplier/10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(0, feature.techDebt - 3);
+        feature.techDebt = Math.max(0, feature.techDebt - action.multiplier+1); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures} features.`, cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
     },
     DEVOPS: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -419,6 +456,8 @@ const actions = {
       player.stats[turn].opsMaturity += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Increased operational maturity to level ${currentOpsMaturity + 1}. `, cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
+
     },
     TRAINING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -428,6 +467,7 @@ const actions = {
       player.stats[turn].cloudNativeSkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Cloud Native Training', cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     TRAINING_LEGACY: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
@@ -437,6 +477,7 @@ const actions = {
       player.stats[turn].legacySkills += 1;
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, 'Legacy Training', cashBefore, cashAfter);
+      decrementCooldownsBasedOnSkills(player, turn);
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
