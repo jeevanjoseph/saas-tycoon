@@ -10,7 +10,7 @@ function calculateMonolithDevCost(player, turn) {
 
     let devCost = constants.DEV_COST_MONOLITH;
     if (featureCount > constants.RELEASE_RAMP_MONOLITH) {
-        devCost += (featureCount - constants.RELEASE_RAMP_MONOLITH) * 500;
+        devCost += (featureCount - constants.RELEASE_RAMP_MONOLITH) * 1000;
     }
 
     if (skills >= constants.SKILL_RAMP_LEGACY) {
@@ -18,7 +18,7 @@ function calculateMonolithDevCost(player, turn) {
     }
 
     if (customers >= constants.CUSTOMER_RAMP_MONOLITH) {
-        devCost += (customers - constants.CUSTOMER_RAMP_MONOLITH) * 1000;
+        devCost += (customers - constants.CUSTOMER_RAMP_MONOLITH) * 3000;
     }
 
     if (opsMaturity >= constants.OPS_MATURITY_RAMP_MONOLITH) {

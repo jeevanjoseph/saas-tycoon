@@ -12,7 +12,7 @@ function calculateSingleTenantMicroserviceDevCost(player, turn) {
 
     // Cost increases as more microservices are built
     if (featureCount > constants.RELEASE_RAMP_SINGLE_TENANT) {
-        devCost += (featureCount - constants.RELEASE_RAMP_SINGLE_TENANT) * 500;
+        devCost += (featureCount - constants.RELEASE_RAMP_SINGLE_TENANT) * 1000;
     }
 
     // Cloud skills reduce cost
@@ -22,7 +22,7 @@ function calculateSingleTenantMicroserviceDevCost(player, turn) {
 
     // More customers increase cost
     if (customers >= constants.CUSTOMER_RAMP_SINGLE_TENANT) {
-        devCost += (customers - constants.CUSTOMER_RAMP_SINGLE_TENANT) * 1000;
+        devCost += (customers - constants.CUSTOMER_RAMP_SINGLE_TENANT) * 3000;
     }
 
     // Ops maturity reduces cost
