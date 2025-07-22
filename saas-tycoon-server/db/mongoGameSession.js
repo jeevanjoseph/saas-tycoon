@@ -73,9 +73,19 @@ async function updateSessionFields(id, update) {
     }
 }
 
+async function close() {
+    try {
+        await client.close();
+        console.log('MongoDB connection closed gracefully.');
+    } catch (err) {
+        console.error('Error closing MongoDB connection:', err);
+    }
+}
+
 module.exports = {
     saveSession,
     getSessionById,
     getAllSessions,
     updateSessionFields,
+    close,
 };
