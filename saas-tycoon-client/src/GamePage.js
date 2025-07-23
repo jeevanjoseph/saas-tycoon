@@ -8,6 +8,8 @@ import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { ProgressBar } from 'primereact/progressbar';
 import { Tooltip } from 'primereact/tooltip';
+import { Stepper } from 'primereact/stepper'; 
+import { StepperPanel } from 'primereact/stepperpanel';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
 import {
@@ -120,6 +122,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
   const lastEventIdRef = useRef(null);
   const toast = useRef(null);
   const shownEventLogIdsRef = useRef(new Set());
+  const stepperRef = useRef(null);
 
   useEffect(() => {
     if (game && game.currentTurn >= game.total_turns) {
@@ -454,13 +457,97 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   .map(turn => `'${25 + Math.floor(Number(turn) / 4) + 'Q' + (Number(turn) % 4 + 1)}`);
 
                 if (!player.ready) {
+                  
+
+                  const steps = [
+                    {
+                      header: "Feature Types",
+                      content: (
+                        <>
+                          <h2>Feature Types</h2>
+                          <p>
+                            <b>Monolith:</b> Cheapest to build, but attracts tech debt quickly and scales poorly.<br />
+                            <b>Single Tenant Microservice:</b> Modern stack, deployed per customer. Moderate cost, scales with customer count.<br />
+                            <b>Multi-Tenant Microservice:</b> Most scalable and profitable, but expensive to build.<br />
+                            <b>Control Plane:</b> Required for managing multi-tenant features, does not generate revenue but is essential for scaling.
+                          </p>
+                        </>
+                      )
+                    },
+                    {
+                      header: "Operational Maturity",
+                      content: (
+                        <>
+                          <h2>Operational Maturity</h2>
+                          <p>
+                            Improves your ability to scale and manage complexity. Higher ops maturity reduces costs and helps you handle more customers efficiently.
+                          </p>
+                        </>
+                      )
+                    },
+                    {
+                      header: "Tech Debt",
+                      content: (
+                        <>
+                          <h2>Tech Debt</h2>
+                          <p>
+                            Accumulates as you build features, especially with older architectures. High tech debt increases costs and can slow you down. Manage it with dedicated actions.
+                          </p>
+                        </>
+                      )
+                    },
+                    {
+                      header: "Skills",
+                      content: (
+                        <>
+                          <h2>Skills</h2>
+                          <p>
+                            <b>Legacy Skills:</b> Help manage and reduce costs for monolith features.<br />
+                            <b>Cloud Native Skills:</b> Reduce costs and complexity for modern features and multi-tenant systems.<br />
+                            Train your team to improve these skills and unlock new capabilities!
+                          </p>
+                        </>
+                      )
+                    }
+                  ];
+
                   return (
-                    <Button
-                      label="I'm Ready"
-                      icon="pi pi-check"
-                      onClick={setReady}
-                      className="p-button-warning"
-                    />
+                    <div style={{  margin: '2rem auto' }}>
+                      <Stepper ref={stepperRef}>
+                        {steps.map((step, idx) => (
+                          <StepperPanel key={step.header} header={step.header}>
+                            <div style={{ minHeight: 180, padding: '1.5rem 0' }}>
+                              {step.content}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+                              <Button
+                                label="Previous"
+                                icon="pi pi-arrow-left"
+                                onClick={() => stepperRef.current.prevCallback()}
+                                disabled={idx === 0}
+                                className="p-button-secondary"
+                              />
+                              {idx < steps.length - 1 ? (
+                                <Button
+                                  label="Next"
+                                  icon="pi pi-arrow-right"
+                                  iconPos="right"
+                                  onClick={() => stepperRef.current.nextCallback()}
+                                  className="p-button-primary"
+                                />
+                              ) : (
+                                <Button
+                                  label="I'm Ready"
+                                  icon="pi pi-check"
+                                  onClick={setReady}
+                                  className="p-button-success"
+                                />
+                              )}
+                            </div>
+                          </StepperPanel>
+                        ))}
+                      </Stepper>
+                    </div>
                   );
                 }
                 return (
