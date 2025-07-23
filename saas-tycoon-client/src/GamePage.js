@@ -610,7 +610,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           {/* Feature Portfolio Overview Card */}
                           <Card className="feature-portfolio-overview" style={{ marginBottom: '1.5rem' }}>
                             <h3 style={{ marginTop: 0 }}>Quarterly Report</h3>
-                            <div className="current-player-stats-row" style={{ marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                            <div className="current-player-stats-row">
 
                               <div className="stat-card">
                                 <i className="pi pi-chart-line stat-icon" />
@@ -774,9 +774,9 @@ function GamePage({ gameId, game, playerId, setReady }) {
                         { header: "Bonus Actions", actions: actions_bonus }
                       ].map(({ header, actions }) => (
                         <TabPanel header={header} key={header}>
-                          <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+                          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                             {/* Left: Action List */}
-                            <div style={{ flex: 1 }}>
+                            <div style={{ flex: 1.5 }}>
                               {actions.map((action) => {
                                 // Determine current level for each skill tree
                                 const currentPlayer = game?.players?.find(p => p.id === playerId);
