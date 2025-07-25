@@ -72,6 +72,8 @@ const allActions = [
   ...actions_bonus
 ];
 
+const playerClasses = [ 'Monolith', 'SingleTenant', 'MultiTenant'];
+
 const BASE_URL = __ENV.K6_API_URL || 'http://localhost:3000/api/game';
 
 export let options = {
@@ -100,13 +102,15 @@ export default function () {
   // 4. Join the session with 10 players
   let playerIds = [];
   for (let i = 0; i < 10; i++) {
+    // Randomly select a player class
+    let playerClass = playerClasses[Math.floor(Math.random() * playerClasses.length)];
     let joinRes = http.post(`${BASE_URL}/${gameId}/join`, JSON.stringify({
       playerName: `K6Player${i + 1}`,
-      playerType: 'Monolith'
+      playerType: playerClass,
     }), { headers: { 'Content-Type': 'application/json' } });
     check(joinRes, { [`player ${i + 1} joined`]: (r) => r.status === 200 && r.json('playerId') });
     playerIds.push(joinRes.json('playerId'));
-    sleep(1);
+    sleep(Math.random() * 3); 
   }
 
   // 5. Mark all players as ready
@@ -115,7 +119,7 @@ export default function () {
       playerId: playerIds[i]
     }), { headers: { 'Content-Type': 'application/json' } });
     check(readyRes, { [`player ${i + 1} ready`]: (r) => r.status === 200 });
-    sleep(1);
+    sleep(Math.random() * 3); 
   }
 
   // 6. All players submit actions for 20 turns
@@ -134,7 +138,7 @@ export default function () {
         if (actionRes.status === 200) {
           check(actionRes, { [`player ${i + 1} played action ${action.code} turn ${turn} on attempt${attempts}`]: (r) => r.status === 200 });
           success = true;
-          sleep(1);
+          sleep(Math.random() * 3); 
         } else {
           attempts++;
         }
@@ -146,5 +150,5 @@ export default function () {
   let gameRes = http.get(`${BASE_URL}/${gameId}`);
   check(gameRes, { 'game session fetched': (r) => r.status === 200 });
 
-  sleep(1);
+  sleep(Math.random() * 3); 
 }
