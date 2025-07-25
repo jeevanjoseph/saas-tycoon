@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saas-tycoon-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saas-tycoon-server
+  template:
+    metadata:
+      labels:
+        app: saas-tycoon-server
+    spec:
+      containers:
+        - name: server
+          image: {{ .Values.server.image }}
+          ports:
+            - containerPort: {{ .Values.server.port }}
+          env:
+            - name: MONGO_URI
+              value: "mongodb://{{ .Values.mongo.username }}:{{ .Values.mongo.password }}@mongo:{{ .Values.mongo.port }}/{{ .Values.mongo.database }}?authSource=admin"
+            - name: NODE_ENV
+              value: {{ .Values.server.env.NODE_ENV }}

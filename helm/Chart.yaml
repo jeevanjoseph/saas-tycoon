@@ -1,0 +1,6 @@
+apiVersion: v2
+name: saas-tycoon
+description: SaaS Tycoon Conference Edition
+type: application
+version: 0.1.0
+appVersion: "1.0"

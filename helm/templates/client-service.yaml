@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: saas-tycoon-client
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.client.port }}
+      targetPort: {{ .Values.client.port }}
+  selector:
+    app: saas-tycoon-client

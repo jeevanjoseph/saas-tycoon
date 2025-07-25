@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saas-tycoon-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saas-tycoon-client
+  template:
+    metadata:
+      labels:
+        app: saas-tycoon-client
+    spec:
+      containers:
+        - name: client
+          image: {{ .Values.client.image }}
+          ports:
+            - containerPort: {{ .Values.client.port }}
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.client.env.NODE_ENV }}
