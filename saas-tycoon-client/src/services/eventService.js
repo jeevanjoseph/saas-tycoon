@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API } from '../constants';
+import { getBaseUrl } from '../constants';
 
 /**
  * Fetch the latest event for a game.
@@ -8,7 +8,7 @@ import { API } from '../constants';
  */
 export async function fetchLatestEvent(gameId) {
   try {
-    const response = await axios.get(`${API}/${gameId}/event`);
+    const response = await axios.get(`${getBaseUrl()}/${gameId}/event`);
     return response.data.event || null;
   } catch (error) {
     console.error("Error fetching the latest event:", error);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API } from '../constants';
+import { getBaseUrl } from '../constants';
 
 /**
  * Create a new game.
@@ -7,7 +7,7 @@ import { API } from '../constants';
  * @returns {Promise<Object>}
  */
 export async function createGame(playerLimit = 10, name) {
-  const res = await axios.post(API, { playerLimit, name });
+  const res = await axios.post(getBaseUrl(), { playerLimit, name });
   return res.data;
 }
 
@@ -19,7 +19,7 @@ export async function createGame(playerLimit = 10, name) {
  * @returns {Promise<Object>}
  */
 export async function joinGame(gameId, playerName, playerType) {
-  const res = await axios.post(`${API}/${gameId}/join`, { playerName, playerType });
+  const res = await axios.post(`${getBaseUrl()}/${gameId}/join`, { playerName, playerType });
   return res.data;
 }
 
@@ -28,7 +28,7 @@ export async function joinGame(gameId, playerName, playerType) {
  * @returns {Promise<Array>}
  */
 export async function fetchSessions() {
-  const res = await axios.get(API);
+  const res = await axios.get(getBaseUrl());
   return res.data;
 }
 
@@ -38,7 +38,7 @@ export async function fetchSessions() {
  * @returns {Promise<Object>}
  */
 export async function fetchGame(gameId) {
-  const res = await axios.get(`${API}/${gameId}`);
+  const res = await axios.get(`${getBaseUrl()}/${gameId}`);
   return res.data;
 }
 
@@ -49,6 +49,6 @@ export async function fetchGame(gameId) {
  * @returns {Promise<Object>}
  */
 export async function setPlayerReady(gameId, playerId) {
-  const res = await axios.post(`${API}/${gameId}/ready`, { playerId });
+  const res = await axios.post(`${getBaseUrl()}/${gameId}/ready`, { playerId });
   return res.data;
 }

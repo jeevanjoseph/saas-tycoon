@@ -2,6 +2,20 @@ const HOST = process.env.GAME_API_HOST || 'localhost';
 const PORT = process.env.GAME_API_PORT || '3000';
 const API = `http://${HOST}:${PORT}/api/game`;
 
+const getBaseUrl = () => {
+  let url;
+  switch(process.env.NODE_ENV) {
+    case 'production':
+      url = 'http://https://129.213.166.230:3000/api/game';
+      break;
+    case 'development':
+    default:
+      url = 'http://localhost:3000/api/game';
+  }
+
+  return url;
+}
+
 const OPS_MATURITY_MAX = 10;
 const LEGACY_SKILLS_MAX = 10;
 const CLOUD_NATIVE_SKILLS_MAX = 10;
@@ -86,6 +100,7 @@ const DEFAULT_PLAYER_TYPE = 'Monolith';
 const DEFAULT_PLAYER_COUNT = 10;
 
 module.exports = {
+    getBaseUrl,
     API,
     OPS_MATURITY_MAX,
     LEGACY_SKILLS_MAX,

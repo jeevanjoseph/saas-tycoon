@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API } from '../constants';
+import { getBaseUrl } from '../constants';
 
 /**
  * Submits a player action to the backend.
@@ -11,7 +11,7 @@ import { API } from '../constants';
  * @returns {Promise<Object>} The response from the backend
  */
 export async function submitPlayerAction({ gameId, playerId, action, turn }) {
-  return axios.post(`${API}/${gameId}/action`, {
+  return axios.post(`${getBaseUrl()}/${gameId}/action`, {
     playerId,
     action: action,
     turn
