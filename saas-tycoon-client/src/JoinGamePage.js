@@ -240,7 +240,7 @@ function JoinGamePage({
                   disabled={
                     !playerName ||
                     !selectedGameId ||
-                    sessions.find(s => s.id === selectedGameId)?.state !== 'not_started'
+                    sessions.find(s => s.id === selectedGameId)?.state === 'finished'
                   }
                 />
                 <Button
