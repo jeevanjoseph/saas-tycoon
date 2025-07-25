@@ -502,6 +502,21 @@
     font-weight: 500
 }
 
+.spectate-content{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.winner-content{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
 
 /* --- Responsive styles --- */
 @media (max-width: 900px) {

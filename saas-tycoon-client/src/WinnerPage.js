@@ -47,7 +47,7 @@ function WinnerPage({ game }) {
       <div className="gamepage-root" style={{ position: 'relative', minHeight: '100vh' }}>
         <Confetti width={dimensions.width} height={dimensions.height} numberOfPieces={350} recycle={false} />
         <h1 className="gamepage-title">🏆 Game Over!</h1>
-        <div style={{ margin: '2rem auto', maxWidth: 900, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        <div className='winner-content'>
           {top3.map((player, idx) => {
             const stats = player.stats?.[lastTurn] || {};
             const placeColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // gold, silver, bronze
