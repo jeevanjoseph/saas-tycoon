@@ -59,8 +59,6 @@ const actions_legacy_skills = [
 const actions_bonus = [
   { code: "LAUNCH_MARKETING_CAMPAIGN", name: "Launch Marketing Campaign", description: "Run a marketing campaign to increase brand awareness. Based on the number of features you have and how good your operational maturity is, you may add customers. This is always a roll of the dice, but more features and better operational maturity increase your odds of success. It does not matter if you have cloud-native or legacy features, or if you have high tech debt, of what your skill level is. Customers care most about feature richness and stability.", icon: "pi pi-megaphone", cost: 5000, unit: "feature", per_unit: false },
   { code: "OPTIMIZE_PRICING", name: "Optimize Pricing", description: "Raise your prices by $500/feature. Improves revenue, but you run the risk of losing customers. Customer audits will reveal your tech debt, and this along with your operational maturity will determine if you lose customers.", icon: "pi pi-dollar", cost: 3000, unit: "feature", per_unit: false },
-  { code: "PRICE_WAR", name: "Start a Price War", description: "Lower your feature price by 25%, forcing all players to lower theirs by 20%. Create downward market pressure on your competition.", icon: "pi pi-flag", cost: 1000, unit: "feature", per_unit: false },
-  { code: "HOSTILE_TAKEOVER", name: "Hostile Takeover", description: "Pay 2X the market cap of one of the other players to acquire all their features, customers, and liabilities.", icon: "pi pi-exclamation-triangle", cost: 100000, unit: "feature", per_unit: false },
 ];
 // Combine all actions
 const allActions = [
@@ -72,7 +70,7 @@ const allActions = [
   ...actions_bonus
 ];
 
-const playerClasses = [ 'Monolith', 'SingleTenant', 'MultiTenant'];
+const playerClasses = ['Monolith', 'SingleTenant', 'MultiTenant'];
 
 const BASE_URL = __ENV.K6_API_URL || 'http://localhost:3000/api/game';
 
@@ -109,17 +107,20 @@ export default function () {
       playerType: playerClass,
     }), { headers: { 'Content-Type': 'application/json' } });
     check(joinRes, { [`player ${i + 1} joined`]: (r) => r.status === 200 && r.json('playerId') });
-    playerIds.push(joinRes.json('playerId'));
-    sleep(Math.random() * 3); 
+    let player = joinRes.json();
+    player.playerType = playerClass; // Set player type
+    playerIds.push(player);
+    sleep(Math.random() * 3);
   }
+  console.log(`All players joined: ${JSON.stringify(playerIds)}`);
 
   // 5. Mark all players as ready
   for (let i = 0; i < playerIds.length; i++) {
     let readyRes = http.post(`${BASE_URL}/${gameId}/ready`, JSON.stringify({
-      playerId: playerIds[i]
+      playerId: playerIds[i].playerId
     }), { headers: { 'Content-Type': 'application/json' } });
     check(readyRes, { [`player ${i + 1} ready`]: (r) => r.status === 200 });
-    sleep(Math.random() * 3); 
+    sleep(Math.random() * 3);
   }
 
   // 6. All players submit actions for 20 turns
@@ -128,17 +129,29 @@ export default function () {
       let success = false;
       let attempts = 0;
       while (!success && attempts < allActions.length) {
-        // Pick a random action
+        // Randomly select an action
         let action = allActions[Math.floor(Math.random() * allActions.length)];
+        console.log(`Player ${i + 1}, ${playerIds[i].playerType} attempting action ${action.code} on turn ${turn}, attempt ${attempts}`);
+        if (playerIds[i].playerType === 'MultiTenant') {
+          if (turn === 0 && attempts === 0) {
+            // MultiTenant players can only build CP in the first turn
+            console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_CONTROL_PLANE action on turn ${turn}`);
+            action = actions_build.find(a => a.code === 'BUILD_CONTROL_PLANE');
+          }else if (turn%5===0 && attempts === 0) {
+            console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_MULTITENANT_FEATURE action on turn ${turn}`);
+            action = actions_build.find(a => a.code === 'BUILD_MULTITENANT_FEATURE');
+          } 
+        } 
+
         let actionRes = http.post(`${BASE_URL}/${gameId}/action`, JSON.stringify({
-          playerId: playerIds[i],
+          playerId: playerIds[i].playerId,
           action: action,
           turn: turn
         }), { headers: { 'Content-Type': 'application/json' } });
         if (actionRes.status === 200) {
           check(actionRes, { [`player ${i + 1} played action ${action.code} turn ${turn} on attempt${attempts}`]: (r) => r.status === 200 });
           success = true;
-          sleep(Math.random() * 3); 
+          sleep(Math.random() * 3);
         } else {
           attempts++;
         }
@@ -150,5 +163,5 @@ export default function () {
   let gameRes = http.get(`${BASE_URL}/${gameId}`);
   check(gameRes, { 'game session fetched': (r) => r.status === 200 });
 
-  sleep(Math.random() * 3); 
+  sleep(Math.random() * 3);
 }
