@@ -38,11 +38,24 @@ function JoinGamePage({
       title: 'A powerhouse that needs modernization',
       description: [
         'Classic monolithic SaaS app.',
-        'Players start off with completed features that start generating revenue immediately.',
-        'These are legacy architectures built on older platforms that increase your tech debt.',
-        'Infrastructure cost is per customer, and teams start out with no cloud native skills.'
+
       ],
-      icon: 'pi pi-database'
+      icon: 'pi pi-database',
+      properties: [
+        'Mature business with a strong base.',
+        'Older tech needs constant maintenance.',
+        'Infrastructure cost is per customer.',
+        'Can up-skill to build modern applications.'
+      ],
+      features: {
+        Cash: "$10,000",
+        Customers: 1,
+        LegacySkills: 4,
+        CloudNativeSkills: 0,
+        OpsMaturity: 0,
+        Feaures: 2
+
+      }
     },
     {
       label: 'Single-Tenant Microservices',
@@ -50,11 +63,23 @@ function JoinGamePage({
       title: 'Modern toolchains, but needs a culture shift',
       description: [
         'Microservice based single-tenant SaaS.',
-        'Teams start with some monolith features and some modernized services.',
-        'Teams are equipped with some cloud native skills, and can stave off tech debt.',
-        'Infrastructure cost is per customer, since these are still single-tenant features.'
+
       ],
-      icon: 'pi pi-user'
+      icon: 'pi pi-user',
+      properties: [
+        'On the path to modernization.',
+        'Modern techstack can stave off tech debt.',
+        'Infrastructure cost is per customer.',
+        'Can upskill to build multi-tenant applications.'
+      ],
+      features: {
+        Cash: "$8,000",
+        Customers: 1,
+        LegacySkills: 4,
+        CloudNativeSkills: 1,
+        OpsMaturity: 0,
+        Features : 1
+      }
     },
     {
       label: 'Multi-Tenant Microservices',
@@ -62,11 +87,24 @@ function JoinGamePage({
       title: 'Start-Up mode. Highly scalable, with an equally high upfront cost.',
       description: [
         'Modern multi-tenant SaaS, that is built for scalability and efficiency.',
-        'Requires high initial investment, and patience, but pays off in the long run.',
-        'Teams start with some cloud native skills, and can build features that are highly scalable.',
-        'Infrastructure cost is per feature, since these are multi-tenant features.'
+
       ],
-      icon: 'pi pi-users'
+      icon: 'pi pi-users',
+      properties: [
+        'Capital intensive, slower initial growth.',
+        'Long term potential tied to customer growth.',
+        'Highly skilled team with modern toolchains.',
+        'Infrastructure cost is per feature, leading to better margins.'
+      ],
+      features: {
+        Cash: "$5,000",
+        Customers: 1,
+        LegacySkills: 4,
+        CloudNativeSkills: 2,
+        OpsMaturity: 0,
+        Features: 0
+
+      }
     }
   ];
 
@@ -123,15 +161,15 @@ function JoinGamePage({
       <div className="top-banner">
         <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
         <div className="game-info">
-                  <span >Current Session: </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem'}}>
-                    <span className="gamepage-turn" style={{ margin: 0 }}>
-                      <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
-                      
-                    </span>
-                  
-                  </div>
-                </div>
+          <span >Current Session: </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span className="gamepage-turn" style={{ margin: 0 }}>
+              <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
+
+            </span>
+
+          </div>
+        </div>
       </div>
       <div className="join-game-container">
         <Toast ref={toast} />
@@ -185,6 +223,7 @@ function JoinGamePage({
             style={{ width: '100%' }}
             autoFocus
             onBlur={() => setNameTouched(true)}
+            keyfilter="email"
             className={showNameError ? 'p-invalid' : ''}
           />
           {showNameError && (
@@ -201,19 +240,40 @@ function JoinGamePage({
                 key={type.value}
                 onClick={() => setPlayerType(type.value)}
                 className={
-                  'player-type-card' +
-                  (playerType === type.value ? ' selected' : '')
+                  ' player-type-card ' + type.value.toLowerCase() +
+                  (playerType === type.value ? ' selected ' : '')
                 }
               >
-                <div className="card-header">
-                  <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
-                  <span className="card-label">{type.label}</span>
-                </div>
-                <div className="card-title">{type.title}</div>
-                <div className="card-description">
-                  {type.description.map((line, idx) => (
-                    <div key={idx}>{line}</div>
-                  ))}
+                <div className="class-card-content">
+
+
+                  <div className="card-header">
+                    <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
+                    <span className="card-label">{type.label}</span>
+                  </div>
+                  <div className="card-title">{type.title}</div>
+
+                  <div className="player-class-properties">
+                    {type.properties.map((prop, idx) => (
+                      <span key={idx}>
+                        <i className="pi pi-check" style={{ color: '#4caf50', marginRight: '0.5rem' }} />
+                        {prop}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="player-class-features">
+                    <h4>Starting Features:</h4>
+
+                    {Object.entries(type.features).map(([key, value]) => (
+                      <div className="player-class-features-list">
+                        <span key={key}>
+                          <strong>{key}:</strong>
+                        </span>
+                        <span>{value}</span>
+                      </div>
+                    ))}
+
+                  </div>
                 </div>
               </Card>
             ))}

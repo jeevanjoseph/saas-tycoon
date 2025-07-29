@@ -286,9 +286,8 @@ function GamePage({ gameId, game, playerId, setReady }) {
           </Dialog>
         )}
 
-
-
         <div className="gamepage-main three-column-layout">
+
           {/* Left Column: Player Status */}
           <div className="left-column-status">
             <div className="player-status-row">
@@ -306,26 +305,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   const statusColor = hasPlayedCurrentTurn
                     ? '#22c55e'
                     : '#fbbf24';
-
-                  // Find the most recent 'action' log for this player for the current turn or previous turn
-                  let recentActionLog = null;
-                  if (Array.isArray(player.log)) {
-                    // Try to find the last 'action' log for the current turn
-                    const logsThisTurn = player.log.filter(
-                      log => typeof log === 'object' && log.turn === game.currentTurn && log.type === 'action'
-                    );
-                    if (logsThisTurn.length > 0) {
-                      recentActionLog = logsThisTurn[logsThisTurn.length - 1];
-                    } else if (game.currentTurn > 0) {
-                      // If not found, try previous turn
-                      const logsPrevTurn = player.log.filter(
-                        log => typeof log === 'object' && log.turn === game.currentTurn - 1 && log.type === 'action'
-                      );
-                      if (logsPrevTurn.length > 0) {
-                        recentActionLog = logsPrevTurn[logsPrevTurn.length - 1];
-                      }
-                    }
-                  }
 
                   return (
                     <Card
@@ -380,17 +359,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                           <span>Ops: {currentStats.opsMaturity ?? 0}</span>
                         </div>
                       </div>
-                      {/* Show the most recent action for this player for this turn or previous turn */}
-                      {recentActionLog && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', marginTop: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'left', gap: 4, fontSize: '0.7em', color: '#666' }}>
-                            <i className="pi pi-comments" style={{ color: '#22c55e' }} />
-                            <span>{recentActionLog.details}. Spent {formatCurrency(recentActionLog.cashSpent ?? 0)}</span>
-
-
-                          </div>
-                        </div>
-                      )}
                     </Card>
                   );
                 })}
@@ -512,7 +480,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   ];
 
                   return (
-                    <div style={{  margin: '2rem auto' }}>
+                    <div className="intro-stepper">
                       <Stepper ref={stepperRef}>
                         {steps.map((step, idx) => (
                           <StepperPanel key={step.header} header={step.header}>

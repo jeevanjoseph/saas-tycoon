@@ -31,7 +31,6 @@
 
 .player-type-card.selected {
     border: 2px solid #007ad9;
-    background: #e0f2fe;
     box-shadow: 0 0 8px #007ad9;
 }
 
@@ -48,8 +47,9 @@
 
 .player-type-card .card-title {
     margin-top: 8px;
+    margin-bottom: 16px;
     font-weight: 700;
-    color: #222;
+    color: #ffffff;
     font-size: 1.05rem;
 }
 
@@ -502,21 +502,92 @@
     font-weight: 500
 }
 
-.spectate-content{
-    display:flex;
+.spectate-content {
+    display: flex;
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
 
-.winner-content{
-    display:flex;
+.winner-content {
+    display: flex;
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
+
+.intro-stepper {
+    margin: 1rem;
+    max-width: 720px;
+    min-width: 720px;
+}
+
+.class-card-content {
+    background-image:  linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    padding: 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.monolith {
+    background-image: 
+       
+        url('../img/monolith.jpg'); 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: white;
+}
+
+.singletenant {
+    background-image: 
+        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent), 
+        url('../img/singletenant.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: white;
+}
+
+.multitenant {
+    background-image: 
+        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent), 
+        url('../img/multitenant.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    color: white;
+}
+
+.player-class-properties{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.player-class-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    width: -webkit-fill-available;
+    padding: 0 3rem;
+}
+
+.player-class-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    border-bottom: #222;
+    justify-content: space-between;
+}
+
 
 /* --- Responsive styles --- */
 @media (max-width: 900px) {
