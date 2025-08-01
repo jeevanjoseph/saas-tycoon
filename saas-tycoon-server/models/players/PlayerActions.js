@@ -242,8 +242,22 @@ const actions = {
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= 700;
-      player.stats[turn].revenue += 1000;
+      player.stats[turn].cash -= constants.OPTIMIZATION_COST;
+      player.features.forEach(feature => {
+        feature.customerPrice += 500;
+      });
+      let details = 'Raised feature pricing to drive up margins';
+      const numFeatures = player.features.length;
+      const opsMaturity = player.stats[turn].opsMaturity;
+      let retainChance =  Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      if (Math.random() > retainChance) {
+        const lostCustomers = 1
+        player.stats[turn].customers -= lostCustomers;
+        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+      } else {
+        details += ' successfully, customers retained due the feature richness and operational maturity.';
+      }
+      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
@@ -375,8 +389,22 @@ const actions = {
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= 700;
-      player.stats[turn].revenue += 1000;
+      player.stats[turn].cash -= constants.OPTIMIZATION_COST;
+      player.features.forEach(feature => {
+        feature.customerPrice += 500;
+      });
+      let details = 'Raised feature pricing to drive up margins';
+      const numFeatures = player.features.length;
+      const opsMaturity = player.stats[turn].opsMaturity;
+      let retainChance =  Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      if (Math.random() > retainChance) {
+        const lostCustomers = 1
+        player.stats[turn].customers -= lostCustomers;
+        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+      } else {
+        details += ' successfully, customers retained due the feature richness and operational maturity.';
+      }
+      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
@@ -508,10 +536,24 @@ const actions = {
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= 700;
-      player.stats[turn].revenue += 1000;
+      player.stats[turn].cash -= constants.OPTIMIZATION_COST;
+      player.features.forEach(feature => {
+        feature.customerPrice += 500;
+      });
+      let details = 'Raised feature pricing to drive up margins';
+      const numFeatures = player.features.length;
+      const opsMaturity = player.stats[turn].opsMaturity;
+      let retainChance =  Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      if (Math.random() > retainChance) {
+        const lostCustomers = 1
+        player.stats[turn].customers -= lostCustomers;
+        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+      } else {
+        details += ' successfully, customers retained due the feature richness and operational maturity.';
+      }
+      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
-      addPlayerLog(player, turn, action, 'Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.', cashBefore, cashAfter);
+      addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
   }
 };

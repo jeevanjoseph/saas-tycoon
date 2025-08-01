@@ -17,6 +17,7 @@ const TRAINING_COST_CLOUD = 500; // Cost for training to increase cloud-native s
 const TRAINING_COST_LEGACY = 250; // Cost for training to increase legacy skills
 const MARKETING_COST = 5000; // Cost for marketing campaigns
 const MARKETING_MAX_CUSTOMERS = 3; // Maximum customers gained from a marketing campaign
+const OPTIMIZATION_COST = 3000; // Cost for optimizing pricing
 //cooldown periods for actions
 const ACTION_COOLDOWN_PERIODS = {
   BUILD_MONOLITH_FEATURE: 4,
@@ -113,6 +114,7 @@ module.exports = {
   MONOLITH_STARTING_STATS,
   SINGLETENANT_STARTING_STATS,
   MULTITENANT_STARTING_STATS,
-  MARKETING_MAX_CUSTOMERS
+  MARKETING_MAX_CUSTOMERS,
+  OPTIMIZATION_COST
 
 };
