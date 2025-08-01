@@ -42,7 +42,7 @@ function checkActionCooldown(player, actionCode) {
 
 // Decrement cooldowns based on training or ops maturity
 function decrementCloudFeatureCooldowns(player, turn) {
-
+  if (!player.actionCooldowns) player.actionCooldowns = {};
   let singleTenantCooldownPeriod = player.actionCooldowns['BUILD_SINGLETENANT_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_SINGLETENANT_FEATURE'];
   if (player.stats[turn].cloudNativeSkills >= 7) {
     singleTenantCooldownPeriod = Math.max(0, singleTenantCooldownPeriod - 2); // Reduce cooldown by 2 if cloud native skills are a greater 7  
@@ -65,6 +65,7 @@ function decrementCloudFeatureCooldowns(player, turn) {
 
 // Decrement cooldowns based on training or ops maturity
 function decrementLegacyFeatureCooldowns(player, turn) {
+  if (!player.actionCooldowns) player.actionCooldowns = {};
   let monolithCooldownPeriod = player.actionCooldowns['BUILD_MONOLITH_FEATURE'] || constants.ACTION_COOLDOWN_PERIODS['BUILD_MONOLITH_FEATURE'];
   if (player.stats[turn].legacySkills >= 7) {
     monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 2); // Reduce cooldown by 2 if legacy skills are a greater 7
