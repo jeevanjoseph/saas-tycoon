@@ -16,6 +16,7 @@ const DEVOPS_COST = 1000; // Cost for DevOps improvements per level of ops matur
 const TRAINING_COST_CLOUD = 500; // Cost for training to increase cloud-native skills
 const TRAINING_COST_LEGACY = 250; // Cost for training to increase legacy skills
 const MARKETING_COST = 5000; // Cost for marketing campaigns
+const MARKETING_MAX_CUSTOMERS = 3; // Maximum customers gained from a marketing campaign
 //cooldown periods for actions
 const ACTION_COOLDOWN_PERIODS = {
   BUILD_MONOLITH_FEATURE: 4,
@@ -111,6 +112,7 @@ module.exports = {
   OPS_MATURITY_RAMP_MULTI_TENANT,
   MONOLITH_STARTING_STATS,
   SINGLETENANT_STARTING_STATS,
-  MULTITENANT_STARTING_STATS
+  MULTITENANT_STARTING_STATS,
+  MARKETING_MAX_CUSTOMERS
 
 };
