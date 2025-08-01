@@ -6,7 +6,7 @@ const getBaseUrl = () => {
   let url;
   switch(process.env.NODE_ENV) {
     case 'production':
-      url = API;
+      url = 'http://129.146.44.143:3000/api/game';
       break;
     case 'development':
     default:
