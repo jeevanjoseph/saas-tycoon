@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const createPlayer = require('./player');
 const PlayerStats = require('./players/PlayerStats');
-const events = require('./events'); // Import the events module
+const events = require('./events/events'); // Import the events module
 const PlayerActions = require('../models/players/PlayerActions');
 
 
@@ -39,7 +39,7 @@ function processTurn(session) {
   let event = null;
   //TODO: make the number of turns between events configurable
   if (turn %3 ==0 && turn > 1) {
-    event = events.getRandomEvent();
+    event = events.getRandomEvent(turn);
     event.turn = turn;
     session.events.push(event);
   }

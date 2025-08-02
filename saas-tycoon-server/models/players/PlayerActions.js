@@ -4,19 +4,24 @@ const MultiTenantMicroservice = require('../features/MultiTenantMicroservice');
 const SingleTenantMicroservice = require('../features/SingleTenantMicroservice');
 const FeatureActions = require('../features/FeatureActions');
 const constants = require('./constants');
-
-// --- LOGGING HELPER ---
-function addPlayerLog(player, turn, actionOrEvent, details, cashBefore, cashAfter) {
-  if (!player.log) player.log = [];
-  const cashSpent = Math.max(0, cashBefore - cashAfter);
-  player.log.push({
-    turn,
-    type: actionOrEvent.type ? 'event' : 'action',
-    code: actionOrEvent.code || actionOrEvent.type,
-    details,
-    cashSpent
-  });
-}
+const { addPlayerLog } = require('../../util/PlayerLog')
+const { handleLighthouseProgram,
+  handleCustomerChurn,
+  handleCloudMigration,
+  handleInnovation,
+  handleMarketDisruption,
+  handleDowntime,
+  handleRisingCosts,
+  handleFeatureInnovation,
+  handleOperationalExcellence,
+  handleTechDebtCrisis,
+  handleLegacySkillsShortage,
+  handleFeatureBloat,
+  handleMarketSaturation,
+  handleRegulatoryChanges,
+  handleBreakingVendorLockin,
+  handleCustomerExperienceRevolution,
+  handleMajorCVE } = require('../events/EventHandlers')
 
 
 
@@ -77,8 +82,8 @@ function decrementLegacyFeatureCooldowns(player, turn) {
     } else if (player.stats[turn].legacySkills >= 5) {
       monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
     }
-  player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
-  addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
+    player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
+    addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
   }
 }
 
@@ -258,7 +263,7 @@ const actions = {
       let details = 'Raised feature pricing to drive up margins';
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
-      let retainChance = Math.min(.95, (numFeatures * 0.1) + .5+(opsMaturity * 0.08)); //5% chance of losing customers
+      let retainChance = Math.min(.95, (numFeatures * 0.1) + .5 + (opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
         player.stats[turn].customers = Math.max(1, player.stats[turn].customers - lostCustomers);
@@ -406,10 +411,10 @@ const actions = {
       let details = 'Raised feature pricing to drive up margins';
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
-      let retainChance = Math.min(.95, .5+(numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      let retainChance = Math.min(.95, .5 + (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
-        player.stats[turn].customers = Max.max(1, player.stats[turn].customers - lostCustomers);
+        player.stats[turn].customers = Math.max(1, player.stats[turn].customers - lostCustomers);
         details += ` successfully, but lost ${lostCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
       } else {
         details += ' successfully, customers retained due the feature richness and operational maturity.';
@@ -557,7 +562,7 @@ const actions = {
       let retainChance = Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
-        player.stats[turn].customers = Max.max(1, player.stats[turn].customers - lostCustomers);
+        player.stats[turn].customers = Math.max(1, player.stats[turn].customers - lostCustomers);
         details += ` successfully, but lost ${lostCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
       } else {
         details += ' successfully, customers retained due the feature richness and operational maturity.';
@@ -573,155 +578,163 @@ const actions = {
 const eventHandlers = {
   Monolith: {
     LIGHTHOUSE_PROGRAM: function (player, turn) {
-      player.stats[turn].opsMaturity += 1;
-      addPlayerLog(player, turn, { type: 'LIGHTHOUSE_PROGRAM' }, `Spectra Lighthouse Program engagement gives you tips of operational improvements, raising operational marturity to ${player.stats[turn].opsMaturity}`);
+      handleLighthouseProgram(player, turn);
     },
     CUSTOMER_CHURN: function (player, turn) {
-      let highTechDebtFeatures = player.features.filter(feature => feature.techDebt > 4);
-      if (highTechDebtFeatures.length > 0) {
-        player.stats[turn].customers = Math.max(0, player.stats[turn].customers - 1);
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Out of control tech debt has resulted in frequent issues that are hard to address completely. Lost a customer.');
-      } else {
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Excellent discipline in managing (or avoiding) tech det earns you a loyal customer base. No effect due to this event');
-      }
+      handleCustomerChurn(player, turn);
     },
     CLOUD_MIGRATION: function (player, turn) {
-      let cloudNativeFeatures = player.features.filter(feature => feature.architecture === 'microservice' || feature.architecture === 'mt-microservice');
-      let legacyFeatures = player.features.filter(feature => feature.architecture === 'monolith');
-      if (cloudNativeFeatures.length > legacyFeatures.length) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers find the mix of feature completeness and modern technology appealing.  Gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers are wary that despite feature completeness, the legacy technology may cause security and operational issues. Customers avoid your product as they make a cloud transformation.');
-      }
+      handleCloudMigration(player, turn);
     },
     INNOVATION: function (player, turn) {
-      let totalSkills = player.stats[turn].legacySkills + player.stats[turn].cloudNativeSkills;
-      if (totalSkills > 5) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: no effect');
-      }
+      handleInnovation(player, turn);
     },
     MARKET_DISRUPTION: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.featurePrice = Math.max(0, feature.featurePrice - (feature.featurePrice * 0.1));
-      });
-      addPlayerLog(player, turn, { type: 'MARKET_DISRUPTION' }, 'New market entrants have disrupted the market, forcing you to reduce feature prices by 10% to compete. This is a good time to invest in features that are more resilient to price pressure.');
+      handleMarketDisruption(player, turn);
     },
     DOWNTIME: function (player, turn) {
-      let penalty = 500 * (constants.OPS_MATURITY_MAX - player.stats[turn].opsMaturity);
-      player.stats[turn].cash = Math.max(0, player.stats[turn].cash - penalty);
-      addPlayerLog(player, turn, { type: 'DOWNTIME' }, `Downtime event: Having better operational maturity helps you deal with unexpected events better. Lost $${penalty} based on the current operational maturity of ${player.stats[turn].opsMaturity}.`);
+      handleDowntime(player, turn);
     },
     RISING_COSTS: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.infrastructureCost = Math.ceil(feature.infrastructureCost * 1.2);
-      });
-      addPlayerLog(player, turn, { type: 'RISING_COSTS' }, 'Increased infrastructure cost have put pressure on your cash flow. All features now require an increased infrastructure spend by 20%. MultiTenant features do not require dedicated infrastructure per customer are more resilient to this change.');
+      handleRisingCosts(player, turn);
+    },
+    FEATURE_INNOVATION: function (player, turn) {
+      handleFeatureInnovation(player, turn);
+    },
+    OPERATIONAL_EXCELLENCE: function (player, turn) {
+      handleOperationalExcellence(player, turn);
+    },
+    TECH_DEBT_CRISIS: function (player, turn) {
+      handleTechDebtCrisis(player, turn);
+    },
+    LEGACY_SKILLS_SHORTAGE: function (player, turn) {
+      handleLegacySkillsShortage(player, turn);
+    },
+    FEATURE_BLOAT: function (player, turn) {
+      handleFeatureBloat(player, turn);
+    },
+    MARKET_SATURATION: function (player, turn) {
+      handleMarketSaturation(player, turn);
+    },
+    REGULATORY_CHANGES: function (player, turn) {
+      handleRegulatoryChanges(player, turn);
+    },
+    BREAKING_VENDOR_LOCKIN: function (player, turn) {
+      handleBreakingVendorLockin(player, turn);
+    },
+    CUSTOMER_EXPERIENCE_REVOLUTION: function (player, turn) {
+      handleCustomerExperienceRevolution(player, turn);
+    },
+    MAJOR_CVE: function (player, turn) {
+      handleMajorCVE(player, turn);
     }
+
+
   },
   SingleTenant: {
     LIGHTHOUSE_PROGRAM: function (player, turn) {
-      player.stats[turn].opsMaturity += 1;
-      addPlayerLog(player, turn, { type: 'LIGHTHOUSE_PROGRAM' }, `Spectra Lighthouse Program engagement gives you tips of operational improvements, raising operational marturity to ${player.stats[turn].opsMaturity}`);
+      handleLighthouseProgram(player, turn);
     },
     CUSTOMER_CHURN: function (player, turn) {
-      let highTechDebtFeatures = player.features.filter(feature => feature.techDebt > 4);
-      if (highTechDebtFeatures.length > 0) {
-        player.stats[turn].customers = Math.max(0, player.stats[turn].customers - 1);
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Out of control tech debt has resulted in frequent issues that are hard to address completely. Lost a customer.');
-      } else {
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Excellent discipline in managing (or avoiding) tech det earns you a loyal customer base. No effect due to this event');
-      }
+      handleCustomerChurn(player, turn);
     },
     CLOUD_MIGRATION: function (player, turn) {
-      let cloudNativeFeatures = player.features.filter(feature => feature.architecture === 'microservice' || feature.architecture === 'mt-microservice');
-      let legacyFeatures = player.features.filter(feature => feature.architecture === 'monolith');
-      if (cloudNativeFeatures.length > legacyFeatures.length) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers find the mix of feature completeness and modern technology appealing.  Gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers are wary that despite feature completeness, the legacy technology may cause security and operational issues. Customers avoid your product as they make a cloud transformation.');
-      }
+      handleCloudMigration(player, turn);
     },
     INNOVATION: function (player, turn) {
-      let totalSkills = player.stats[turn].legacySkills + player.stats[turn].cloudNativeSkills;
-      if (totalSkills > 5) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: no effect');
-      }
+      handleInnovation(player, turn);
     },
     MARKET_DISRUPTION: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.featurePrice = Math.max(0, feature.featurePrice - (feature.featurePrice * 0.1));
-      });
-      addPlayerLog(player, turn, { type: 'MARKET_DISRUPTION' }, 'New market entrants have disrupted the market, forcing you to reduce feature prices by 10% to compete. This is a good time to invest in features that are more resilient to price pressure.');
+      handleMarketDisruption(player, turn);
     },
     DOWNTIME: function (player, turn) {
-      let penalty = 500 * (constants.OPS_MATURITY_MAX - player.stats[turn].opsMaturity);
-      player.stats[turn].cash = Math.max(0, player.stats[turn].cash - penalty);
-      addPlayerLog(player, turn, { type: 'DOWNTIME' }, `Downtime event: Having better operational maturity helps you deal with unexpected events better. Lost $${penalty} based on the current operational maturity of ${player.stats[turn].opsMaturity}.`);
+      handleDowntime(player, turn);
     },
     RISING_COSTS: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.infrastructureCost = Math.ceil(feature.infrastructureCost * 1.2);
-      });
-      addPlayerLog(player, turn, { type: 'RISING_COSTS' }, 'Increased infrastructure cost have put pressure on your cash flow. All features now require an increased infrastructure spend by 20%. MultiTenant features do not require dedicated infrastructure per customer are more resilient to this change.');
+      handleRisingCosts(player, turn);
+    },
+    FEATURE_INNOVATION: function (player, turn) {
+      handleFeatureInnovation(player, turn);
+    },
+    OPERATIONAL_EXCELLENCE: function (player, turn) {
+      handleOperationalExcellence(player, turn);
+    },
+    TECH_DEBT_CRISIS: function (player, turn) {
+      handleTechDebtCrisis(player, turn);
+    },
+    LEGACY_SKILLS_SHORTAGE: function (player, turn) {
+      handleLegacySkillsShortage(player, turn);
+    },
+    FEATURE_BLOAT: function (player, turn) {
+      handleFeatureBloat(player, turn);
+    },
+    MARKET_SATURATION: function (player, turn) {
+      handleMarketSaturation(player, turn);
+    },
+    REGULATORY_CHANGES: function (player, turn) {
+      handleRegulatoryChanges(player, turn);
+    },
+    BREAKING_VENDOR_LOCKIN: function (player, turn) {
+      handleBreakingVendorLockin(player, turn);
+    },
+    CUSTOMER_EXPERIENCE_REVOLUTION: function (player, turn) {
+      handleCustomerExperienceRevolution(player, turn);
+    },
+    MAJOR_CVE: function (player, turn) {
+      handleMajorCVE(player, turn);
     }
   },
   MultiTenant: {
     LIGHTHOUSE_PROGRAM: function (player, turn) {
-      player.stats[turn].opsMaturity += 1;
-      addPlayerLog(player, turn, { type: 'LIGHTHOUSE_PROGRAM' }, `Spectra Lighthouse Program engagement gives you tips of operational improvements, raising operational marturity to ${player.stats[turn].opsMaturity}`);
+      handleLighthouseProgram(player, turn);
     },
     CUSTOMER_CHURN: function (player, turn) {
-      let highTechDebtFeatures = player.features.filter(feature => feature.techDebt > 4);
-      if (highTechDebtFeatures.length > 0) {
-        player.stats[turn].customers = Math.max(0, player.stats[turn].customers - 1);
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Out of control tech debt has resulted in frequent issues that are hard to address completely. Lost a customer.');
-      } else {
-        addPlayerLog(player, turn, { type: 'CUSTOMER_CHURN' }, 'Excellent discipline in managing (or avoiding) tech det earns you a loyal customer base. No effect due to this event');
-      }
+      handleCustomerChurn(player, turn);
     },
     CLOUD_MIGRATION: function (player, turn) {
-      let cloudNativeFeatures = player.features.filter(feature => feature.architecture === 'microservice' || feature.architecture === 'mt-microservice');
-      let legacyFeatures = player.features.filter(feature => feature.architecture === 'monolith');
-      if (cloudNativeFeatures.length > legacyFeatures.length) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers find the mix of feature completeness and modern technology appealing.  Gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'CLOUD_MIGRATION' }, 'Customers are wary that despite feature completeness, the legacy technology may cause security and operational issues. Customers avoid your product as they make a cloud transformation.');
-      }
+      handleCloudMigration(player, turn);
     },
     INNOVATION: function (player, turn) {
-      let totalSkills = player.stats[turn].legacySkills + player.stats[turn].cloudNativeSkills;
-      if (totalSkills > 5) {
-        player.stats[turn].customers += 1;
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: gained a customer');
-      } else {
-        addPlayerLog(player, turn, { type: 'INNOVATION' }, 'Innovation event: no effect');
-      }
+      handleInnovation(player, turn);
     },
     MARKET_DISRUPTION: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.featurePrice = Math.max(0, feature.featurePrice - (feature.featurePrice * 0.1));
-      });
-      addPlayerLog(player, turn, { type: 'MARKET_DISRUPTION' }, 'New market entrants have disrupted the market, forcing you to reduce feature prices by 10% to compete. This is a good time to invest in features that are more resilient to price pressure.');
+      handleMarketDisruption(player, turn);
     },
     DOWNTIME: function (player, turn) {
-      let penalty = 500 * (constants.OPS_MATURITY_MAX - player.stats[turn].opsMaturity);
-      player.stats[turn].cash = Math.max(0, player.stats[turn].cash - penalty);
-      addPlayerLog(player, turn, { type: 'DOWNTIME' }, `Downtime event: Having better operational maturity helps you deal with unexpected events better. Lost $${penalty} based on the current operational maturity of ${player.stats[turn].opsMaturity}.`);
+      handleDowntime(player, turn);
     },
     RISING_COSTS: function (player, turn) {
-      player.features.forEach((feature) => {
-        feature.infrastructureCost = Math.ceil(feature.infrastructureCost * 1.2);
-      });
-      addPlayerLog(player, turn, { type: 'RISING_COSTS' }, 'Increased infrastructure cost have put pressure on your cash flow. All features now require an increased infrastructure spend by 20%. MultiTenant features do not require dedicated infrastructure per customer are more resilient to this change.');
+      handleRisingCosts(player, turn);
+    },
+    FEATURE_INNOVATION: function (player, turn) {
+      handleFeatureInnovation(player, turn);
+    },
+    OPERATIONAL_EXCELLENCE: function (player, turn) {
+      handleOperationalExcellence(player, turn);
+    },
+    TECH_DEBT_CRISIS: function (player, turn) {
+      handleTechDebtCrisis(player, turn);
+    },
+    LEGACY_SKILLS_SHORTAGE: function (player, turn) {
+      handleLegacySkillsShortage(player, turn);
+    },
+    FEATURE_BLOAT: function (player, turn) {
+      handleFeatureBloat(player, turn);
+    },
+    MARKET_SATURATION: function (player, turn) {
+      handleMarketSaturation(player, turn);
+    },
+    REGULATORY_CHANGES: function (player, turn) {
+      handleRegulatoryChanges(player, turn);
+    },
+    BREAKING_VENDOR_LOCKIN: function (player, turn) {
+      handleBreakingVendorLockin(player, turn);
+    },
+    CUSTOMER_EXPERIENCE_REVOLUTION: function (player, turn) {
+      handleCustomerExperienceRevolution(player, turn);
+    },
+    MAJOR_CVE: function (player, turn) {
+      handleMajorCVE(player, turn);
     }
   }
 };
