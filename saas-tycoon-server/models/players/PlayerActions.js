@@ -236,7 +236,7 @@ const actions = {
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
       if (Math.random() < successChance) {
-        const gainedCustomers = Math.min(constants.MARKETING_MAX_CUSTOMERS, (1 + Math.round(numFeatures * 0.2) + Math.round(opsMaturity * 0.5)));
+        const gainedCustomers = Math.min(constants.MARKETING_MAX_CUSTOMERS, (Math.round(numFeatures * 0.25) + Math.round(opsMaturity * 0.25)));
         player.stats[turn].customers += gainedCustomers;
         details += ` successfully, gained ${gainedCustomers} customers.`;
       } else {
@@ -383,7 +383,7 @@ const actions = {
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
       if (Math.random() < successChance) {
-        const gainedCustomers = 1 + Math.round(numFeatures * 0.2) + Math.round(opsMaturity * 0.5);
+        const gainedCustomers = Math.min(constants.MARKETING_MAX_CUSTOMERS, (Math.round(numFeatures * 0.25) + Math.round(opsMaturity * 0.25)));
         player.stats[turn].customers += gainedCustomers;
         details += ` successfully, gained ${gainedCustomers} customers.`;
       } else {
@@ -530,7 +530,7 @@ const actions = {
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
       if (Math.random() < successChance) {
-        const gainedCustomers = 1 + Math.round(numFeatures * 0.2) + Math.round(opsMaturity * 0.5);
+        const gainedCustomers = Math.min(constants.MARKETING_MAX_CUSTOMERS, (Math.round(numFeatures * 0.25) + Math.round(opsMaturity * 0.25)));
         player.stats[turn].customers += gainedCustomers;
         details += ` successfully, gained ${gainedCustomers} customers.`;
       } else {
