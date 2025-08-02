@@ -77,12 +77,9 @@ function decrementLegacyFeatureCooldowns(player, turn) {
     } else if (player.stats[turn].legacySkills >= 5) {
       monolithCooldownPeriod = Math.max(0, monolithCooldownPeriod - 1); // Reduce cooldown by 1 if legacy skills are a greater 5
     }
-  }
-
   player.actionCooldowns['BUILD_MONOLITH_FEATURE'] = monolithCooldownPeriod;
-
   addPlayerLog(player, turn, { code: 'DECREMENT_COOLDOWNS' }, `Cooldowns adjusted based on skills: Monolith ${monolithCooldownPeriod}`, player.stats[turn].cash, player.stats[turn].cash);
-
+  }
 }
 
 // Helper to set cooldown after executing an action
@@ -113,6 +110,9 @@ function setActionCooldown(player, turn, actionCode) {
     }
   }
 
+  if (actionCode === 'LAUNCH_MARKETING_CAMPAIGN') {
+    cooldownPeriod = constants.ACTION_COOLDOWN_PERIODS[actionCode]
+  }
   if (cooldownPeriod < (constants.ACTION_COOLDOWN_PERIODS[actionCode] || 0)) {
     addPlayerLog(player, turn, { code: actionCode }, `Cooldown for ${actionCode.replace(/_/g, ' ')} reduced to ${cooldownPeriod} turns due to skill level.`, player.stats[turn].cash, player.stats[turn].cash);
   }
@@ -229,9 +229,10 @@ const actions = {
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.MARKETING_COST;
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
+      checkActionCooldown(player, 'LAUNCH_MARKETING_CAMPAIGN');
+      player.stats[turn].cash -= constants.MARKETING_COST;
       let successChance = 0.05 + (numFeatures * 0.05) + (opsMaturity * 0.08);
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
@@ -243,26 +244,28 @@ const actions = {
         details += ' , but due to lack of features and operational maturity, it has failed to attract new customers. Customers look for feature rich products with a proven track record for operational maturity.';
       }
       const cashAfter = player.stats[turn].cash;
+      setActionCooldown(player, turn, 'LAUNCH_MARKETING_CAMPAIGN');
       addPlayerLog(player, turn, action, details, cashBefore, cashAfter);
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
+      checkActionCooldown(player, 'OPTIMIZE_PRICING');
       player.stats[turn].cash -= constants.OPTIMIZATION_COST;
       player.features.forEach(feature => {
-        feature.customerPrice += 500;
+        feature.featurePrice += 500;
       });
+      setActionCooldown(player, turn, 'OPTIMIZE_PRICING');
       let details = 'Raised feature pricing to drive up margins';
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
-      let retainChance = Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      let retainChance = Math.min(.95, (numFeatures * 0.1) + .5+(opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
-        player.stats[turn].customers -= lostCustomers;
-        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+        player.stats[turn].customers = Math.max(1, player.stats[turn].customers - lostCustomers);
+        details += ` successfully, but lost ${lostCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
       } else {
         details += ' successfully, customers retained due the feature richness and operational maturity.';
       }
-      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
@@ -376,9 +379,10 @@ const actions = {
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.MARKETING_COST;
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
+      checkActionCooldown(player, 'LAUNCH_MARKETING_CAMPAIGN');
+      player.stats[turn].cash -= constants.MARKETING_COST;
       let successChance = 0.05 + (numFeatures * 0.05) + (opsMaturity * 0.08);
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
@@ -390,26 +394,26 @@ const actions = {
         details += ' , but due to lack of features and operational maturity, it has failed to attract new customers. Customers look for feature rich products with a proven track record for operational maturity.';
       }
       const cashAfter = player.stats[turn].cash;
+      setActionCooldown(player, turn, 'LAUNCH_MARKETING_CAMPAIGN');
       addPlayerLog(player, turn, action, details, cashBefore, cashAfter);
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
       player.stats[turn].cash -= constants.OPTIMIZATION_COST;
       player.features.forEach(feature => {
-        feature.customerPrice += 500;
+        feature.featurePrice += 500;
       });
       let details = 'Raised feature pricing to drive up margins';
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
-      let retainChance = Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
+      let retainChance = Math.min(.95, .5+(numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
-        player.stats[turn].customers -= lostCustomers;
-        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+        player.stats[turn].customers = Max.max(1, player.stats[turn].customers - lostCustomers);
+        details += ` successfully, but lost ${lostCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
       } else {
         details += ' successfully, customers retained due the feature richness and operational maturity.';
       }
-      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }
@@ -523,10 +527,11 @@ const actions = {
     },
     LAUNCH_MARKETING_CAMPAIGN: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
-      player.stats[turn].cash -= constants.MARKETING_COST;
       const numFeatures = player.features.length;
       const opsMaturity = player.stats[turn].opsMaturity;
-      let successChance = 0.2 + (numFeatures * 0.1) + (opsMaturity * 0.1);
+      checkActionCooldown(player, 'LAUNCH_MARKETING_CAMPAIGN');
+      player.stats[turn].cash -= constants.MARKETING_COST;
+      let successChance = 0.05 + (numFeatures * 0.05) + (opsMaturity * 0.08);
       if (successChance > 0.9) successChance = 0.9;
       let details = 'Launched Marketing Campaign';
       if (Math.random() < successChance) {
@@ -537,13 +542,14 @@ const actions = {
         details += ' , but due to lack of features and operational maturity, it has failed to attract new customers. Customers look for feature rich products with a proven track record for operational maturity.';
       }
       const cashAfter = player.stats[turn].cash;
+      setActionCooldown(player, turn, 'LAUNCH_MARKETING_CAMPAIGN');
       addPlayerLog(player, turn, action, details, cashBefore, cashAfter);
     },
     OPTIMIZE_PRICING: function (player, turn, action) {
       const cashBefore = player.stats[turn].cash;
       player.stats[turn].cash -= constants.OPTIMIZATION_COST;
       player.features.forEach(feature => {
-        feature.customerPrice += 500;
+        feature.featurePrice += 500;
       });
       let details = 'Raised feature pricing to drive up margins';
       const numFeatures = player.features.length;
@@ -551,12 +557,11 @@ const actions = {
       let retainChance = Math.min(.95, (numFeatures * 0.1) + (opsMaturity * 0.08)); //5% chance of losing customers
       if (Math.random() > retainChance) {
         const lostCustomers = 1
-        player.stats[turn].customers -= lostCustomers;
-        details += ` successfully, but lost ${gainedCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
+        player.stats[turn].customers = Max.max(1, player.stats[turn].customers - lostCustomers);
+        details += ` successfully, but lost ${lostCustomers} customers, due to high pricing and lack of features & Ops maturity.`;
       } else {
         details += ' successfully, customers retained due the feature richness and operational maturity.';
       }
-      player.stats[turn].customers = Math.max(0, player.stats[turn].customers - Math.floor(player.stats[turn].customers * 0.1)); // Lose 10%
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Raised feature pricing to drive up margins. Customers feel squeezed, and may start looking for alternatives.`, cashBefore, cashAfter);
     }

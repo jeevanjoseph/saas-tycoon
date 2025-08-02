@@ -8,7 +8,7 @@ import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { ProgressBar } from 'primereact/progressbar';
 import { Tooltip } from 'primereact/tooltip';
-import { Stepper } from 'primereact/stepper'; 
+import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
@@ -110,7 +110,7 @@ const actions_legacy_skills = [
 const actions_bonus = [
   { code: "LAUNCH_MARKETING_CAMPAIGN", name: "Launch Marketing Campaign", description: "Run a marketing campaign to increase brand awareness. Based on the number of features you have and how good your operational maturity is, you may add customers. This is always a roll of the dice, but more features and better operational maturity increase your odds of success. It does not matter if you have cloud-native or legacy features, or if you have high tech debt, of what your skill level is. Customers care most about feature richness and stability.", icon: "pi pi-megaphone", cost: MARKETING_COST, unit: "feature", per_unit: false },
   { code: "OPTIMIZE_PRICING", name: "Optimize Pricing", description: "Raise your prices by $500/feature. Improves revenue, but you run the risk of losing customers. Customer audits will reveal your tech debt, and this along with your operational maturity will determine if you lose customers.", icon: "pi pi-dollar", cost: 3000, unit: "feature", per_unit: false },
- 
+
 ];
 
 function GamePage({ gameId, game, playerId, setReady }) {
@@ -221,6 +221,9 @@ function GamePage({ gameId, game, playerId, setReady }) {
       updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0 : 0;
     } else if (action.code === "BUILD_CONTROL_PLANE") {
       updatedAction.cost = calculateControlPlaneDevCost(player, turn);
+      updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0 : 0;
+    } else if (action.code === "LAUNCH_MARKETING_CAMPAIGN") {
+      updatedAction.cost = MARKETING_COST
       updatedAction.cooldown = player.actionCooldowns ? player.actionCooldowns[action.code] || 0 : 0;
     }
     // You can add similar logic for other action types if needed
@@ -424,7 +427,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                   .map(turn => `'${25 + Math.floor(Number(turn) / 4) + 'Q' + (Number(turn) % 4 + 1)}`);
 
                 if (!player.ready) {
-                  
+
 
                   const steps = [
                     {
@@ -796,7 +799,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     {pendingAction.description}
                                   </div>
 
-                            
+
                                   <div style={{
                                     display: 'flex',
                                     flexDirection: 'row',
@@ -823,8 +826,8 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                           : ''}
                                         <i className="tooltip-info pi pi-info-circle p-text-secondary"
                                           data-pr-tooltip={`The point at which building more features becomes harder without improved skills. Once you hit ${pendingAction.releaseRamp} features of this type, the cost of building it progressively increases. Good skills can help you scale your development practices, and every skill point you earn from level ${pendingAction.skillRamp}, reduces development cost.`} data-pr-position="right"
-                                          style={{ marginLeft:'.5em', cursor: 'pointer' }}>
-                                          
+                                          style={{ marginLeft: '.5em', cursor: 'pointer' }}>
+
                                         </i>
                                       </div>
                                     )}
@@ -838,8 +841,8 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                           : ''}
                                         <i className="tooltip-info pi pi-info-circle p-text-secondary"
                                           data-pr-tooltip={`The point at which it becomes harder to scale your service to more users without good operational practices. The development cost increases progressively after onborading ${pendingAction.releaseRamp} customers. Good Operational maturity can help you scale to a larger userbase. Every Ops Maturity skill point you earn from level ${pendingAction.opsMaturityRamp}, reduces development cost.`} data-pr-position="right"
-                                          style={{ marginLeft:'.5em', cursor: 'pointer' }}>
-                                          
+                                          style={{ marginLeft: '.5em', cursor: 'pointer' }}>
+
                                         </i>
                                       </div>
                                     )}
@@ -873,19 +876,26 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                     autoFocus
                                     disabled={
                                       (() => {
-                                        if (!pendingAction.level) return false;
-                                        const currentPlayer = game?.players?.find(p => p.id === playerId);
-                                        if (header === "Ops Maturity") {
-                                          const currentOpsMaturity = currentPlayer?.stats?.[game.currentTurn]?.opsMaturity ?? 0;
-                                          return currentOpsMaturity !== (pendingAction.level - 1);
-                                        } else if (header === "Cloud Skills") {
-                                          const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.cloudNativeSkills ?? 0;
-                                          return currentSkillLevel !== (pendingAction.level - 1);
-                                        } else if (header === "Legacy Skills") {
-                                          const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.legacySkills ?? 0;
-                                          return currentSkillLevel !== (pendingAction.level - 1);
+                                        //|| pendingAction.cost > currentTurnStats.cash
+                                        let needsCooldown = false;
+                                        let levelMismatch = false;
+                                        if ( pendingAction.cooldown) { 
+                                          needsCooldown = pendingAction.cooldown > 0;
+                                        } else if(pendingAction.level) {
+                                          const currentPlayer = game?.players?.find(p => p.id === playerId);
+                                          if (header === "Ops Maturity") {
+                                            const currentOpsMaturity = currentPlayer?.stats?.[game.currentTurn]?.opsMaturity ?? 0;
+                                            levelMismatch = currentOpsMaturity !== (pendingAction.level - 1) ? true : false;
+                                          } else if (header === "Cloud Skills") {
+                                            const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.cloudNativeSkills ?? 0;
+                                            levelMismatch = currentSkillLevel !== (pendingAction.level - 1) ? true : false;
+                                          } else if (header === "Legacy Skills") {
+                                            const currentSkillLevel = currentPlayer?.stats?.[game.currentTurn]?.legacySkills ?? 0;
+                                            levelMismatch = currentSkillLevel !== (pendingAction.level - 1) ? true : false;
+                                          }
+                                          
                                         }
-                                        return false;
+                                        return needsCooldown || levelMismatch;
                                       })()
                                     }
                                   />
