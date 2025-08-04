@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getBaseUrl } from '../constants';
+import { getBaseUrl } from '../utils/constants';
 
 /**
  * Fetch the latest event for a game.

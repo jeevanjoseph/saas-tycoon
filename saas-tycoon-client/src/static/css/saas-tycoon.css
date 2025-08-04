@@ -477,6 +477,15 @@
     align-content: flex-end;
 }
 
+.game-info-detail {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .game-info>span {
     font-weight: 300;
     color: #FEF7E8;
@@ -525,16 +534,17 @@
 }
 
 .class-card-content {
-    background-image:  linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
     padding: 1.2rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+
 .monolith {
-    background-image: 
-       
-        url('../img/monolith.jpg'); 
+    background-image:
+
+        url('../img/monolith.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
@@ -542,8 +552,8 @@
 }
 
 .singletenant {
-    background-image: 
-        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent), 
+    background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent),
         url('../img/singletenant.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -552,8 +562,8 @@
 }
 
 .multitenant {
-    background-image: 
-        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent), 
+    background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent),
         url('../img/multitenant.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -561,7 +571,7 @@
     color: white;
 }
 
-.player-class-properties{
+.player-class-properties {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -710,6 +720,23 @@
     }
 }
 
+.player-name-field {
+    margin-bottom: 24px;
+    max-width: 550px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    flex-wrap: nowrap;
+    gap: .5em;
+
+}
+
 .p-field {
+
     margin-bottom: 1.5rem;
+}
+
+.select-player-class {
+    margin-top: 1.5em;
 }

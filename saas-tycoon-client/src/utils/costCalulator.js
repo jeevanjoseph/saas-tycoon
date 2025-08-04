@@ -14,7 +14,7 @@ import {
   OPS_MATURITY_RAMP_MONOLITH,
   OPS_MATURITY_RAMP_SINGLE_TENANT,
   OPS_MATURITY_RAMP_MULTI_TENANT
-} from '../constants';
+} from './constants';
 
 // Monolith Feature Cost Calculation
 export function calculateMonolithDevCost(player, turn) {

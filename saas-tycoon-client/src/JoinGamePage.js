@@ -9,7 +9,8 @@ import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber';
 import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
-import constants from './constants';
+import { Badge } from 'primereact/badge';
+import constants from './utils/constants';
 
 function JoinGamePage({
   playerName,
@@ -42,8 +43,8 @@ function JoinGamePage({
       ],
       icon: 'pi pi-database',
       properties: [
-        'Mature business with a strong base.',
-        'Older tech needs constant maintenance.',
+        'Mature business with a strong base and features.',
+        'Older tech stack needs constant maintenance.',
         'Infrastructure cost is per customer.',
         'Can up-skill to build modern applications.'
       ],
@@ -65,10 +66,10 @@ function JoinGamePage({
         'Microservice based single-tenant SaaS.',
 
       ],
-      icon: 'pi pi-user',
+      icon: 'pi pi-cloud',
       properties: [
         'On the path to modernization.',
-        'Modern techstack can stave off tech debt.',
+        'A more modern tech-stack can stave off tech debt.',
         'Infrastructure cost is per customer.',
         'Can upskill to build multi-tenant applications.'
       ],
@@ -78,18 +79,18 @@ function JoinGamePage({
         LegacySkills: 4,
         CloudNativeSkills: 1,
         OpsMaturity: 0,
-        Features : 1
+        Features: 1
       }
     },
     {
       label: 'Multi-Tenant Microservices',
       value: 'MultiTenant',
-      title: 'Start-Up mode. Highly scalable, with an equally high upfront cost.',
+      title: 'Start with a skilled team, but low capital.',
       description: [
         'Modern multi-tenant SaaS, that is built for scalability and efficiency.',
 
       ],
-      icon: 'pi pi-users',
+      icon: 'pi pi-sparkles',
       properties: [
         'Capital intensive, slower initial growth.',
         'Long term potential tied to customer growth.',
@@ -213,7 +214,8 @@ function JoinGamePage({
           </div>
         </Dialog>
         <h1>SaaS Tycoon</h1>
-        <div className="p-field" style={{ marginBottom: 24, maxWidth: 350 }}>
+        <div className="player-name-field" >
+          <Badge value="1" size="xlarge" ></Badge>
           <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
           <InputText
             id="playerName"
@@ -233,12 +235,16 @@ function JoinGamePage({
           )}
         </div>
         <div className="p-field player-type-section">
-          <label>Select Player Type</label>
+          <div className='player-name-field'>
+            <Badge value="2" size="xlarge" ></Badge>
+            <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Select Player Type</label>
+          </div>
+
           <div className="player-type-cards">
             {playerTypes.map((type) => (
               <Card
                 key={type.value}
-                onClick={() => setPlayerType(type.value)}
+
                 className={
                   ' player-type-card ' + type.value.toLowerCase() +
                   (playerType === type.value ? ' selected ' : '')
@@ -248,7 +254,7 @@ function JoinGamePage({
 
 
                   <div className="card-header">
-                    <i className={type.icon} style={{ fontSize: '2rem', color: '#007ad9' }} />
+                    <i className={type.icon} style={{ fontSize: '3rem', color: '#ffffffff' }} />
                     <span className="card-label">{type.label}</span>
                   </div>
                   <div className="card-title">{type.title}</div>
@@ -274,100 +280,111 @@ function JoinGamePage({
                     ))}
 
                   </div>
+                  <Button
+                    label="Select"
+                    icon={type.icon}
+                    className="select-player-class"
+                    onClick={() => setPlayerType(type.value)} />
                 </div>
               </Card>
             ))}
           </div>
         </div>
-        <DataTable
-          value={sessions}
-          header={
-            <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-              <span className="text-xl text-900 font-bold">Available Games</span>
-              <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: 8 }}>
-                <Button
-                  label="Create Game"
-                  icon="pi pi-plus"
-                  onClick={() => setGameConfigVisible(true)}
-                  disabled={!playerName}
-                  className="p-button-success"
-                />
-                <Button
-                  label="Join"
-                  icon="pi pi-sign-in"
-                  onClick={() => joinGame(selectedGameId)}
-                  className="p-button-primary"
-                  disabled={
-                    !playerName ||
-                    !selectedGameId ||
-                    sessions.find(s => s.id === selectedGameId)?.state === 'finished'
-                  }
-                />
-                <Button
-                  label="Spectate"
-                  icon="pi pi-eye"
-                  className="p-button-info"
-                  onClick={() => onSpectate && onSpectate(selectedGameId)}
-                  disabled={!selectedGameId}
-                />
+        <div className='game-list'>
+          <div className='player-name-field'>
+            <Badge value="3" size="xlarge" ></Badge>
+            <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Start or Join a Game.</label>
+          </div>
+          <DataTable
+            value={sessions}
+            header={
+              <div className="flex flex-wrap align-items-center justify-content-between gap-2">
+                <span className="text-xl text-900 font-bold">Available Games</span>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', paddingRight: 8 }}>
+                  <Button
+                    label="Create Game"
+                    icon="pi pi-plus"
+                    onClick={() => setGameConfigVisible(true)}
+                    disabled={!playerName || !playerType}
+                    className="p-button-success"
+                  />
+                  <Button
+                    label="Join"
+                    icon="pi pi-sign-in"
+                    onClick={() => joinGame(selectedGameId)}
+                    className="p-button-primary"
+                    disabled={
+                      !playerName || !playerType ||
+                      !selectedGameId ||
+                      sessions.find(s => s.id === selectedGameId)?.state === 'finished'
+                    }
+                  />
+                  <Button
+                    label="Spectate"
+                    icon="pi pi-eye"
+                    className="p-button-info"
+                    onClick={() => onSpectate && onSpectate(selectedGameId)}
+                    disabled={!selectedGameId}
+                  />
+                </div>
               </div>
-            </div>
-          }
-          selectionMode="single"
-          selection={selectedGameId}
-          onSelectionChange={(e) => setSelectedGameId(e.value.id)}
-          dataKey="id"
-          responsiveLayout="scroll"
-        >
-          <Column field="name" header="Name"></Column>
-          <Column field="playerCount" header="Players"></Column>
-          <Column field="playerLimit" header="Player Limit"></Column>
-          <Column
-            field="state"
-            header="State"
-            body={rowData => (
-              <span>
-                <Tag
-                  value={
-                    rowData.state === 'not_started'
-                      ? 'Not Started'
-                      : rowData.state === 'started'
-                        ? 'In Progress'
-                        : rowData.state === 'finished'
-                          ? 'Finished'
-                          : rowData.state
-                  }
-                  severity={
-                    rowData.state === 'not_started'
-                      ? 'success'
-                      : rowData.state === 'started'
-                        ? 'warning'
-                        : rowData.state === 'finished'
-                          ? 'info'
-                          : null
-                  }
-                />
-              </span>
-            )}
-          ></Column>
-          <Column
-            header="Progress"
-            body={rowData => {
-              const percent = rowData.total_turns
-                ? Math.round((rowData.currentTurn / rowData.total_turns) * 100)
-                : 0;
-              return (
-                <ProgressBar
-                  value={percent}
-                  showValue
-                  style={{ height: '1.5rem' }}
-                >
-                  {percent}%
-                </ProgressBar>
-              );
-            }}
-          />
-        </DataTable>
+            }
+            selectionMode="single"
+            selection={selectedGameId}
+            onSelectionChange={(e) => setSelectedGameId(e.value.id)}
+            dataKey="id"
+            responsiveLayout="scroll"
+          >
+            <Column field="name" header="Name"></Column>
+            <Column field="playerCount" header="Players"></Column>
+            <Column field="playerLimit" header="Player Limit"></Column>
+            <Column
+              field="state"
+              header="State"
+              body={rowData => (
+                <span>
+                  <Tag
+                    value={
+                      rowData.state === 'not_started'
+                        ? 'Not Started'
+                        : rowData.state === 'started'
+                          ? 'In Progress'
+                          : rowData.state === 'finished'
+                            ? 'Finished'
+                            : rowData.state
+                    }
+                    severity={
+                      rowData.state === 'not_started'
+                        ? 'success'
+                        : rowData.state === 'started'
+                          ? 'warning'
+                          : rowData.state === 'finished'
+                            ? 'info'
+                            : null
+                    }
+                  />
+                </span>
+              )}
+            ></Column>
+            <Column
+              header="Progress"
+              body={rowData => {
+                const percent = rowData.total_turns
+                  ? Math.round((rowData.currentTurn / rowData.total_turns) * 100)
+                  : 0;
+                return (
+                  <ProgressBar
+                    value={percent}
+                    showValue
+                    style={{ height: '1.5rem' }}
+                  >
+                    {percent}%
+                  </ProgressBar>
+                );
+              }}
+            />
+          </DataTable>
+        </div>
       </div>
     </div>
   );

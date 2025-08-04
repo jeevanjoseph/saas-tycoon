@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import JoinGamePage from './JoinGamePage';
 import GamePage from './GamePage';
 import SpectatePage from './SpectatePage'; 
-import constants from './constants';
+import constants from './utils/constants';
 import './static/css/saas-tycoon.css';
 import {
   createGame,
@@ -17,7 +17,7 @@ function App() {
   const [gameId, setGameId] = useState(null);
   const [playerId, setPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState('');
-  const [playerType, setPlayerType] = useState(constants.DEFAULT_PLAYER_TYPE);
+  const [playerType, setPlayerType] = useState(null);
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
   const [spectateId, setSpectateId] = useState(null); // <-- Add spectate state

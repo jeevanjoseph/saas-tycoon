@@ -12,32 +12,7 @@ import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { fetchLatestEvent } from './services/eventService';
 import { submitPlayerAction } from './services/actionService';
-import {
-  DEV_COST_CONTROL_PLANE,
-  DEV_COST_MONOLITH,
-  DEV_COST_MULTI_TENANT,
-  DEV_COST_SINGLE_TENANT,
-  DEVOPS_COST,
-  MARKETING_COST,
-  TECH_DEBT_REDUCTION_COST,
-  TRAINING_COST_CLOUD,
-  TRAINING_COST_LEGACY,
-  CUSTOMER_PRICE_CONTROL_PLANE,
-  CUSTOMER_PRICE_MULTI_TENANT,
-  CUSTOMER_PRICE_SINGLE_TENANT,
-  CUSTOMER_PRICE_MONOLITH,
-  RELEASE_RAMP_MONOLITH,
-  RELEASE_RAMP_SINGLE_TENANT,
-  RELEASE_RAMP_MULTI_TENANT,
-  SKILL_RAMP_LEGACY,
-  SKILL_RAMP_CLOUD_NATIVE,
-  CUSTOMER_RAMP_MONOLITH,
-  CUSTOMER_RAMP_SINGLE_TENANT,
-  CUSTOMER_RAMP_MULTI_TENANT,
-  OPS_MATURITY_RAMP_MONOLITH,
-  OPS_MATURITY_RAMP_SINGLE_TENANT,
-  OPS_MATURITY_RAMP_MULTI_TENANT
-} from './constants';
+import { MARKETING_COST } from './utils/constants';
 import WinnerPage from './WinnerPage';
 import { formatCurrency } from './utils/formatCurrency';
 import { Tag } from 'primereact/tag';
@@ -185,9 +160,14 @@ function GamePage({ gameId, game, playerId, setReady }) {
       <div className="top-banner">
         <h1 className="gamepage-title">SaaS Tycoon Conference Edition</h1>
         <div className="game-info">
+          <div className='game-info-detail'>
           {game && (game.name || game.id) && (
             <span >Current Session: {game.name ? game.name : game.id}</span>
           )}
+          <span>
+          {game ? 'Turn '+game.currentTurn + ' of ' + game.total_turns  : 'Loading...'}
+          </span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span className="gamepage-turn" style={{ margin: 0 }}>
               <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />

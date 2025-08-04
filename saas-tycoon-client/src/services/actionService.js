@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getBaseUrl } from '../constants';
+import { getBaseUrl } from '../utils/constants';
 
 /**
  * Submits a player action to the backend.
