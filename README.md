@@ -4,14 +4,18 @@ The game is like a turn based strategy game. Each player represents a team that 
 
 ## How the game is played
 
-The players first choose a class. Each class gives them strengths and weaknesses. 3 Classes are available. Monolith, Single tenant microservice and multi tenant micro service. Once the players choose thier classes, the game can begin.  
+The players first choose a class. Each class gives them strengths and weaknesses. 3 Classes are available. Monolith, Single tenant microservice and multi tenant micro service. Once the players choose their classes, the game can begin.  
 
-At each turn, the players make an action (see actions). Actions are at the discretion of the player and once a player has chosen an action that action for the turn in final. When all players have made their actions, an event occurs (See Events). Events affect all teams. Events affect the stats for each player differently based on the skills, operational maturity and the features they have. Once the event adjusts the stats, the revenue for each team is generated. The revenue depends on the class and features. This concludes a single turn in the game. At the end of each turn, revenue is generated based on player stats (See Player Stats). 
+Players can create a new game session or join an existing game session. Whena new game session is created, the number of players allowed in that session is set by the player who creates the session. Once players start joining the game, they take a quick tutorial that explains the gma emechanics and then the plyers mark themselves as ready to play. When all the players in a game session have marked themselves ready, the game begins. Note that that the game does not wait for the player count to fill up. When playing ina group setting, the player that created the session should wait for all players to join before marking themselves as ready. Once all players are ready, the game begins and new players can no longer join the session. 
+
+At each turn, the players make an action (see actions). Actions are at the discretion of the player and once a player has chosen an action that action for the turn in final. When all players have made their actions, that turn is over, and the revenue and costs are calculated and attributed. Every few turns, a random event occurs (See Events). Events affect all players. Events affect the stats for each player differently based on the skills, operational maturity and the features they have - so the choices they have made so far. Once the event adjusts the stats, the revenue for each team is generated. The revenue depends on the class and features. This concludes a single turn in the game. At the end of each turn, revenue is generated based on player stats (See Player Stats). 
 
 ## Player Stats
 
 Player Stats are tracked per player. Every action and event impact the player stats. The combined effect of these stats modify the revenue generated in each turn.
 The goal for the players to to manage their resources so that they can maintain favorable stats throughout the game.
+
+The key goals for players are to maximize their revenue and minimize their costs. Revenue is generated from building new features and gaining more customers. Customer acquisition always depends on the player's feature count and operational maturity, and never on the player class. A feature rich and stable SaaS product attracts customers, regardless of the technology used. Technology can have an impact on the cost to develop and maintain features though. 
 
 ### Stats
  - Cash on hand [current cash]
@@ -207,4 +211,6 @@ Training
 - Micros can go -ve and dont really care about cash other than time pressure.
 - As you progress the amount of cash completely eclipses the cost of upgrades, everyuthis is easily attainable.
 - The Marketing campaign is too powerful and adds too many customers. 
-- 
+- Admin APIs
+    - eject p[layers
+    - mark platers as incatrive]
