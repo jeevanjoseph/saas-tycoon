@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { InputOtp } from 'primereact/inputotp';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -10,7 +11,10 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
 import { Badge } from 'primereact/badge';
+import { Message } from 'primereact/message';
+
 import constants from './utils/constants';
+import { verifyPlayer } from './services/playerService'; // <-- Import the verifyPlayer function
 
 function JoinGamePage({
   playerName,
@@ -30,6 +34,11 @@ function JoinGamePage({
   const [gameConfigVisible, setGameConfigVisible] = useState(false);
   const [playerLimit, setPlayerLimit] = useState(constants.DEFAULT_PLAYER_LIMIT);
   const [playerLimitError, setPlayerLimitError] = useState('');
+  const [playerCode, setPlayerCode] = useState('');
+  const [playerCodeTouched, setPlayerCodeTouched] = useState(false);
+  const [playerCodeError, setPlayerCodeError] = useState('');
+  const [playerInfo, setPlayerInfo] = useState(null);
+  const [verifying, setVerifying] = useState(false);
   const toast = useRef(null);
 
   const playerTypes = [
@@ -157,6 +166,31 @@ function JoinGamePage({
     }
   };
 
+  
+  const handlePlayerCodeChange = async (value) => {
+    setPlayerCode(value);
+    setPlayerCodeTouched(true);
+    setPlayerInfo(null);
+    setPlayerName(null);
+    setPlayerCodeError('');
+    if (value && value.length === 8) {
+      setVerifying(true);
+      try {
+        const res = await verifyPlayer(value);
+        setPlayerInfo(res);
+        setPlayerName(res.playerEmail); // Set playerName to playerEmail
+        setPlayerCodeError('');
+      } catch (err) {
+        setPlayerInfo(null);
+        setPlayerName(null);
+        setPlayerCodeError('Invalid player code');
+      } finally {
+        setVerifying(false);
+      }
+    }
+  };
+
+
   return (
     <div className='gamepage-container'>
       <div className="top-banner">
@@ -214,29 +248,65 @@ function JoinGamePage({
           </div>
         </Dialog>
         <h1>SaaS Tycoon</h1>
-        <div className="player-name-field" >
-          <Badge value="1" size="xlarge" ></Badge>
-          <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Name</label>
-          <InputText
-            id="playerName"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Enter name"
-            style={{ width: '100%' }}
+        {/* --- Player Code Section --- */}
+        <div className="player-code-field" style={{ marginBottom: 24 }}>
+          <Badge value="1" size="xlarge" />
+          <label htmlFor="playerCode" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Code</label>
+          <InputOtp
+            id="playerCode"
+            value={playerCode}
+            onChange={(e) => handlePlayerCodeChange(e.value)}
+            length={8}
+            disabled={verifying}
+            invalid={!!playerCodeError}
             autoFocus
-            onBlur={() => setNameTouched(true)}
-            keyfilter="email"
-            className={showNameError ? 'p-invalid' : ''}
           />
-          {showNameError && (
+          {verifying && (
+            <small style={{ color: '#888', display: 'block', marginTop: 4 }}>Verifying...</small>
+          )}
+          {playerCodeTouched && playerCodeError && (
             <small className="p-error" style={{ display: 'block', marginTop: 4 }}>
-              Player name is required.
+              {playerCodeError}
             </small>
           )}
+          
+         
         </div>
+         {/* {playerInfo && (
+            <div style={{ marginTop: 8, background: '#f6fafd', borderRadius: 6, padding: 12 }}>
+              <div><strong>First Name:</strong> {playerInfo.playerFirstName}</div>
+              <div><strong>Last Name:</strong> {playerInfo.playerLastName}</div>
+              <div><strong>Email:</strong> {playerInfo.playerEmail}</div>
+            </div>
+          )} */}
+        {/* --- Player Name and Type Section --- */}
+        <div className="player-name-field">
+           <Badge value="2" size="xlarge" ></Badge>
+            <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Verification</label>
+            <Message severity={playerName ? 'success':'info'} text={playerName ? playerName:'Verify your player code to auto-fill'} />
+
+            {/* <InputText
+              id="playerName"
+              value={playerName}
+              //onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Verify your player code to auto-fill"
+              style={{ width: '275px' }}
+              
+              //onBlur={() => setNameTouched(true)}
+              keyfilter="email"
+              className={showNameError ? 'p-invalid' : ''}
+              disabled // now disabled, because playerName is set from playerInfo.playerEmail
+            />
+            {showNameError && (
+              <small className="p-error" style={{ display: 'block', marginTop: 4 }}>
+                Player name is required.
+              </small>
+            )} */}
+          </div>
+        
         <div className="p-field player-type-section">
           <div className='player-name-field'>
-            <Badge value="2" size="xlarge" ></Badge>
+            <Badge value="3" size="xlarge" ></Badge>
             <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Select Player Type</label>
           </div>
 
@@ -292,7 +362,7 @@ function JoinGamePage({
         </div>
         <div className='game-list'>
           <div className='player-name-field'>
-            <Badge value="3" size="xlarge" ></Badge>
+            <Badge value="4" size="xlarge" ></Badge>
             <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Start or Join a Game.</label>
           </div>
           <DataTable
