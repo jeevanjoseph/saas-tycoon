@@ -35,6 +35,13 @@ class PlayerDAO {
         }
         return this.players[playerCode] || null;
     }
+
+    async findByEmail(playerEmail) {
+        if (this.mongoAvailable) {
+            return await mongoPlayer.findByEmail(playerEmail);
+        }
+        return this.players[Object.values(this.players).find(p => p.playerEmail === playerEmail)?.playerCode] || null;
+    }
 }
 
 module.exports = new PlayerDAO();

@@ -17,6 +17,7 @@ function App() {
   const [gameId, setGameId] = useState(null);
   const [playerId, setPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState('');
+  const [playerCode, setPlayerCode] = useState('');
   const [playerType, setPlayerType] = useState(null);
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
@@ -69,7 +70,7 @@ function App() {
 
   const handleJoinGame = async (id) => {
     try {
-      const res = await joinGame(id, playerName, playerType);
+      const res = await joinGame(id, playerCode, playerType);
       setGameId(res.gameId);
       setPlayerId(res.playerId);
     } catch (err) {
@@ -108,6 +109,8 @@ function App() {
       <JoinGamePage
         playerName={playerName}
         setPlayerName={setPlayerName}
+        playerCode={playerCode}
+        setPlayerCode={setPlayerCode}
         playerType={playerType}
         setPlayerType={setPlayerType}
         sessions={sessions}

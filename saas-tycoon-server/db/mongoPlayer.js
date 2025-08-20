@@ -25,6 +25,11 @@ async function findByCode(playerCode) {
     return await col.findOne({ playerCode });
 }
 
+async function findByEmail(playerEmail) {
+    const col = await connect();
+    return await col.findOne({ playerEmail });
+}
+
 module.exports = {
     insertMany,
     findByCode,

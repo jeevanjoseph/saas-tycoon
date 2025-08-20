@@ -19,6 +19,8 @@ import { verifyPlayer } from './services/playerService'; // <-- Import the verif
 function JoinGamePage({
   playerName,
   setPlayerName,
+  playerCode,
+  setPlayerCode,
   playerType,
   setPlayerType,
   sessions,
@@ -34,7 +36,6 @@ function JoinGamePage({
   const [gameConfigVisible, setGameConfigVisible] = useState(false);
   const [playerLimit, setPlayerLimit] = useState(constants.DEFAULT_PLAYER_LIMIT);
   const [playerLimitError, setPlayerLimitError] = useState('');
-  const [playerCode, setPlayerCode] = useState('');
   const [playerCodeTouched, setPlayerCodeTouched] = useState(false);
   const [playerCodeError, setPlayerCodeError] = useState('');
   const [playerInfo, setPlayerInfo] = useState(null);

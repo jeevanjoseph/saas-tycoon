@@ -18,8 +18,8 @@ export async function createGame(playerLimit = 10, name) {
  * @param {string} playerType
  * @returns {Promise<Object>}
  */
-export async function joinGame(gameId, playerName, playerType) {
-  const res = await axios.post(`${getBaseUrl()}/${gameId}/join`, { playerName, playerType });
+export async function joinGame(gameId, playerCode, playerType) {
+  const res = await axios.post(`${getBaseUrl()}/${gameId}/join`, { playerCode, playerType });
   return res.data;
 }
 
