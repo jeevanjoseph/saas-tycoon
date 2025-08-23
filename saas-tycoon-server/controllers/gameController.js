@@ -1,6 +1,7 @@
 const { createGameSession, canStartGame, processTurn } = require('../models/gameSession');
 const createPlayer = require('../models/player');
 const sessionDAO = require('../db/sessionDAO');
+const playerDAO = require('../db/playerDAO');
 const PlayerActions = require('../models/players/PlayerActions');
 
 // Helper to sync in-memory and DB 
@@ -43,8 +44,13 @@ async function joinSession(req, res) {
   const session = await sessionDAO.getSessionById(req.params.id);
   if (!session) return res.status(404).json({ error: 'Game not found' });
 
-  const { playerName, playerType } = req.body;
-  const existingPlayer = session.players.find(p => p.name === playerName);
+  const { playerCode, playerType } = req.body;
+  const playerInfo = await playerDAO.findByCode(playerCode);
+  if (!playerInfo) {
+    return res.status(400).json({ error: 'Player cannot be verified. Please check your player code.' });
+  }
+
+  const existingPlayer = session.players.find(p => p.name === playerInfo.playerEmail);
   if (existingPlayer) {
     return res.json({ gameId: session.id, playerId: existingPlayer.id, playerName: existingPlayer.name });
   } else {
@@ -52,7 +58,8 @@ async function joinSession(req, res) {
     if (session.players.length >= session.playerLimit) return res.status(400).json({ error: 'Game is full' });
 
     try {
-      const player = createPlayer(playerName, playerType);
+      //TODO : update player to have Email. Currently setting email to the player.name. 
+      const player = createPlayer(playerInfo.playerEmail, playerType);
       session.players.push(player);
       await syncSessionToDb(session);
       return res.json({ gameId: session.id, playerId: player.id, playerName: player.name });
