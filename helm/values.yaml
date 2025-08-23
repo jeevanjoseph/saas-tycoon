@@ -1,5 +1,5 @@
 mongo:
-  image: ghcr.io/jeevanjoseph/saas-tycoon-db:latest
+  image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-db:latest
   username: root
   password: example
   database: saas-tycoon
@@ -9,13 +9,13 @@ mongo:
     size: 1Gi
 
 server:
-  image: ghcr.io/jeevanjoseph/saas-tycoon-server:latest
+  image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-server:latest
   port: 3000
   env:
     NODE_ENV: production
 
 client:
-  image: ghcr.io/jeevanjoseph/saas-tycoon-client:latest
+  image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-client:latest
   port: 80
   env:
     NODE_ENV: production
