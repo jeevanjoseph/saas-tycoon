@@ -1,19 +1,7 @@
-const HOST = process.env.GAME_API_HOST || 'localhost';
-const PORT = process.env.GAME_API_PORT || '3000';
-const API = `http://${HOST}:${PORT}/api/game`;
+const apiUrl = window._env_?.API_URL || 'http://localhost:3000/api/game';
 
 const getBaseUrl = () => {
-  let url;
-  switch(process.env.NODE_ENV) {
-    case 'production':
-      url = 'http://129.146.44.143:3000/api/game';
-      break;
-    case 'development':
-    default:
-      url = 'http://localhost:3000/api/game';
-  }
-
-  return url;
+  return apiUrl;
 }
 
 const OPS_MATURITY_MAX = 10;
@@ -101,7 +89,6 @@ const DEFAULT_PLAYER_COUNT = 10;
 
 module.exports = {
     getBaseUrl,
-    API,
     OPS_MATURITY_MAX,
     LEGACY_SKILLS_MAX,
     CLOUD_NATIVE_SKILLS_MAX,
@@ -135,7 +122,5 @@ module.exports = {
     SINGLETENANT_STARTING_STATS,
     MULTITENANT_STARTING_STATS,
     DEFAULT_PLAYER_TYPE,
-    DEFAULT_PLAYER_COUNT,
-    HOST,
-    PORT
+    DEFAULT_PLAYER_COUNT
 };
