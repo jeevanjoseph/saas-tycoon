@@ -12,8 +12,8 @@ async function syncSessionToDb(session) {
 async function getAllSessions(req, res) {
   try {
     const sessions = await sessionDAO.getAllSessions();
-    const sessionList = sessions.map(({ id, name, state, players, playerLimit, currentTurn, total_turns, createdAt }) => ({
-      id, name, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt
+    const sessionList = sessions.map(({ id, name, state, players, playerLimit, currentTurn, total_turns, createdAt, finishedAt }) => ({
+      id, name, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt, finishedAt
     }));
     res.json(sessionList);
   } catch (err) {
@@ -143,6 +143,8 @@ async function performAction(req, res) {
     // If after processing, the game is over, mark as finished
     if (session.currentTurn >= session.total_turns) {
       session.state = 'finished';
+      session.finishedAt = new Date().toISOString();
+      session.log.push(`Game session ${session.id} finished at turn ${session.currentTurn}.`);
     }
   }
 

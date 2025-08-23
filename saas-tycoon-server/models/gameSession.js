@@ -19,7 +19,8 @@ function createGameSession(playerLimit, name) {
     state: 'not_started', 
     events: [],
     log: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    finishedAt: null
   };
 }
 
