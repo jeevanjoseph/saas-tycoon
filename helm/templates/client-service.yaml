@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: saas-tycoon-client
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: {{ .Values.client.port }}
       targetPort: {{ .Values.client.port }}

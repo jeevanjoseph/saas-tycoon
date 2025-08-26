@@ -20,3 +20,8 @@ spec:
           env:
             - name: NODE_ENV
               value: {{ .Values.client.env.NODE_ENV }}
+            - name: API_URL
+              from:
+                configMapKeyRef:
+                  name: client-config
+                  key: API_URL

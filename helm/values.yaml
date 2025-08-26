@@ -1,7 +1,7 @@
 mongo:
   image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-db:latest
   username: root
-  password: example
+  password: osspadmin123!
   database: saas-tycoon
   port: 27017
   persistence:
@@ -19,3 +19,5 @@ client:
   port: 80
   env:
     NODE_ENV: production
+  config:
+    API_URL: http://localhost:3000/api/game

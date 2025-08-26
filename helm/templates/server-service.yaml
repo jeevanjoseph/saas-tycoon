@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: saas-tycoon-server
 spec:
+  type: ClusterIP
   ports:
     - port: {{ .Values.server.port }}
       targetPort: {{ .Values.server.port }}
