@@ -1,5 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import exec from 'k6/execution';
+
 
 // Actions from GamePage.js (sync with your actual actions if you change them)
 const actions_build = [
@@ -99,11 +101,22 @@ export default function () {
 
   // 4. Join the session with 10 players
   let playerIds = [];
-  for (let i = 0; i < 10; i++) {
+  let maxPlayers = 10;
+  let playerCodeEnd = exec.vu.idInTest * maxPlayers; // Unique player codes across VUs
+  let playerCodeStart = playerCodeEnd - maxPlayers;
+  //console.log(`VU ${exec.vu.idInTest} joining players with codes from ${playerCodeStart} to ${playerCodeEnd - 1}`);
+  for (let i = playerCodeStart; i < playerCodeEnd; i++) {
+    // verify player code
+    let verifyRes = http.post(`${BASE_URL}/verify-player`, JSON.stringify({ playerCode: String(i + 1).padStart(8, '0') }), { headers: { 'Content-Type': 'application/json' } });
+    check(verifyRes, { [`player code ${String(i + 1).padStart(8, '0')} verified`]: (r) => r.status === 200 && r.json('playerEmail') });
+    if (!verifyRes.json('playerEmail')) {
+      console.error(`Player code ${String(i + 1).padStart(8, '0')} is not valid!`);
+      continue;
+    }
     // Randomly select a player class
     let playerClass = playerClasses[Math.floor(Math.random() * playerClasses.length)];
     let joinRes = http.post(`${BASE_URL}/${gameId}/join`, JSON.stringify({
-      playerName: `K6Player${i + 1}`,
+      playerCode: String(i + 1).padStart(8, '0'),
       playerType: playerClass,
     }), { headers: { 'Content-Type': 'application/json' } });
     check(joinRes, { [`player ${i + 1} joined`]: (r) => r.status === 200 && r.json('playerId') });
@@ -112,7 +125,7 @@ export default function () {
     playerIds.push(player);
     sleep(Math.random() * 3);
   }
-  console.log(`All players joined: ${JSON.stringify(playerIds)}`);
+  //console.log(`All players joined: ${JSON.stringify(playerIds)}`);
 
   // 5. Mark all players as ready
   for (let i = 0; i < playerIds.length; i++) {
@@ -131,14 +144,14 @@ export default function () {
       while (!success && attempts < allActions.length) {
         // Randomly select an action
         let action = allActions[Math.floor(Math.random() * allActions.length)];
-        console.log(`Player ${i + 1}, ${playerIds[i].playerType} attempting action ${action.code} on turn ${turn}, attempt ${attempts}`);
+        //console.log(`Player ${i + 1}, ${playerIds[i].playerType} attempting action ${action.code} on turn ${turn}, attempt ${attempts}`);
         if (playerIds[i].playerType === 'MultiTenant') {
           if (turn === 0 && attempts === 0) {
             // MultiTenant players can only build CP in the first turn
-            console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_CONTROL_PLANE action on turn ${turn}`);
+            //console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_CONTROL_PLANE action on turn ${turn}`);
             action = actions_build.find(a => a.code === 'BUILD_CONTROL_PLANE');
           }else if (turn%5===0 && attempts === 0) {
-            console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_MULTITENANT_FEATURE action on turn ${turn}`);
+            //console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_MULTITENANT_FEATURE action on turn ${turn}`);
             action = actions_build.find(a => a.code === 'BUILD_MULTITENANT_FEATURE');
           } 
         } 
