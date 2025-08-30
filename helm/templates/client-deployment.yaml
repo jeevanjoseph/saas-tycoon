@@ -15,13 +15,18 @@ spec:
       containers:
         - name: client
           image: {{ .Values.client.image }}
+          imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.client.port }}
           env:
             - name: NODE_ENV
               value: {{ .Values.client.env.NODE_ENV }}
             - name: API_URL
-              from:
-                configMapKeyRef:
-                  name: client-config
-                  key: API_URL
+              value: {{ .Values.client.config.API_URL }}
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"

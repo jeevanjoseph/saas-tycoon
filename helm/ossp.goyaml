@@ -1,0 +1,6 @@
+server:
+  port: {{ .config.backend-port }}
+client:
+  port: {{ .config.frontend-port }}
+  config:
+    API_URL: http://{{ .environment.loadbalancerFQDN }}/api/game

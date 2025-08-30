@@ -15,6 +15,7 @@ spec:
       containers:
         - name: mongo
           image: {{ .Values.mongo.image }}
+          imagePullPolicy: Always
           ports:
             - containerPort: {{ .Values.mongo.port }}
           env:
@@ -35,3 +36,10 @@ spec:
         - name: mongo-data
           persistentVolumeClaim:
             claimName: mongo-pvc
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "800m"
+        limits:
+          memory: "2Gi"
+          cpu: "800m"
