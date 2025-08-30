@@ -1,0 +1,7 @@
+workloadResources:
+  workloadArtifacts:
+    - repoName: ossp-demo-apps
+      workloadArtifactName: saas-tycoon
+      version: 0.0.1
+  genericArtifacts: []
+  signalHandlers: []

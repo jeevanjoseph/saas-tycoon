@@ -1,0 +1,13 @@
+compartmentId: ocid1.compartment.oc1..aaaaaaaare32yf7volazoaqhyzoghs2ezz7sr2uizddb2komt5yt3mwd5o7a
+workloadVersions:
+  - workloadVersionId:
+      repoName: ossp-demo-apps
+      version: 0.0.1
+      workloadName: saas-tycoon
+config:
+  frontend-port: 80
+  frontend-replicas: 1
+  backend-api-url: http://ossp-demo-env2.ossp-demo.ossp.us-phoenix-1.ocs.oc-test.com/api/game
+  backend-port: 3000
+  backend-replicas: 1
+secrets: []

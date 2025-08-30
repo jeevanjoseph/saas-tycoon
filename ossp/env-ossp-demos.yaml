@@ -1,0 +1,26 @@
+name: ossp-demos
+description: cluster for OSSP Demos
+fleetName: ossp-demo
+compartmentId: ocid1.compartment.oc1..aaaaaaaare32yf7volazoaqhyzoghs2ezz7sr2uizddb2komt5yt3mwd5o7a
+stage: beta
+zone: non_prod
+environmentMetadata: {}
+dryRun: false
+environmentVersion: 0.5.3
+clusterDetails:
+  nodePools:
+    - name: default
+      defaultNodePool: true
+      shape: VM.Standard.E4.Flex
+      ocpus: 4
+      memoryInGBs: 60
+      minNodes: 3
+      maxNodes: 3
+      autoscaling:
+        enabled: false
+  loadBalancers:
+    - name: default
+      public: true
+      inboundPointToPointLink:
+        envInboundLinks: []
+  envOutboundLinks: []

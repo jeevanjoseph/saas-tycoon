@@ -1,0 +1,47 @@
+dependencies: []
+body:
+  resource:
+    type: helm
+    url: https://artifactory-phx-prod.cdaas.oraclecloud.com/artifactory/generic-spectra-platform-dev-local/ossp/ossp-demo-apps/saas-tycoon/saas-tycoon-0.1.0.tgz
+  namedRoutes:
+    - name: saas-tycoon-frontend
+      rules:
+        - matches:
+          - '(pathPrefix matches "/")'
+          backend:
+            serviceName: saas-tycoon-client
+            servicePort: 80
+    - name: saas-tycoon-backend
+      rules:
+        - matches:
+          - '(pathPrefix matches "/api/game")'
+          backend:
+            serviceName: saas-tycoon-server
+            servicePort: 3000
+published: true
+propertiesSchema:
+  type: object
+  properties:
+    frontend-port:
+      default: 80
+      description: The port to run the Saas Tycoon frontend on
+      type: integer
+    frontend-replicas:
+      default: 1
+      description: The number of replicas for the SaaS tycoon frontend
+      type: integer
+    backend-api-url:
+      default: http://localhost:3000/api/game
+      description: The API URL for the SaaS tycoon backend
+      type: string
+    backend-port:
+      default: 3000
+      description: The port to run the Saas Tycoon backend on
+      type: integer
+    backend-replicas:
+      default: 1
+      description: The number of replicas for the SaaS tycoon backend
+      type: integer
+  
+
+
