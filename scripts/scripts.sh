@@ -20,3 +20,8 @@ curl --verbose --fail -s -u "${CDAAS_USER}:${CDAAS_PASS}" -X PUT --upload-file s
 
 
 ossp-cli create workload-deployment --fleet ossp-demo --env ossp-demos saas-tycoon -f ../ossp/wkld-deploy-saas-tycoon.yaml
+
+## Notes for k9s
+ # export OCI_CLI_AUTH=security_token
+ # oci session authenticate --profile-name DEFAULT --region us-ashburn-1 --tenancy-name bmc_operator_access --config-file ~/.oci/config
+ # 
