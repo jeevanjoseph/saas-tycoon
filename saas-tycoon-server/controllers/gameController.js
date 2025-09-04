@@ -159,6 +159,65 @@ async function performAction(req, res) {
   res.json({ message: 'Action accepted for turn ' + turn });
 }
 
+// Create a function to get all sessions after a given start date and in a finished state
+// For each session, identify the players who palced in the top 3 by total cash
+// Return an array of objects with session id, name, and an array of top players with their name and total cash
+async function getTopPlayersSince(req, res) {
+  const { startDate } = req.query;
+  if (!startDate) {
+    return res.status(400).json({ error: 'startDate query parameter is required' });
+  }
+
+  validatedDate = new Date(startDate);
+  if (isNaN(validatedDate.getTime())) {
+    // if startDate is in the -Xm|h|d format, where m, h, d are minutes, hours and days, calculate the date
+    if (startDate.startsWith('-') && (startDate.endsWith('m') || startDate.endsWith('h') || startDate.endsWith('d'))) {
+      const now = new Date();
+      validatedDate = new Date();
+      const value = parseInt(startDate.slice(1, -1));
+      if (isNaN(value)) {
+        return res.status(400).json({ error: `Got ${startDate} - Invalid startDate format. Numerical value not found in format -Xm|h|d.` });
+      }
+      if (startDate.endsWith('m')) {
+        validatedDate.setMinutes(now.getMinutes() - value);
+      } else if (startDate.endsWith('h')) {
+        validatedDate.setHours(now.getHours() - value);
+      } else if (startDate.endsWith('d')) {
+        validatedDate.setDate(now.getDate() - value);
+      }
+    } else {
+      return res.status(400).json({ error: `Got ${startDate} - Invalid startDate format. Numerical value not found in format -Xm|h|d.` });
+    }
+    
+  }
+
+  const sessions = await sessionDAO.getSessionsFinishedSince(validatedDate.toISOString());
+  const result = sessions.map(session => {
+    const topPlayers = [...session.players]
+      .sort((a, b) => {
+        const bLength = b.stats ? Object.keys(b.stats).length : 0;
+        const aLength = a.stats ? Object.keys(a.stats).length : 0;
+        const bCash = b.stats[bLength - 1].cash;
+        const aCash = a.stats[aLength - 1].cash;
+        return bCash - aCash;
+      })
+      .slice(0, 3)
+      .map(player => {
+        const statLength = player.stats ? Object.keys(player.stats).length : 0;
+        const lastStat = player.stats[statLength - 1];
+        return { name: player.name, totalCash: lastStat.cash, playerClass: player.playerClass, featureCount: player.features.length };
+      });
+
+    return {
+      sessionId: session.id,
+      sessionName: session.name,
+      topPlayers
+    };
+  });
+
+  res.json(result);
+}
+
 module.exports = {
   getAllSessions,
   createSession,
@@ -166,5 +225,6 @@ module.exports = {
   setPlayerReady,
   getGameSession,
   getLastEvent,
-  performAction
+  performAction,
+  getTopPlayersSince
 };
