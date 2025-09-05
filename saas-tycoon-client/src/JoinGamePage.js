@@ -15,6 +15,7 @@ import { Message } from 'primereact/message';
 
 import constants from './utils/constants';
 import { verifyPlayer } from './services/playerService'; // <-- Import the verifyPlayer function
+import LeadersPage from './LeadersPage'; // Add this import if not already present
 
 function JoinGamePage({
   playerName,
@@ -28,7 +29,8 @@ function JoinGamePage({
   joinGame,
   error,
   setError,
-  onSpectate
+  onSpectate,
+  onShowLeaders 
 }) {
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [sessionName, setSessionName] = useState(null);
@@ -167,7 +169,7 @@ function JoinGamePage({
     }
   };
 
-  
+
   const handlePlayerCodeChange = async (value) => {
     setPlayerCode(value);
     setPlayerCodeTouched(true);
@@ -270,10 +272,10 @@ function JoinGamePage({
               {playerCodeError}
             </small>
           )}
-          
-         
+
+
         </div>
-         {/* {playerInfo && (
+        {/* {playerInfo && (
             <div style={{ marginTop: 8, background: '#f6fafd', borderRadius: 6, padding: 12 }}>
               <div><strong>First Name:</strong> {playerInfo.playerFirstName}</div>
               <div><strong>Last Name:</strong> {playerInfo.playerLastName}</div>
@@ -282,11 +284,11 @@ function JoinGamePage({
           )} */}
         {/* --- Player Name and Type Section --- */}
         <div className="player-name-field">
-           <Badge value="2" size="xlarge" ></Badge>
-            <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Verification</label>
-            <Message severity={playerName ? 'success':'info'} text={playerName ? playerName:'Verify your player code to auto-fill'} />
+          <Badge value="2" size="xlarge" ></Badge>
+          <label htmlFor="playerName" style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Player Verification</label>
+          <Message severity={playerName ? 'success' : 'info'} text={playerName ? playerName : 'Verify your player code to auto-fill'} />
 
-            {/* <InputText
+          {/* <InputText
               id="playerName"
               value={playerName}
               //onChange={(e) => setPlayerName(e.target.value)}
@@ -303,8 +305,8 @@ function JoinGamePage({
                 Player name is required.
               </small>
             )} */}
-          </div>
-        
+        </div>
+
         <div className="p-field player-type-section">
           <div className='player-name-field'>
             <Badge value="3" size="xlarge" ></Badge>
@@ -396,6 +398,13 @@ function JoinGamePage({
                     className="p-button-info"
                     onClick={() => onSpectate && onSpectate(selectedGameId)}
                     disabled={!selectedGameId}
+                  />
+                  <Button
+                    label="Leaders"
+                    icon="pi pi-star"
+                    className="p-button-warning"
+                    onClick={onShowLeaders}
+                    style={{ marginLeft: 12 }}
                   />
                 </div>
               </div>

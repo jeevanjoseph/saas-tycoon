@@ -1,5 +1,11 @@
 .join-game-container {
     padding: 2rem 1rem;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.leaderboard-container {
+    padding: 2rem 1rem;
     max-width: 1600px;
     margin: 0 auto;
 }
@@ -20,7 +26,7 @@
 .player-type-card {
     cursor: pointer;
     min-width: 260px;
-    max-width: 340px;
+    /* max-width: 340px; */
     flex: 1 1 200px;
     transition: box-shadow 0.2s, border 0.2s;
     border: 1px solid #ccc;
@@ -750,4 +756,153 @@
 
 .select-player-class {
     margin-top: 1.5em;
+}
+
+/* --- Leaderboard Table Styles --- */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px #e0e7ef;
+    font-weight: 300;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 8px 4px;
+    font-size: 0.97em;
+}
+
+.leaderboard-table th {
+    background: #f3f6fa;
+    font-weight: 700;
+    text-align: left;
+}
+
+.leaderboard-session-cell {
+    padding: 8px 4px;
+    vertical-align: top;
+    min-width: 120px;
+    font-size: 1em;
+    font-weight: 700;
+    color: #2563eb;
+    line-height: 1.1;
+}
+
+.leaderboard-session-id {
+    color: #888;
+    font-size: 0.90em;
+    margin-top: 2px;
+    font-weight: 400;
+}
+
+.leaderboard-player-cell {
+    padding: 6px 4px;
+    vertical-align: top;
+    min-width: 120px;
+}
+
+.leaderboard-player-card {
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 0.97em;
+    font-weight: 300;
+    background: #f8fafc;
+    border: 1px solid #2563eb;
+}
+
+.leaderboard-player-card.gold {
+    border: 2px solid #ffd700;
+    background: #fffbe7;
+    box-shadow: 0 0 6px #ffd70033;
+}
+
+.leaderboard-player-card .player-name {
+    font-weight: 700;
+    color: #2563eb;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.leaderboard-player-card .player-crown {
+    color: #ffd700;
+    font-size: 1em;
+}
+
+.leaderboard-player-card .player-class-tag {
+    margin-bottom: 2px;
+    font-size: 0.9em;
+}
+
+.leaderboard-player-card .player-cash,
+.leaderboard-player-card .player-features {
+    font-size: 0.93em;
+    margin: 2px 0;
+}
+
+.leaderboard-player-card .player-cash i,
+.leaderboard-player-card .player-features i {
+    margin-right: 2px;
+}
+
+.leaderboard-player-card .player-cash i {
+    color: #2563eb;
+}
+
+.leaderboard-player-card .player-features i {
+    color: #42A5F5;
+}
+
+.leaderboard-player-card-empty {
+    color: #bbb;
+    font-style: italic;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+.leaderboard-other-players-row {
+    background: #f9fafb;
+}
+
+.leaderboard-other-players-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.leaderboard-other-player-card {
+    border: 1px solid #e0e7ef;
+    border-radius: 4px;
+    padding: 4px;
+    min-width: 100px;
+    background: #f9fafb;
+    font-size: 0.93em;
+    margin-bottom: 2px;
+}
+
+.leaderboard-other-player-card .player-name {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.leaderboard-other-player-card .player-class-tag {
+    margin-bottom: 2px;
+    font-size: 0.9em;
+}
+
+.leaderboard-other-player-card .player-cash i,
+.leaderboard-other-player-card .player-features i {
+    margin-right: 2px;
+}
+
+.leaderboard-other-player-card .player-cash i {
+    color: #2563eb;
+}
+
+.leaderboard-other-player-card .player-features i {
+    color: #42A5F5;
 }

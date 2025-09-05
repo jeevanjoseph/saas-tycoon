@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import JoinGamePage from './JoinGamePage';
 import GamePage from './GamePage';
 import SpectatePage from './SpectatePage'; 
+import LeadersPage from './LeadersPage'; // Add this import
 import constants from './utils/constants';
 import './static/css/saas-tycoon.css';
 import {
@@ -22,9 +23,11 @@ function App() {
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
   const [spectateId, setSpectateId] = useState(null); // <-- Add spectate state
+  const [showLeaders, setShowLeaders] = useState(false);
 
   useEffect(() => {
-    if (!gameId && !spectateId) {
+    // Only fetch sessions if NOT on leaderboard page
+    if (!gameId && !spectateId && !showLeaders) {
       const interval = setInterval(() => {
         fetchSessions()
           .then(setSessions)
@@ -44,7 +47,7 @@ function App() {
           });
       }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
-    } else {
+    } else if (gameId) {
       const interval = setInterval(() => {
         fetchGame(gameId)
           .then(setGame)
@@ -55,7 +58,8 @@ function App() {
       }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
     }
-  }, [gameId, spectateId]);
+    // If showLeaders is true, do not fetch sessions or games
+  }, [gameId, spectateId, showLeaders]);
 
   const handleCreateGame = async (sessionName, playerCount) => {
     try {
@@ -95,12 +99,27 @@ function App() {
     setPlayerId(null);
   };
 
+  // Add the handler
+  const handleShowLeaders = () => {
+    setShowLeaders(true);
+    setSpectateId(null);
+    setGameId(null);
+    setPlayerId(null);
+  };
+
   // Show SpectatePage if spectateId is set
   if (spectateId) {
     return (
       <SpectatePage
         game={game}
       />
+    );
+  }
+
+  // Show LeadersPage if showLeaders is true
+  if (showLeaders) {
+    return (
+      <LeadersPage />
     );
   }
 
@@ -118,7 +137,8 @@ function App() {
         joinGame={handleJoinGame}
         error={error}
         setError={setError}
-        onSpectate={handleSpectate} // <-- Pass the handler
+        onSpectate={handleSpectate}
+        onShowLeaders={handleShowLeaders} 
       />
     );
   }
