@@ -7,7 +7,6 @@ function WinnerPage({ game }) {
   if (!game) return null;
 
   const lastTurn = game.currentTurn;
-  // Sort all players by final cash descending
   const sortedPlayers = [...game.players]
     .map(player => ({
       ...player,
@@ -28,6 +27,9 @@ function WinnerPage({ game }) {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  const placeColors = ['gold', 'silver', 'bronze'];
+  const placeLabels = ['1st', '2nd', '3rd'];
+
   return (
     <div className="gamepage-container">
       <div className="top-banner">
@@ -39,10 +41,8 @@ function WinnerPage({ game }) {
               <i className="pi pi-calendar" style={{ marginRight: '0.5rem', fontSize: '1.2em' }} />
               {game ? 2025 + Math.floor(game.currentTurn / 4) + 'Q' + (game.currentTurn % 4 + 1) : 'Loading...'}
             </span>
-            
           </div>
         </div>
-
       </div>
       <div className="gamepage-root" style={{ position: 'relative', minHeight: '100vh' }}>
         <Confetti width={dimensions.width} height={dimensions.height} numberOfPieces={350} recycle={false} />
@@ -50,75 +50,51 @@ function WinnerPage({ game }) {
         <div className='winner-content'>
           {top3.map((player, idx) => {
             const stats = player.stats?.[lastTurn] || {};
-            const placeColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // gold, silver, bronze
-            const placeLabels = ['1st', '2nd', '3rd'];
             return (
               <Card
                 key={player.id}
-                className={`player-status-card${idx === 0 ? ' current' : ''}`}
-                style={{
-                  minWidth: 260,
-                  maxWidth: 340,
-                  margin: '0 auto',
-                  position: 'relative',
-                  border: `2.5px solid ${placeColors[idx]}`,
-                  boxShadow: idx === 0 ? '0 0 16px #ffd70055' : undefined
-                }}
+                className={`winner-card winner-card-${placeColors[idx]}${idx === 0 ? ' winner-card-current' : ''}`}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <div style={{ fontWeight: 700, fontSize: '1.1em', color: '#2563eb' }}>
-                    {player.name} <span style={{ fontSize: '0.9em', color: '#888' }}>({placeLabels[idx]} Place)</span>
+                <div className="winner-card-header">
+                  <div className="winner-card-name">
+                    {player.name} <span className="winner-card-place">({placeLabels[idx]} Place)</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="winner-card-status">
                     <span
-                      className="player-status-dot"
-                      style={{
-                        background: idx === 0 ? '#22c55e' : '#aaa',
-                        width: 14,
-                        height: 14,
-                        borderRadius: '50%',
-                        display: 'inline-block',
-                        marginRight: 6
-                      }}
+                      className={`winner-status-dot winner-status-dot-${idx === 0 ? 'victory' : 'played'}`}
                     />
-                    <span style={{
-                      fontSize: '0.95em',
-                      color: idx === 0 ? '#22c55e' : '#888',
-                      fontWeight: 600
-                    }}>
+                    <span className={`winner-status-label winner-status-label-${idx === 0 ? 'victory' : 'played'}`}>
                       {idx === 0 ? 'Victory' : 'Played'}
                     </span>
                   </div>
                 </div>
-                <div style={{ fontSize: '0.95em', color: '#888', marginBottom: 8 }}>
-                  {player.playerClass}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', marginBottom: 4, justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="pi pi-dollar" style={{ color: '#2563eb' }} />
-                    <span style={{ fontWeight: 600 }}>{formatCurrency(player.finalCash)}</span>
+                <div className="winner-card-class">{player.playerClass}</div>
+                <div className="winner-card-stats">
+                  <div className="winner-card-cash">
+                    <i className="pi pi-dollar" />
+                    <span>{formatCurrency(player.finalCash)}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="pi pi-users" style={{ color: '#2563eb' }} />
+                  <div className="winner-card-customers">
+                    <i className="pi pi-users" />
                     <span>{stats.customers ?? 0} Customers</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="pi pi-database" style={{ color: '#b03a2e' }} />
+                <div className="winner-card-skills">
+                  <div>
+                    <i className="pi pi-database" />
                     <span>Legacy: {stats.legacySkills ?? 0}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="pi pi-cloud" style={{ color: '#42A5F5' }} />
+                  <div>
+                    <i className="pi pi-cloud" />
                     <span>Cloud: {stats.cloudNativeSkills ?? 0}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <i className="pi pi-shield" style={{ color: '#22c55e' }} />
+                  <div>
+                    <i className="pi pi-shield" />
                     <span>Ops: {stats.opsMaturity ?? 0}</span>
                   </div>
                 </div>
-                <div style={{ marginTop: '1.5rem', color: '#444', fontWeight: 500 }}>
-                  <i className="pi pi-star" style={{ color: '#fbbf24', marginRight: 6 }} />
+                <div className="winner-card-features">
+                  <i className="pi pi-star" />
                   Features Built: {player.features?.length ?? 0}
                 </div>
               </Card>

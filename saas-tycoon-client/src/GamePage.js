@@ -103,15 +103,32 @@ function GamePage({ gameId, game, playerId, setReady }) {
 
     // Find the current player
     const currentPlayer = game.players?.find(p => p.id === playerId);
-    if (!currentPlayer || !Array.isArray(currentPlayer.log)) return;
+    if (!currentPlayer) return;
 
-    // Find the most recent event log for the current turn
+    // Show "It's your turn now" toast if player is waiting, but only if not already shown
+    const hasPlayedCurrentTurn = game.currentTurn >= 0 && currentPlayer.turns[game.currentTurn];
+    const toastKey = `turn_${game.currentTurn}_your_turn`;
+    if (
+      currentPlayer.ready &&
+      !hasPlayedCurrentTurn &&
+      !shownEventLogIdsRef.current.has(toastKey)
+    ) {
+      shownEventLogIdsRef.current.add(toastKey);
+      toast.current.show({
+        severity: 'info',
+        summary: 'Your Turn',
+        detail: "It's your turn to make a move.",
+        life: 8000
+      });
+    }
+
+    // Existing event log toast logic
+    if (!Array.isArray(currentPlayer.log)) return;
     const eventLogsThisTurn = currentPlayer.log.filter(
       log => typeof log === 'object' && log.turn === game.currentTurn - 1 && log.type === 'event'
     );
     if (eventLogsThisTurn.length > 0) {
       const lastEvent = eventLogsThisTurn[eventLogsThisTurn.length - 1];
-      // Use a unique key for the log (turn + code + details)
       const logKey = `${lastEvent.turn}_${lastEvent.code}_${lastEvent.details}`;
       if (!shownEventLogIdsRef.current.has(logKey)) {
         shownEventLogIdsRef.current.add(logKey);
@@ -237,11 +254,11 @@ function GamePage({ gameId, game, playerId, setReady }) {
                     <Card
                       key={player.id}
                       className={`player-status-card${player.id === playerId ? ' current' : ''}${player.ready ? ' ready' : ''}`}
-                      style={{ marginBottom: '1rem', minWidth: 260, maxWidth: 320, position: 'relative' }}
+                      style={{ marginBottom: '1rem', minWidth: 260, maxWidth: 320, position: 'relative', fontSize: '0.85em' }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                        <div style={{ fontWeight: 700, fontSize: '1.1em' }}>
-                          {player.name} {player.id === playerId && <span style={{ color: '#2563eb' }}>(You)</span>}
+                      <div style={{ display: 'flex', flexDirection:'column', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700, fontSize: '1.1em', paddingBottom: 4 }}>
+                          {player.name} {player.id === playerId && <span style={{ fontSize:'.8em',color: '#2563eb' }}>(You)</span>}
                           {index === 0 && <i className="pi pi-crown" style={{ color: '#2563eb' }} />}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -469,7 +486,6 @@ function GamePage({ gameId, game, playerId, setReady }) {
                         <div className="stat-value">
                           {Object.values(archCounts).reduce((a, b) => a + b, 0)}
                         </div>
-                        <div className="stat-label">Total Features</div>
                         <ul style={{ margin: 0, paddingLeft: 18, fontSize: '0.95em', color: '#666' }}>
                           {Object.entries(archCounts).map(([arch, count]) => (
                             <li key={arch}>
@@ -477,13 +493,13 @@ function GamePage({ gameId, game, playerId, setReady }) {
                             </li>
                           ))}
                         </ul>
+                        <div className="stat-label">Total Features</div>
                       </div>
                       <div className="stat-card">
                         <i className="pi pi-sliders-h stat-icon" />
                         <div className="stat-value">
                           {currentTurnStats.legacySkills + currentTurnStats.cloudNativeSkills}
                         </div>
-                        <div className="stat-label">Total Skills</div>
                         <ul style={{ margin: 0, paddingLeft: 18, fontSize: '0.95em', color: '#666' }}>
                           <li>
                             <span style={{ textTransform: 'capitalize' }}>Legacy:</span> {currentTurnStats.legacySkills}
@@ -492,6 +508,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                             <span style={{ textTransform: 'capitalize' }}>Cloud Native:</span> {currentTurnStats.cloudNativeSkills}
                           </li>
                         </ul>
+                        <div className="stat-label">Total Skills</div>
                       </div>
                       <div className="stat-card">
                         <i className="pi pi-shield stat-icon" />
@@ -668,7 +685,7 @@ function GamePage({ gameId, game, playerId, setReady }) {
                         { header: "Legacy Skills", actions: actions_legacy_skills },
                         { header: "Bonus Actions", actions: actions_bonus }
                       ].map(({ header, actions }) => (
-                        <TabPanel header={header} key={header}>
+                        <TabPanel header={header} key={header} className='full-width-tab-panel'>
                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                             {/* Left: Action List */}
                             <div style={{ flex: 1.5 }}>
@@ -704,9 +721,9 @@ function GamePage({ gameId, game, playerId, setReady }) {
                                       </span>
                                     }
                                     icon={action.icon}
-                                    className={statusIcon ? currentLevel >= action.level ? "p-button-success" : currentLevel == action.level - 1 ? "p-button-primary" : "p-button-secondary" : "p-button-primary"}
+                                    className={statusIcon ? currentLevel >= action.level ? "game-action-button p-button-success" : currentLevel == action.level - 1 ? "game-action-button p-button-primary" : "game-action-button p-button-secondary" : "game-action-button p-button-primary"}
                                     onClick={() => prepareAction(action, currentPlayer, game.currentTurn)}
-                                    style={{ marginBottom: '0.5rem', marginRight: '0.5rem', width: '100%', textAlign: 'left' }}
+                                    
                                   />
                                 );
                               })}

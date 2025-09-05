@@ -127,13 +127,13 @@
 }
 
 .player-status-card.ready {
-    background: var(--highlight-bg);
-    color: var(--highlight-text-color);
+    background: #f8fafc;
+    color: #183a44
 }
 
 .player-status-card.current {
     border: 2px solid;
-    border-color: var(--highlight-text-color);
+    border-color: #183a44
 }
 
 .player-status-name {
@@ -161,7 +161,7 @@
 }
 
 .current-player-center {
-    min-width: 720px;
+    min-width: 900px;
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
@@ -172,6 +172,7 @@
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    font-size: .85em;
 }
 
 .current-player-stats {
@@ -203,7 +204,7 @@
 
 .stat-icon {
     font-size: 2rem;
-    color: #2563eb;
+    color: var(--blue-800);
     margin-bottom: 0.5rem;
 }
 
@@ -262,7 +263,7 @@
 }
 
 .left-column-status {
-    flex: 0 0 270px;
+    flex: 0 0 300px;
     min-width: 220px;
     max-width: 320px;
     border-radius: 10px;
@@ -357,7 +358,7 @@
 }
 
 .player-news-avatar {
-    background: #2563eb;
+    background: var(--blue-800);
     color: #fff;
     border-radius: 50%;
     width: 32px;
@@ -374,7 +375,7 @@
 
 .player-news-name {
     font-weight: 600;
-    color: #2563eb;
+    color: var(--blue-800);
     font-size: 14;
 }
 
@@ -402,11 +403,23 @@
     padding: 0.25em 1em;
     text-align: right;
     clear: both;
+    background: var(--blue-800);
 }
 
 .full-width-tab-panel {
     width: 100%;
     box-sizing: border-box;
+    font-size: .85em;
+    font-weight: 300;
+}
+
+.game-action-button {
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+    width: 100%;
+    text-align: left;
+    font-weight: 400;
+    font-size: 0.85em;
 }
 
 .latest-event-dialog-content {
@@ -420,7 +433,7 @@
     margin-top: 0;
     margin-bottom: 1rem;
     font-size: 1.3rem;
-    color: #2563eb;
+    color: var(--blue-800);
 }
 
 .latest-event-dialog-content p {
@@ -699,7 +712,7 @@
     }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1600px) {
     .three-column-layout {
         gap: 1.2rem;
     }
@@ -712,7 +725,7 @@
     }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1500px) {
     .three-column-layout {
         flex-direction: column;
         gap: 1.5rem;
@@ -737,6 +750,7 @@
     gap: .5em;
 
 }
+
 .player-code-field {
     margin-bottom: 24px;
     max-width: 800px;
@@ -787,7 +801,7 @@
     min-width: 120px;
     font-size: 1em;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--blue-800);
     line-height: 1.1;
 }
 
@@ -810,7 +824,7 @@
     font-size: 0.97em;
     font-weight: 300;
     background: #f8fafc;
-    border: 1px solid #2563eb;
+    border: 1px solid var(--blue-800);
 }
 
 .leaderboard-player-card.gold {
@@ -821,7 +835,7 @@
 
 .leaderboard-player-card .player-name {
     font-weight: 700;
-    color: #2563eb;
+    color: var(--blue-800);
     font-size: 1em;
     display: flex;
     align-items: center;
@@ -850,7 +864,7 @@
 }
 
 .leaderboard-player-card .player-cash i {
-    color: #2563eb;
+    color: var(--blue-800);
 }
 
 .leaderboard-player-card .player-features i {
@@ -886,7 +900,7 @@
 
 .leaderboard-other-player-card .player-name {
     font-weight: 600;
-    color: #2563eb;
+    color: var(--blue-800);
 }
 
 .leaderboard-other-player-card .player-class-tag {
@@ -900,9 +914,155 @@
 }
 
 .leaderboard-other-player-card .player-cash i {
-    color: #2563eb;
+    color: var(--blue-800);
 }
 
 .leaderboard-other-player-card .player-features i {
     color: #42A5F5;
+}
+
+/* Winner Page Styles */
+.winner-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.winner-card {
+    min-width: 260px;
+    max-width: 340px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 12px;
+    background: #fffbe0;
+    border: 2.5px solid var(--blue-800);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 1.2rem 1rem 1.5rem 1rem;
+    font-weight: 400;
+    color: #22223b;
+}
+
+.winner-card-gold {
+    border-color: #ffd700;
+    background: #fffbe7;
+    box-shadow: 0 0 16px #ffd70055;
+}
+.winner-card-silver {
+    border-color: #c0c0c0;
+    background: #f8fafd;
+}
+.winner-card-bronze {
+    border-color: #cd7f32;
+    background: #f9f6f2;
+}
+.winner-card-current {
+    border-width: 3px;
+}
+
+.winner-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.winner-card-name {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--blue-800);
+}
+
+.winner-card-place {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.winner-card-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.winner-status-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+.winner-status-dot-victory {
+    background: #22c55e;
+}
+.winner-status-dot-played {
+    background: #aaa;
+}
+.winner-status-label {
+    font-size: 0.95em;
+    font-weight: 600;
+}
+.winner-status-label-victory {
+    color: #22c55e;
+}
+.winner-status-label-played {
+    color: #888;
+}
+
+.winner-card-class {
+    font-size: 0.95em;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.winner-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-bottom: 4px;
+    justify-content: center;
+}
+.winner-card-cash, .winner-card-customers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}
+.winner-card-cash i {
+    color: var(--blue-800);
+}
+.winner-card-customers i {
+    color: var(--blue-800);
+}
+
+.winner-card-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.winner-card-skills i {
+    margin-right: 4px;
+}
+.winner-card-skills .pi-database {
+    color: #b03a2e;
+}
+.winner-card-skills .pi-cloud {
+    color: #42A5F5;
+}
+.winner-card-skills .pi-shield {
+    color: #22c55e;
+}
+
+.winner-card-features {
+    margin-top: 1.5rem;
+    color: #444;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.winner-card-features .pi-star {
+    color: #fbbf24;
 }
