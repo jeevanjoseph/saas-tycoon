@@ -211,6 +211,8 @@ async function getTopPlayersSince(req, res) {
     return {
       sessionId: session.id,
       sessionName: session.name,
+      startTime: session.createdAt,
+      endTime: session.finishedAt,
       topPlayers
     };
   });
