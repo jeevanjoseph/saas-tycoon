@@ -67,10 +67,11 @@ function SpectatePage({ game }) {
                   margin: '0 auto',
                   position: 'relative',
                   border: '2.5px solid #2563eb',
-                  boxShadow: idx === 0 ? '0 0 16px #ffd70055' : undefined
+                  boxShadow: idx === 0 ? '0 0 16px #ffd70055' : undefined,
+                  fontSize: '.85em',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div style={{ display: 'flex', flexDirection:'column', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                   <div style={{ fontWeight: 700, fontSize: '1.1em', color: '#2563eb' }}>
                     {player.name}
                     {idx === 0 && <i className="pi pi-crown" style={{ color: '#2563eb' }} />}
@@ -84,7 +85,8 @@ function SpectatePage({ game }) {
                         height: 14,
                         borderRadius: '50%',
                         display: 'inline-block',
-                        marginRight: 6
+                        marginRight: 6,
+                        marginTop:5
                       }}
                     />
                     <span style={{ fontSize: '0.95em', color: '#666', fontWeight: 500 }}>{statusText}</span>

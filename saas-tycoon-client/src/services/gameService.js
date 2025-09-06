@@ -52,3 +52,16 @@ export async function setPlayerReady(gameId, playerId) {
   const res = await axios.post(`${getBaseUrl()}/${gameId}/ready`, { playerId });
   return res.data;
 }
+
+/**
+ * Fetch leaderboard sessions and players.
+ * @param {string|Date} startDate
+ * @returns {Promise<Array>}
+ */
+export async function fetchLeaders(startDate = '-7d') {
+  let param = startDate instanceof Date
+    ? startDate.toISOString().slice(0, 10)
+    : startDate;
+  const res = await axios.get(`${getBaseUrl()}/leaders?startDate=${encodeURIComponent(param)}`);
+  return res.data;
+}

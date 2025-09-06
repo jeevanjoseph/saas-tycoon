@@ -58,6 +58,13 @@ class SessionDAO {
     }
     return Object.values(this.sessions).find(session => session.name === name) || null;
   }
+
+  async getSessionsFinishedSince(timestamp) {
+    if (this.mongoAvailable) {
+      return await mongoGameSession.getSessionsFinishedSince(timestamp);
+    }
+    return Object.values(this.sessions).filter(session => session.state === 'finished' && session.createdAt > timestamp);
+  }
 }
 
 module.exports = new SessionDAO();

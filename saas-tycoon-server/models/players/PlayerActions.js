@@ -198,7 +198,7 @@ const actions = {
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
       player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier - action.multiplier / 10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
+        feature.techDebt = Math.max(0, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
@@ -346,7 +346,7 @@ const actions = {
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
       player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier - action.multiplier / 10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
+        feature.techDebt = Math.max(0, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);
@@ -494,7 +494,7 @@ const actions = {
       const buggyFeatures = player.features.filter(feature => feature.techDebt > 0);
       player.stats[turn].cash -= constants.TECH_DEBT_REDUCTION_COST * (action.multiplier - action.multiplier / 10) * buggyFeatures.length;
       buggyFeatures.forEach(feature => {
-        feature.techDebt = Math.max(-1, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
+        feature.techDebt = Math.max(0, feature.techDebt - (action.multiplier + 1)); // +1 becassue the turn will a unit of tech debt.
       });
       const cashAfter = player.stats[turn].cash;
       addPlayerLog(player, turn, action, `Investing in tech debt reduction. Upkeep effort reduced techdebt on ${buggyFeatures.length} features.`, cashBefore, cashAfter);

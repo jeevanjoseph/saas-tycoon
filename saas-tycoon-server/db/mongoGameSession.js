@@ -82,10 +82,21 @@ async function close() {
     }
 }
 
+async function getSessionsFinishedSince(timestamp) {
+    try {
+        const col = await connect();
+        return await col.find({ state: 'finished', createdAt: { $gte: timestamp } }).toArray();
+    } catch (err) {
+        console.error('Error fetching sessions finished since timestamp:', err);
+        throw new Error('Failed to fetch sessions');
+    }
+}   
+
 module.exports = {
     saveSession,
     getSessionById,
     getAllSessions,
     updateSessionFields,
     close,
+    getSessionsFinishedSince,
 };
