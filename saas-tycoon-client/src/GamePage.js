@@ -729,13 +729,18 @@ function GamePage({ gameId, game, playerId, setReady }) {
                               })}
                             </div>
                             {/* Right: Action Details & Confirm */}
-                            <div style={{ flex: 3, minWidth: 260, background: '#f8fafc', borderRadius: 8, padding: '1rem', boxShadow: '0 0 0.5rem #e0e7ef' }}>
+                            <div className='action-details-panel'>
                               {pendingAction ? (
                                 <>
-                                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                                    <i className={pendingAction.icon} style={{ fontSize: '1.5rem', color: '#2563eb', marginRight: 8 }} />
+                                  <div className='action-details-header'>
+                                    <i className={pendingAction.icon}/>
                                     <h3 style={{ marginTop: 0 }}>{pendingAction.name}</h3>
                                   </div>
+                                  {pendingAction.effect ? (
+                                    <div className='action-details-effect'>
+                                       {pendingAction.effect}
+                                    </div>
+                                  ) : null}
                                   <div style={{ marginBottom: '1rem', color: '#444' }}>
 
                                     {pendingAction.description}

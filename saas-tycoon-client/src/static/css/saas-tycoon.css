@@ -95,7 +95,10 @@
     margin-bottom: 0.5rem;
     padding-left: 7em;
 }
-
+.winnerpage-subtitle {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
 .gamepage-turn {
     text-align: center;
     margin-bottom: 1.5rem;
@@ -420,6 +423,42 @@
     text-align: left;
     font-weight: 400;
     font-size: 0.85em;
+}
+
+.action-details-panel {
+    flex: 3;
+    min-width: 260;
+    background: #f8fafc;
+    border-radius: 8;
+    padding: 1rem;
+    box-shadow: 0 0 0.5rem #e0e7ef;
+}
+
+.action-details-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.action-details-header i {
+    font-size: 2rem;
+    color: var(--blue-800);
+    margin-right: 8px;
+}
+
+.action-details-header h3 {
+    font-size: 1.4rem;
+    color: var(--blue-800);
+    margin-bottom: 0px;
+}
+
+.action-details-effect{
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #444;
 }
 
 .latest-event-dialog-content {
@@ -938,25 +977,28 @@
     border-radius: 12px;
     background: #fffbe0;
     border: 2.5px solid var(--blue-800);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 1.2rem 1rem 1.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     font-weight: 400;
     color: #22223b;
+    font-size: 0.85em;
 }
 
 .winner-card-gold {
     border-color: #ffd700;
-    background: #fffbe7;
+    background: #fffffc;
     box-shadow: 0 0 16px #ffd70055;
 }
+
 .winner-card-silver {
     border-color: #c0c0c0;
-    background: #f8fafd;
+    background: #f9fbff;
 }
+
 .winner-card-bronze {
     border-color: #cd7f32;
     background: #f9f6f2;
 }
+
 .winner-card-current {
     border-width: 3px;
 }
@@ -966,6 +1008,8 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
+    flex-direction: column;
+    font-size: .85em;
 }
 
 .winner-card-name {
@@ -983,6 +1027,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-top: 5px;
 }
 
 .winner-status-dot {
@@ -992,21 +1037,42 @@
     display: inline-block;
     margin-right: 6px;
 }
-.winner-status-dot-victory {
-    background: #22c55e;
+
+.winner-status-dot-gold {
+    background: #e9dc23;
 }
+
+.winner-status-dot-silver {
+    background: #8a8a8a;
+}
+
+.winner-status-dot-bronze {
+    background: #c6a100;
+}
+
 .winner-status-dot-played {
-    background: #aaa;
+    background: #616161;
 }
+
 .winner-status-label {
     font-size: 0.95em;
     font-weight: 600;
 }
-.winner-status-label-victory {
-    color: #22c55e;
+
+.winner-status-label-gold {
+    color: #e9dc23;
 }
+
+.winner-status-label-silver {
+    color: #8a8a8a;
+}
+
+.winner-status-label-bronze {
+    color: #c6a100;
+}
+
 .winner-status-label-played {
-    color: #888;
+    color: #616161;
 }
 
 .winner-card-class {
@@ -1022,15 +1088,19 @@
     margin-bottom: 4px;
     justify-content: center;
 }
-.winner-card-cash, .winner-card-customers {
+
+.winner-card-cash,
+.winner-card-customers {
     display: flex;
     align-items: center;
     gap: 4px;
     font-weight: 600;
 }
+
 .winner-card-cash i {
     color: var(--blue-800);
 }
+
 .winner-card-customers i {
     color: var(--blue-800);
 }
@@ -1042,15 +1112,19 @@
     justify-content: center;
     margin-bottom: 1rem;
 }
+
 .winner-card-skills i {
     margin-right: 4px;
 }
+
 .winner-card-skills .pi-database {
     color: #b03a2e;
 }
+
 .winner-card-skills .pi-cloud {
     color: #42A5F5;
 }
+
 .winner-card-skills .pi-shield {
     color: #22c55e;
 }
@@ -1063,6 +1137,7 @@
     align-items: center;
     gap: 6px;
 }
+
 .winner-card-features .pi-star {
     color: #fbbf24;
 }
