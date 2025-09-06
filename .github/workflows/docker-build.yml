@@ -2,7 +2,7 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [main, player-list-upload]
+    branches: [main, node-otel]
   pull_request:
     branches: [main]
 
