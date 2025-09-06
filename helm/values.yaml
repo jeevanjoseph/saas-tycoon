@@ -11,6 +11,8 @@ mongo:
 server:
   image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-server:latest
   port: 3000
+  adminPort: 5002
+  metricsPort: 9464
   env:
     NODE_ENV: production
 

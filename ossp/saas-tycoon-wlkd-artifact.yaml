@@ -30,10 +30,6 @@ propertiesSchema:
       default: 1
       description: The number of replicas for the SaaS tycoon frontend
       type: integer
-    backend-api-url:
-      default: http://localhost:3000/api/game
-      description: The API URL for the SaaS tycoon backend
-      type: string
     backend-port:
       default: 3000
       description: The port to run the Saas Tycoon backend on
