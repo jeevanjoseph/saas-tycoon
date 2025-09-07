@@ -43,3 +43,11 @@ const sdk = new NodeSDK({
 });
 
 sdk.start();
+console.log('OpenTelemetry SDK initialized');
+
+process.on('SIGTERM', () => {
+    sdk.shutdown()
+        .then(() => console.log('OpenTelemetry SDK shut down successfully'))
+        .catch((error) => console.log('Error shutting down OpenTelemetry SDK', error))
+        .finally(() => process.exit(0));
+});
