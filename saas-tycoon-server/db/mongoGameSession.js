@@ -4,11 +4,7 @@ const uri = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const dbName = process.env.MONGO_DB || 'saas_tycoon';
 const collectionName = 'game_sessions';
 
-const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}
-);
+const client = new MongoClient(uri, {});
 let db;
 let collection;
 
