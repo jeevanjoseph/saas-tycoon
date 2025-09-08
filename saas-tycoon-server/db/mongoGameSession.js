@@ -1,8 +1,9 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
 // --- OpenTelemetry ---
-const { metrics } = require('@opentelemetry/api');
+const { metrics, trace } = require('@opentelemetry/api');
 const meter = metrics.getMeter('mongoGameSession');
+const tracer = trace.getTracer('mongoGameSession');
 
 const requestCount = meter.createCounter('mongo_game_session_requests', {
     description: 'Count of requests to mongoGameSession functions'
@@ -22,117 +23,137 @@ const client = new MongoClient(uri, {});
 let db;
 let collection;
 
-async function connect() {
+async function connect(parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'connect' });
-    try {
-        await client.connect();
-        await client.db("admin").command({ ping: 1 });
-        db = client.db(dbName);
-        collection = db.collection(collectionName);
-        return collection;
-    } catch (err) {
-        errorCount.add(1, { function: 'connect' });
-        console.error('MongoDB connection error:', err);
-        throw new Error('Failed to connect to MongoDB');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'connect' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.connect', { parent: parentSpan }, async (span) => {
+        try {
+            await client.connect();
+            await client.db("admin").command({ ping: 1 });
+            db = client.db(dbName);
+            collection = db.collection(collectionName);
+            return collection;
+        } catch (err) {
+            errorCount.add(1, { function: 'connect' });
+            span.recordException(err);
+            throw new Error('Failed to connect to MongoDB');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'connect' });
+            span.end();
+        }
+    });
 }
 
-async function saveSession(session) {
+async function saveSession(session, parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'saveSession' });
-    try {
-        const col = await connect();
-        if (session._id) {
-            await col.replaceOne({ _id: session._id }, session, { upsert: true });
-        } else {
-            const result = await col.insertOne(session);
-            session._id = result.insertedId;
+    return tracer.startActiveSpan('mongoGameSession.saveSession', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            if (session._id) {
+                await col.replaceOne({ _id: session._id }, session, { upsert: true });
+            } else {
+                const result = await col.insertOne(session);
+                session._id = result.insertedId;
+            }
+            return session;
+        } catch (err) {
+            errorCount.add(1, { function: 'saveSession' });
+            span.recordException(err);
+            throw new Error('Failed to save session');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'saveSession' });
+            span.end();
         }
-        return session;
-    } catch (err) {
-        errorCount.add(1, { function: 'saveSession' });
-        console.error('Error saving session:', err);
-        throw new Error('Failed to save session');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'saveSession' });
-    }
+    });
 }
 
-async function getSessionById(id) {
+async function getSessionById(id, parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'getSessionById' });
-    try {
-        const col = await connect();
-        return await col.findOne({ id });
-    } catch (err) {
-        errorCount.add(1, { function: 'getSessionById' });
-        console.error('Error fetching session by id:', err);
-        throw new Error('Failed to fetch session');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'getSessionById' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.getSessionById', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            return await col.findOne({ id });
+        } catch (err) {
+            errorCount.add(1, { function: 'getSessionById' });
+            span.recordException(err);
+            throw new Error('Failed to fetch session');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'getSessionById' });
+            span.end();
+        }
+    });
 }
 
-async function getAllSessions() {
+async function getAllSessions(parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'getAllSessions' });
-    try {
-        const col = await connect();
-        return await col.find({}).toArray();
-    } catch (err) {
-        errorCount.add(1, { function: 'getAllSessions' });
-        console.error('Error fetching all sessions:', err);
-        throw new Error('Failed to fetch sessions');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'getAllSessions' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.getAllSessions', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            return await col.find({}).toArray();
+        } catch (err) {
+            errorCount.add(1, { function: 'getAllSessions' });
+            span.recordException(err);
+            throw new Error('Failed to fetch sessions');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'getAllSessions' });
+            span.end();
+        }
+    });
 }
 
-async function updateSessionFields(id, update) {
+async function updateSessionFields(id, update, parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'updateSessionFields' });
-    try {
-        const col = await connect();
-        return await col.updateOne({ id }, { $set: update });
-    } catch (err) {
-        errorCount.add(1, { function: 'updateSessionFields' });
-        console.error('Error updating session fields:', err);
-        throw new Error('Failed to update session');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'updateSessionFields' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.updateSessionFields', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            return await col.updateOne({ id }, { $set: update });
+        } catch (err) {
+            errorCount.add(1, { function: 'updateSessionFields' });
+            span.recordException(err);
+            throw new Error('Failed to update session');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'updateSessionFields' });
+            span.end();
+        }
+    });
 }
 
-async function close() {
+async function close(parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'close' });
-    try {
-        await client.close();
-        console.log('MongoDB connection closed gracefully.');
-    } catch (err) {
-        errorCount.add(1, { function: 'close' });
-        console.error('Error closing MongoDB connection:', err);
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'close' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.close', { parent: parentSpan }, async (span) => {
+        try {
+            await client.close();
+        } catch (err) {
+            errorCount.add(1, { function: 'close' });
+            span.recordException(err);
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'close' });
+            span.end();
+        }
+    });
 }
 
-async function getSessionsFinishedSince(timestamp) {
+async function getSessionsFinishedSince(timestamp, parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'getSessionsFinishedSince' });
-    try {
-        const col = await connect();
-        return await col.find({ state: 'finished', createdAt: { $gte: timestamp } }).toArray();
-    } catch (err) {
-        errorCount.add(1, { function: 'getSessionsFinishedSince' });
-        console.error('Error fetching sessions finished since timestamp:', err);
-        throw new Error('Failed to fetch sessions');
-    } finally {
-        requestDuration.record(Date.now() - start, { function: 'getSessionsFinishedSince' });
-    }
+    return tracer.startActiveSpan('mongoGameSession.getSessionsFinishedSince', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            return await col.find({ state: 'finished', createdAt: { $gte: timestamp } }).toArray();
+        } catch (err) {
+            errorCount.add(1, { function: 'getSessionsFinishedSince' });
+            span.recordException(err);
+            throw new Error('Failed to fetch sessions');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'getSessionsFinishedSince' });
+            span.end();
+        }
+    });
 }
 
 module.exports = {

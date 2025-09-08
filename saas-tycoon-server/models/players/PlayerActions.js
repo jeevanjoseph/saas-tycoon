@@ -26,8 +26,9 @@ const { handleLighthouseProgram,
 
 
 // --- OpenTelemetry ---
-const { metrics } = require('@opentelemetry/api');
+const { metrics, trace } = require('@opentelemetry/api');
 const meter = metrics.getMeter('PlayerActions');
+const tracer = trace.getTracer('PlayerActions');
 
 const requestCount = meter.createCounter('player_actions_requests', {
   description: 'Count of requests to PlayerActions functions'
@@ -1479,61 +1480,73 @@ const eventHandlers = {
 
 // --- MAIN APPLY FUNCTION ---
 
-function applyAction(player, action, turn) {
+function applyAction(player, action, turn, parentSpan) {
   const start = Date.now();
   requestCount.add(1, { function: 'applyAction' });
-  try {
-    const playerType = player.playerClass;
-    const playerActions = actions[playerType];
-    if (playerActions && playerActions[action.code]) {
-      playerActions[action.code](player, turn, action);
-    } else {
-      throw new Error('Unknown action type: ' + action.code);
+  return tracer.startActiveSpan('PlayerActions.applyAction', { parent: parentSpan }, (span) => {
+    try {
+      const playerType = player.playerClass;
+      const playerActions = actions[playerType];
+      if (playerActions && playerActions[action.code]) {
+        playerActions[action.code](player, turn, action);
+      } else {
+        throw new Error('Unknown action type: ' + action.code);
+      }
+    } catch (err) {
+      errorCount.add(1, { function: 'applyAction', code: action.code });
+      span.recordException(err);
+      throw err;
+    } finally {
+      requestDuration.record(Date.now() - start, { function: 'applyAction' });
+      span.end();
     }
-  } catch (err) {
-    errorCount.add(1, { function: 'applyAction', code: action.code });
-    throw err;
-  } finally {
-    requestDuration.record(Date.now() - start, { function: 'applyAction' });
-  }
+  });
 }
 
-function applyEvent(player, event, turn) {
+function applyEvent(player, event, turn, parentSpan) {
   const start = Date.now();
   requestCount.add(1, { function: 'applyEvent' });
-  try {
-    const playerType = player.playerClass;
-    const playerEventHandlers = eventHandlers[playerType];
-    if (playerEventHandlers && playerEventHandlers[event.type]) {
-      playerEventHandlers[event.type](player, turn);
-    } else {
-      throw new Error('Unknown event type: ' + event.type);
+  return tracer.startActiveSpan('PlayerActions.applyEvent', { parent: parentSpan }, (span) => {
+    try {
+      const playerType = player.playerClass;
+      const playerEventHandlers = eventHandlers[playerType];
+      if (playerEventHandlers && playerEventHandlers[event.type]) {
+        playerEventHandlers[event.type](player, turn);
+      } else {
+        throw new Error('Unknown event type: ' + event.type);
+      }
+    } catch (err) {
+      errorCount.add(1, { function: 'applyEvent', code: event.type });
+      span.recordException(err);
+      throw err;
+    } finally {
+      requestDuration.record(Date.now() - start, { function: 'applyEvent' });
+      span.end();
     }
-  } catch (err) {
-    errorCount.add(1, { function: 'applyEvent', code: event.type });
-    throw err;
-  } finally {
-    requestDuration.record(Date.now() - start, { function: 'applyEvent' });
-  }
+  });
 }
 
-function finishTurn(player, turn) {
+function finishTurn(player, turn, parentSpan) {
   const start = Date.now();
   requestCount.add(1, { function: 'finishTurn' });
-  try {
-    let featureRevenue = 0;
-    player.features.forEach((feature) => {
-      FeatureActions.updateTechDebt(feature, turn);
-      featureRevenue += FeatureActions.calculateRevenue(feature, turn, player.stats[turn].customers);
-    });
-    player.stats[turn].cash += featureRevenue;
-    decrementActionCooldowns(player, turn);
-  } catch (err) {
-    errorCount.add(1, { function: 'finishTurn' });
-    throw err;
-  } finally {
-    requestDuration.record(Date.now() - start, { function: 'finishTurn' });
-  }
+  return tracer.startActiveSpan('PlayerActions.finishTurn', { parent: parentSpan }, (span) => {
+    try {
+      let featureRevenue = 0;
+      player.features.forEach((feature) => {
+        FeatureActions.updateTechDebt(feature, turn);
+        featureRevenue += FeatureActions.calculateRevenue(feature, turn, player.stats[turn].customers);
+      });
+      player.stats[turn].cash += featureRevenue;
+      decrementActionCooldowns(player, turn);
+    } catch (err) {
+      errorCount.add(1, { function: 'finishTurn' });
+      span.recordException(err);
+      throw err;
+    } finally {
+      requestDuration.record(Date.now() - start, { function: 'finishTurn' });
+      span.end();
+    }
+  });
 }
 
 module.exports = {
