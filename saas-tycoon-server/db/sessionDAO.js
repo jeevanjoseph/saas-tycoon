@@ -29,6 +29,7 @@ class SessionDAO {
       try {
         await mongoGameSession.getAllSessions(span);
         this.mongoAvailable = true;
+        console.log('DB is available for session storage.');
       } catch (err) {
         console.warn('MongoDB not available, using in-memory storage for sessions.');
         errorCount.add(1, { function: 'init' });

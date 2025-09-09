@@ -110,7 +110,8 @@ async function getOngoingSessionList(parentSpan) {
     return tracer.startActiveSpan('mongoGameSession.getOngoingSessions', { parent: parentSpan }, async (span) => {
         try {
             const col = await connect(span);
-            return await col.find({ state: { $ne: 'finished' }},{id:1, name:1, state:1, playerCount:{$size:"$players"},playerLimit:1, currentTurn:1, total_turns:1, createdAt:1, finishedAt:1}).toArray();
+            const sessionList =  await col.find({ state: { $ne: 'finished' } }).project({ id: 1, name: 1, state: 1, playerCount: { $size: "$players" }, playerLimit: 1, currentTurn: 1, total_turns: 1, createdAt: 1, finishedAt: 1 }).toArray();
+            return sessionList;
         } catch (err) {
             errorCount.add(1, { function: 'getOngoingSessions' });
             span.recordException(err);
@@ -120,7 +121,7 @@ async function getOngoingSessionList(parentSpan) {
             span.end();
         }
     });
-    
+
 }
 
 async function updateSessionFields(id, update, parentSpan) {

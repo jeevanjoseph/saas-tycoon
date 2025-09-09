@@ -27,6 +27,7 @@ class PlayerDAO {
         try {
             await mongoPlayer.findByCode('__test__');
             this.mongoAvailable = true;
+            console.log('DB is available for player storage.');
         } catch (err) {
             errorCount.add(1, { function: 'init' });
             console.warn('MongoDB unavailable, using in-memory player store.');
