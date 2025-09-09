@@ -30,6 +30,7 @@ class SessionDAO {
         await mongoGameSession.getAllSessions(span);
         this.mongoAvailable = true;
       } catch (err) {
+        console.warn('MongoDB not available, using in-memory storage for sessions.');
         errorCount.add(1, { function: 'init' });
         span.recordException(err);
         this.mongoAvailable = false;
@@ -55,6 +56,27 @@ class SessionDAO {
         throw err;
       } finally {
         requestDuration.record(Date.now() - start, { function: 'getAllSessions' });
+        span.end();
+      }
+    });
+  }
+
+  async getOngoingSessionList(parentSpan) {
+    const start = Date.now();
+    requestCount.add(1, { function: 'getOngoingSessions' });
+    return tracer.startActiveSpan('sessionDAO.getOngoingSessions', { parent: parentSpan }, async (span) => {
+      try {
+        if (this.mongoAvailable) {
+          const sessions = await mongoGameSession.getOngoingSessionList(span);
+          return sessions;
+        }
+        return Object.values(this.sessions).filter(session => session.state !== 'finished');
+      } catch (err) {
+        errorCount.add(1, { function: 'getOngoingSessions' });
+        span.recordException(err);
+        throw err;
+      } finally {
+        requestDuration.record(Date.now() - start, { function: 'getOngoingSessions' });
         span.end();
       }
     });

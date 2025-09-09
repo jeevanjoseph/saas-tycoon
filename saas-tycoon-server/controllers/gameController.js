@@ -43,10 +43,11 @@ async function getAllSessions(req, res) {
   requestCount.add(1, { function: 'getAllSessions' });
   return tracer.startActiveSpan('getAllSessions', async (span) => {
     try {
-      const sessions = await sessionDAO.getAllSessions(span);
-      const sessionList = sessions.map(({ id, name, state, players, playerLimit, currentTurn, total_turns, createdAt, finishedAt }) => ({
-        id, name, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt, finishedAt
-      }));
+      const sessionList = await sessionDAO.getOngoingSessionList(span);
+      // const sessions = await sessionDAO.getAllSessions(span);
+      // const sessionList = sessions.map(({ id, name, state, players, playerLimit, currentTurn, total_turns, createdAt, finishedAt }) => ({
+      //   id, name, state, playerCount: players.length, playerLimit, currentTurn, total_turns, createdAt, finishedAt
+      // }));
       res.json(sessionList);
     } catch (err) {
       errorCount.add(1, { function: 'getAllSessions' });

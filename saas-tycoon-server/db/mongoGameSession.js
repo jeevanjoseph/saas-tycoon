@@ -104,6 +104,25 @@ async function getAllSessions(parentSpan) {
     });
 }
 
+async function getOngoingSessionList(parentSpan) {
+    const start = Date.now();
+    requestCount.add(1, { function: 'getOngoingSessions' });
+    return tracer.startActiveSpan('mongoGameSession.getOngoingSessions', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            return await col.find({ state: { $ne: 'finished' }},{id:1, name:1, state:1, playerCount:{$size:"$players"},playerLimit:1, currentTurn:1, total_turns:1, createdAt:1, finishedAt:1}).toArray();
+        } catch (err) {
+            errorCount.add(1, { function: 'getOngoingSessions' });
+            span.recordException(err);
+            throw new Error('Failed to fetch ongoing sessions');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'getOngoingSessions' });
+            span.end();
+        }
+    });
+    
+}
+
 async function updateSessionFields(id, update, parentSpan) {
     const start = Date.now();
     requestCount.add(1, { function: 'updateSessionFields' });
@@ -163,4 +182,5 @@ module.exports = {
     updateSessionFields,
     close,
     getSessionsFinishedSince,
+    getOngoingSessionList,
 };
