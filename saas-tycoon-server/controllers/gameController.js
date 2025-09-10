@@ -41,7 +41,8 @@ async function syncSessionToDb(session, parentSpan) {
 async function getAllSessions(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getAllSessions' });
-  return tracer.startActiveSpan('getAllSessions', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('getAllSessions', {parent: traceId}, async (span) => {
     try {
       const sessionList = await sessionDAO.getOngoingSessionList(span);
       // const sessions = await sessionDAO.getAllSessions(span);
@@ -64,7 +65,8 @@ async function getAllSessions(req, res) {
 async function createSession(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'createSession' });
-  return tracer.startActiveSpan('createSession', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('createSession', {parent: traceId}, async (span) => {
     try {
       const { playerLimit, name } = req.body;
       if (name) {
@@ -92,7 +94,8 @@ async function createSession(req, res) {
 async function joinSession(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'joinSession' });
-  return tracer.startActiveSpan('joinSession', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('joinSession', {parent: traceId}, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -136,7 +139,8 @@ async function joinSession(req, res) {
 async function setPlayerReady(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'setPlayerReady' });
-  return tracer.startActiveSpan('setPlayerReady', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('setPlayerReady', {parent: traceId}, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -171,7 +175,8 @@ async function setPlayerReady(req, res) {
 async function getGameSession(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getGameSession' });
-  return tracer.startActiveSpan('getGameSession', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('getGameSession', { parent: traceId }, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -199,7 +204,8 @@ async function getGameSession(req, res) {
 async function getLastEvent(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getLastEvent' });
-  return tracer.startActiveSpan('getLastEvent', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('getLastEvent', {parent:traceId}, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -221,7 +227,8 @@ async function getLastEvent(req, res) {
 async function performAction(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'performAction' });
-  return tracer.startActiveSpan('performAction', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('performAction', { parent: traceId }, async (span) => {
     try {
       const { playerId, action, turn } = req.body;
       const session = await sessionDAO.getSessionById(req.params.id, span);
@@ -280,7 +287,8 @@ async function performAction(req, res) {
 async function getTopPlayersSince(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getTopPlayersSince' });
-  return tracer.startActiveSpan('getTopPlayersSince', async (span) => {
+  const traceId = req.headers['request_X_B3_Traceid'];
+  return tracer.startActiveSpan('getTopPlayersSince', {parent: traceId}, async (span) => {
     try {
       const { startDate } = req.query;
       if (!startDate) {
