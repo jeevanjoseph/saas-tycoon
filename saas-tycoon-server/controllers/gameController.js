@@ -27,6 +27,7 @@ async function syncSessionToDb(session, parentSpan) {
     try {
       await sessionDAO.saveSession(session, span);
     } catch (err) {
+      console.error('Error syncing session to DB:', err);
       errorCount.add(1, { function: 'syncSessionToDb' });
       span.recordException(err);
       throw err;
@@ -51,6 +52,7 @@ async function getAllSessions(req, res) {
       // }));
       res.json(sessionList);
     } catch (err) {
+      console.error('Error fetching sessions:', err);
       errorCount.add(1, { function: 'getAllSessions' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to fetch sessions' });
@@ -80,6 +82,7 @@ async function createSession(req, res) {
       await syncSessionToDb(session, span);
       res.json({ gameId: session.id });
     } catch (err) {
+      console.error('Error creating session:', err);
       errorCount.add(1, { function: 'createSession' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to create session' });
@@ -125,6 +128,7 @@ async function joinSession(req, res) {
         }
       }
     } catch (err) {
+      console.error('Error joining session:', err);
       errorCount.add(1, { function: 'joinSession' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to join session' });
@@ -161,6 +165,7 @@ async function setPlayerReady(req, res) {
       await syncSessionToDb(session, span);
       res.json({ status: 'Player marked ready', gameStarted: session.state });
     } catch (err) {
+      console.error('Error setting player ready:', err);
       errorCount.add(1, { function: 'setPlayerReady' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to set player ready' });
@@ -190,6 +195,7 @@ async function getGameSession(req, res) {
 
       res.json(session);
     } catch (err) {
+      console.error('Error getting game session:', err);
       errorCount.add(1, { function: 'getGameSession' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to get game session' });
@@ -213,6 +219,7 @@ async function getLastEvent(req, res) {
       const lastEvent = session.events.length > 0 ? session.events[session.events.length - 1] : null;
       res.json({ event: lastEvent, currentTurn: session.currentTurn });
     } catch (err) {
+      console.error('Error getting last event:', err);
       errorCount.add(1, { function: 'getLastEvent' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to get last event' });
@@ -273,6 +280,7 @@ async function performAction(req, res) {
       await syncSessionToDb(session, span);
       res.json({ message: 'Action accepted for turn ' + turn });
     } catch (err) {
+      console.error('Error performing action:', err);
       errorCount.add(1, { function: 'performAction' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to perform action' });
@@ -344,6 +352,7 @@ async function getTopPlayersSince(req, res) {
 
       res.json(result);
     } catch (err) {
+      console.error('Error getting top players:', err);
       errorCount.add(1, { function: 'getTopPlayersSince' });
       span.recordException(err);
       res.status(500).json({ error: 'Failed to get top players' });
