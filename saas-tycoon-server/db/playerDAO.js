@@ -49,6 +49,7 @@ class PlayerDAO {
             }
             return { insertedCount: players.length };
         } catch (err) {
+            console.error('Error importing players:', err);
             errorCount.add(1, { function: 'insertMany' });
             throw err;
         } finally {
@@ -65,6 +66,7 @@ class PlayerDAO {
             }
             return this.players[playerCode] || null;
         } catch (err) {
+            console.error(`Error finding player by code ${playerCode}:`, err);
             errorCount.add(1, { function: 'findByCode' });
             throw err;
         } finally {
@@ -81,6 +83,7 @@ class PlayerDAO {
             }
             return this.players[Object.values(this.players).find(p => p.playerEmail === playerEmail)?.playerCode] || null;
         } catch (err) {
+            console.error(`Error finding player by email ${playerEmail}:`, err);
             errorCount.add(1, { function: 'findByEmail' });
             throw err;
         } finally {

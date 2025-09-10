@@ -52,6 +52,7 @@ class SessionDAO {
         }
         return Object.values(this.sessions);
       } catch (err) {
+        console.error('Error getting all sessions:', err);
         errorCount.add(1, { function: 'getAllSessions' });
         span.recordException(err);
         throw err;
@@ -73,6 +74,7 @@ class SessionDAO {
         }
         return Object.values(this.sessions).filter(session => session.state !== 'finished');
       } catch (err) {
+        console.error('Error getting ongoing sessions:', err);
         errorCount.add(1, { function: 'getOngoingSessions' });
         span.recordException(err);
         throw err;
@@ -93,6 +95,7 @@ class SessionDAO {
         }
         return this.sessions[id];
       } catch (err) {
+        console.error(`Error getting session by ID ${id}:`, err);
         errorCount.add(1, { function: 'getSessionById' });
         span.recordException(err);
         throw err;
@@ -114,6 +117,7 @@ class SessionDAO {
         this.sessions[session.id] = session;
         return session;
       } catch (err) {
+        console.error('Error saving session:', err);
         errorCount.add(1, { function: 'saveSession' });
         span.recordException(err);
         throw err;
@@ -138,6 +142,7 @@ class SessionDAO {
         }
         return null;
       } catch (err) {
+        console.error(`Error updating session ${id}:`, err);
         errorCount.add(1, { function: 'updateSessionFields' });
         span.recordException(err);
         throw err;
@@ -159,6 +164,7 @@ class SessionDAO {
         }
         return Object.values(this.sessions).find(session => session.name === name) || null;
       } catch (err) {
+        console.error(`Error getting session by name ${name}:`, err);
         errorCount.add(1, { function: 'getSessionByName' });
         span.recordException(err);
         throw err;
@@ -179,6 +185,7 @@ class SessionDAO {
         }
         return Object.values(this.sessions).filter(session => session.state === 'finished' && session.createdAt > timestamp);
       } catch (err) {
+        console.error('Error getting sessions finished since timestamp:', err);
         errorCount.add(1, { function: 'getSessionsFinishedSince' });
         span.recordException(err);
         throw err;
