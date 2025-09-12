@@ -1,6 +1,8 @@
 server:
   port: {{ .config.backend-port }}
+  replicas: {{ .config.backend-replicas }}
 client:
   port: {{ .config.frontend-port }}
+  replicas: {{ .config.frontend-replicas }}
   config:
     API_URL: http://{{ .environment.loadbalancerFQDN }}/api/game

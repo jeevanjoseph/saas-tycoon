@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: saas-tycoon-server
 spec:
-  replicas: 1
+  replicas: {{ .Values.server.replicas }}
   selector:
     matchLabels:
       app: saas-tycoon-server
@@ -34,7 +34,7 @@ spec:
           resources:
             requests:
               memory: "512Mi"
-              cpu: "250m"
+              cpu: "500m"
             limits:
               memory: "2Gi"
-              cpu: "500m"
+              cpu: "1000m"

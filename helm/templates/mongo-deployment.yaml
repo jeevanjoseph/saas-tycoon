@@ -29,6 +29,13 @@ spec:
                 secretKeyRef:
                   name: mongo-secret
                   key: password
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "800m"
+            limits:
+              memory: "4Gi"
+              cpu: "800m"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -36,10 +43,4 @@ spec:
         - name: mongo-data
           persistentVolumeClaim:
             claimName: mongo-pvc
-      resources:
-        requests:
-          memory: "2Gi"
-          cpu: "800m"
-        limits:
-          memory: "2Gi"
-          cpu: "800m"
+      

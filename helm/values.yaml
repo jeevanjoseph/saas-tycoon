@@ -13,12 +13,14 @@ server:
   port: 3000
   adminPort: 5002
   metricsPort: 9464
+  replicas: 3
   env:
     NODE_ENV: production
 
 client:
   image: artifactory-phx-prod.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/saas-tycoon/saas-tycoon-client:latest
   port: 80
+  replicas: 2
   env:
     NODE_ENV: production
   config:
