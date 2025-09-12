@@ -77,16 +77,25 @@ const playerClasses = ['Monolith', 'SingleTenant', 'MultiTenant'];
 const BASE_URL = __ENV.K6_API_URL || 'http://localhost:3000/api/game';
 
 export let options = {
-  vus: 1,
-  iterations: 1,
+
+  scenarios: {
+    // arbitrary name of scenario
+    average_load: {
+      executor: 'ramping-vus',
+      stages: [
+        // ramp up to average load of 20 virtual users
+        { duration: '180s', target: 50 },
+        { duration: '1h', target: 50 },
+        // ramp down to zero
+        { duration: '10m', target: 0 },
+      ],
+    },
+  },
 };
 
 export default function () {
-  // 1. Open the page (simulate GET /)
-  let res = http.get(BASE_URL);
-  check(res, { 'homepage loaded': (r) => r.status === 200 });
-
-  // 2. Get Sessions
+  
+  // 1. Get Sessions
   let sessionsRes = http.get(BASE_URL);
   check(sessionsRes, { 'sessions listed': (r) => r.status === 200 });
 
@@ -108,7 +117,7 @@ export default function () {
   for (let i = playerCodeStart; i < playerCodeEnd; i++) {
     // verify player code
     let verifyRes = http.post(`${BASE_URL}/verify-player`, JSON.stringify({ playerCode: String(i + 1).padStart(8, '0') }), { headers: { 'Content-Type': 'application/json' } });
-    check(verifyRes, { [`player code ${String(i + 1).padStart(8, '0')} verified`]: (r) => r.status === 200 && r.json('playerEmail') });
+    check(verifyRes, { [`player code verified`]: (r) => r.status === 200 && r.json('playerEmail') });
     if (!verifyRes.json('playerEmail')) {
       console.error(`Player code ${String(i + 1).padStart(8, '0')} is not valid!`);
       continue;
@@ -119,7 +128,7 @@ export default function () {
       playerCode: String(i + 1).padStart(8, '0'),
       playerType: playerClass,
     }), { headers: { 'Content-Type': 'application/json' } });
-    check(joinRes, { [`player ${i + 1} joined`]: (r) => r.status === 200 && r.json('playerId') });
+    check(joinRes, { [`player joined`]: (r) => r.status === 200 && r.json('playerId') });
     let player = joinRes.json();
     player.playerType = playerClass; // Set player type
     playerIds.push(player);
@@ -132,7 +141,7 @@ export default function () {
     let readyRes = http.post(`${BASE_URL}/${gameId}/ready`, JSON.stringify({
       playerId: playerIds[i].playerId
     }), { headers: { 'Content-Type': 'application/json' } });
-    check(readyRes, { [`player ${i + 1} ready`]: (r) => r.status === 200 });
+    check(readyRes, { [`player ready`]: (r) => r.status === 200 });
     sleep(Math.random() * 3);
   }
 
@@ -154,15 +163,18 @@ export default function () {
             //console.log(`Player ${i + 1} is a MultiTenant player, forcing BUILD_MULTITENANT_FEATURE action on turn ${turn}`);
             action = actions_build.find(a => a.code === 'BUILD_MULTITENANT_FEATURE');
           } 
-        } 
+        }
+
+        let getSession = http.get(`${BASE_URL}/${gameId}`);
+        check(getSession, { 'sessions listed': (r) => r.status === 200 });
 
         let actionRes = http.post(`${BASE_URL}/${gameId}/action`, JSON.stringify({
           playerId: playerIds[i].playerId,
           action: action,
           turn: turn
-        }), { headers: { 'Content-Type': 'application/json' } });
+        }), { responseCallback: http.expectedStatuses(200,400), headers: { 'Content-Type': 'application/json' } });
         if (actionRes.status === 200) {
-          check(actionRes, { [`player ${i + 1} played action ${action.code} turn ${turn} on attempt${attempts}`]: (r) => r.status === 200 });
+          check(actionRes, { [`player made their move`]: (r) => r.status === 200 });
           success = true;
           sleep(Math.random() * 3);
         } else {
