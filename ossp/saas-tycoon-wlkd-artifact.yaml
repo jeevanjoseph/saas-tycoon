@@ -18,6 +18,98 @@ body:
           backend:
             serviceName: saas-tycoon-server
             servicePort: 3000
+  lifecycleHooks:
+    - name: demo-precreate
+      phase: preCreate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - preCreate
+    - name: demo-postcreate-1
+      phase: postCreate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: bash
+        args:
+          - "-c"
+          - |
+            NAMESPACE=$(cat /ossp/jobs/input.json | jq -r '.workloadDeploymentName')
+            echo "Updating ConfigMap postCreateStatus in namespace $NAMESPACE"
+            kubectl patch configmap lifecycle-status \
+              -n "$NAMESPACE" \
+              --type strategic \
+              -p '{"data": {"postCreateStatus": "Success"}}'
+    - name: demo-postcreate-2
+      phase: postCreate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postCreate-2
+    - name: demo-postcreate-3
+      phase: postCreate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postCreate-3
+    - name: demo-preupdate
+      phase: preUpdate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - preUpdate
+    - name: demo-postupdate
+      phase: postUpdate
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postUpdate
+    - name: demo-prestop
+      phase: preStop
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - preStop
+    - name: demo-poststop
+      phase: postStop
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postStop
+    - name: demo-prestart
+      phase: preStart
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - preStart
+    - name: demo-poststart
+      phase: postStart
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postStart
+    - name: demo-predelete
+      phase: preDelete
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - preDelete
+    - name: demo-postdelete
+      phase: postDelete
+      jobConfig:
+        image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        command: echo
+        args:
+        - postDelete
 published: true
 propertiesSchema:
   type: object
@@ -27,7 +119,7 @@ propertiesSchema:
       description: The port to run the Saas Tycoon frontend on
       type: integer
     frontend-replicas:
-      default: 1
+      default: 2
       description: The number of replicas for the SaaS tycoon frontend
       type: integer
     backend-port:
@@ -35,7 +127,7 @@ propertiesSchema:
       description: The port to run the Saas Tycoon backend on
       type: integer
     backend-replicas:
-      default: 1
+      default: 3
       description: The number of replicas for the SaaS tycoon backend
       type: integer
   

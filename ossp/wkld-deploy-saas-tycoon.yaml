@@ -2,11 +2,11 @@ compartmentId: ocid1.compartment.oc1..aaaaaaaare32yf7volazoaqhyzoghs2ezz7sr2uizd
 workloadVersions:
   - workloadVersionId:
       repoName: ossp-demo-apps
-      version: 0.0.1
+      version: 0.0.2
       workloadName: saas-tycoon
 config:
   frontend-port: 80
-  frontend-replicas: 1
+  frontend-replicas: 2
   backend-port: 3000
-  backend-replicas: 1
+  backend-replicas: 3
 secrets: []
