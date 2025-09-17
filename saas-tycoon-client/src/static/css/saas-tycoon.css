@@ -160,11 +160,11 @@
     justify-content: center;
     align-items: flex-start;
     margin: 0 auto 2rem auto;
-    max-width: 100vw;
+    max-width: 98vw;
 }
 
 .current-player-center {
-    min-width: 900px;
+    min-width: 700px;
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
@@ -276,7 +276,7 @@
 
 .right-column-features {
     flex: 0 0 340px;
-    min-width: 360px;
+    min-width: 320px;
     max-width: 420px;
     border-radius: 10px;
     margin-left: 0.5rem;
@@ -658,7 +658,11 @@
 
 
 /* --- Responsive styles --- */
-@media (max-width: 900px) {
+@media (max-width: 800px) {
+    .three-column-layout {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
     .player-type-cards {
         gap: 1rem;
     }
@@ -759,22 +763,19 @@
     .left-column-status,
     .right-column-features {
         min-width: 180px;
-        max-width: 100vw;
+        max-width: 98vw;
         padding: 0.7rem 0.5rem;
     }
 }
 
 @media (max-width: 1500px) {
-    .three-column-layout {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
+    
 
     .left-column-status,
     .right-column-features {
         margin: 0 auto;
         width: 100%;
-        max-width: 100vw;
+        max-width: 98vw;
     }
 }
 
