@@ -23,6 +23,7 @@ body:
       phase: preCreate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - preCreate
@@ -30,6 +31,7 @@ body:
       phase: postCreate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: bash
         args:
           - "-c"
@@ -44,6 +46,7 @@ body:
       phase: postCreate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postCreate-2
@@ -51,6 +54,7 @@ body:
       phase: postCreate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postCreate-3
@@ -58,6 +62,7 @@ body:
       phase: preUpdate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - preUpdate
@@ -65,6 +70,7 @@ body:
       phase: postUpdate
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postUpdate
@@ -72,6 +78,7 @@ body:
       phase: preStop
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - preStop
@@ -79,6 +86,7 @@ body:
       phase: postStop
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postStop
@@ -86,6 +94,7 @@ body:
       phase: preStart
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - preStart
@@ -93,6 +102,7 @@ body:
       phase: postStart
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postStart
@@ -100,6 +110,7 @@ body:
       phase: preDelete
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - preDelete
@@ -107,6 +118,7 @@ body:
       phase: postDelete
       jobConfig:
         image: docker-master.cdaas.oraclecloud.com/docker-spectra-platform-dev/ossp-demo-apps/ossp/kubectl-oraclelinux:simple-hellospectra-lifecyclehook
+        ignoreFailures: true
         command: echo
         args:
         - postDelete
