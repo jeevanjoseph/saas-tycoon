@@ -81,6 +81,7 @@ function LeadersPage({ defaultStartDate = '-7d' }) {
           dateFormat="yy-mm-dd"
           placeholder="Pick a date"
           showIcon
+          showTime
           style={{ minWidth: 160 }}
         />
         <Button label="Show Leaderboard" icon="pi pi-search" onClick={handleFetch} disabled={!startDate} />
@@ -113,10 +114,10 @@ function LeadersPage({ defaultStartDate = '-7d' }) {
                             Session ID: {session.sessionId}
                           </div>
                           <div className="leaderboard-session-id">
-                            Started: {session.startTime ? timeAgo(session.startTime) : '-'}
+                            Started: {session.startTime ? session.startTime : '-'}
                           </div>
                           <div className="leaderboard-session-id">
-                            Ended: {session.endTime ? timeAgo(session.endTime) : '-'}
+                            Ended: {session.endTime ? session.endTime : '-'}
                           </div>
                         </td>
                         {/* Top 3 Players */}
