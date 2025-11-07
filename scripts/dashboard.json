@@ -1,0 +1,467 @@
+{
+  "dashboard": {
+    "uid": "fexfllvslea69e",
+    "title": "SaaS Tycoon Server: OpenTelemetry Metrics",
+    "tags": ["opentelemetry", "nodejs", "saas-tycoon"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "row",
+        "title": "HTTP Server Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "HTTP Requests (Count)",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(http_server_duration_count{app=\"saas-tycoon-server\"})",
+            "legendFormat": "Total HTTP Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "HTTP Errors (4xx/5xx)",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(http_server_duration_count{http_status_code=~\"4..|5..\",app=\"saas-tycoon-server\"})",
+            "legendFormat": "HTTP Errors"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "HTTP Request Duration (ms)",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "rate(http_server_duration_sum{app=\"saas-tycoon-server\"}[5m]) / rate(http_server_duration_count{app=\"saas-tycoon-server\"}[5m])",
+            "legendFormat": "Avg Duration"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "HTTP Request Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (le) (rate(http_server_duration_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "table",
+        "title": "HTTP Request Breakdown",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (http_method, http_route, http_status_code) (rate(http_server_duration_count{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{http_method}} {{http_route}} {{http_status_code}}"
+          }
+        ]
+      },
+      {
+        "type": "row",
+        "title": "DAO & GameSession Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "Player DAO Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 14 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(player_dao_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "PlayerDAO Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Player DAO Errors",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 14 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(player_dao_errors_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "PlayerDAO Errors"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Session DAO Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 14 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(session_dao_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "SessionDAO Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Session DAO Errors",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 14 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(session_dao_errors_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "SessionDAO Errors"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "Session DAO Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(session_dao_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "heatmap",
+        "title": "Player DAO Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(player_dao_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "row",
+        "title": "Game Logic Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "GameSession Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 27 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(game_session_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "GameSession Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "GameSession Duration (ms)",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 27 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "rate(game_session_duration_ms_sum{app=\"saas-tycoon-server\"}[5m]) / rate(game_session_duration_ms_count{app=\"saas-tycoon-server\"}[5m])",
+            "legendFormat": "Avg Duration"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "GameSession Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 27 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(game_session_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "row",
+        "title": "Player Actions Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "Player Actions Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 36 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(player_actions_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "PlayerActions Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Player Actions Errors",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 36 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(player_actions_errors_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "PlayerActions Errors"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "Player Actions Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(player_actions_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "row",
+        "title": "Mongo Metrics",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 44 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "Mongo Player Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 45 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(mongo_player_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "MongoPlayer Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Mongo Player Errors",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 45 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(mongo_player_errors_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "MongoPlayer Errors"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "Mongo Player Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 45 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(mongo_player_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "stat",
+        "title": "Mongo GameSession Requests",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 53 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(mongo_game_session_requests_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "MongoGameSession Requests"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Mongo GameSession Errors",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 53 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(mongo_game_session_errors_total{app=\"saas-tycoon-server\"})",
+            "legendFormat": "MongoGameSession Errors"
+          }
+        ]
+      },
+      {
+        "type": "heatmap",
+        "title": "Mongo GameSession Duration Histogram",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum by (function, le) (rate(mongo_game_session_duration_ms_bucket{app=\"saas-tycoon-server\"}[5m]))",
+            "legendFormat": "{{function}} le={{le}}"
+          }
+        ],
+        "yAxis": { "format": "ms" }
+      },
+      {
+        "type": "row",
+        "title": "Node.js Runtime",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 },
+        "collapsed": false,
+        "panels": []
+      },
+      {
+        "type": "stat",
+        "title": "Event Loop Utilization",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 62 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_utilization{app=\"saas-tycoon-server\"}",
+            "legendFormat": "Event Loop Utilization"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Event Loop Delay (mean, ms)",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 62 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_delay_mean{app=\"saas-tycoon-server\"} * 1000",
+            "legendFormat": "Event Loop Delay Mean"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Heap Used (MB)",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 62 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(v8js_memory_heap_used{app=\"saas-tycoon-server\"}) / 1024 / 1024",
+            "legendFormat": "Heap Used"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Heap Limit (MB)",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 62 },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir-us-phoenix-1-fa"
+        },
+        "targets": [
+          {
+            "expr": "sum(v8js_memory_heap_limit{app=\"saas-tycoon-server\"}) / 1024 / 1024",
+            "legendFormat": "Heap Limit"
+          }
+        ]
+      }
+    ]
+  }
+}
