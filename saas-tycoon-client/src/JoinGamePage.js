@@ -24,6 +24,8 @@ function JoinGamePage({
   setPlayerCode,
   playerType,
   setPlayerType,
+  playerInfo,
+  setPlayerInfo,
   sessions,
   createGame,
   joinGame,
@@ -40,7 +42,6 @@ function JoinGamePage({
   const [playerLimitError, setPlayerLimitError] = useState('');
   const [playerCodeTouched, setPlayerCodeTouched] = useState(false);
   const [playerCodeError, setPlayerCodeError] = useState('');
-  const [playerInfo, setPlayerInfo] = useState(null);
   const [verifying, setVerifying] = useState(false);
   const toast = useRef(null);
 
@@ -171,12 +172,13 @@ function JoinGamePage({
 
 
   const handlePlayerCodeChange = async (value) => {
-    setPlayerCode(value);
+    //setPlayerCode(value);
     setPlayerCodeTouched(true);
     setPlayerInfo(null);
     setPlayerName(null);
     setPlayerCodeError('');
     if (value && value.length === 8) {
+      setPlayerCode(value);
       setVerifying(true);
       try {
         const res = await verifyPlayer(value);
@@ -397,7 +399,7 @@ function JoinGamePage({
                     icon="pi pi-eye"
                     className="p-button-info"
                     onClick={() => onSpectate && onSpectate(selectedGameId)}
-                    disabled={!selectedGameId}
+                    disabled={!selectedGameId || !playerName}
                   />
                   <Button
                     label="Leaders"
@@ -405,6 +407,7 @@ function JoinGamePage({
                     className="p-button-warning"
                     onClick={onShowLeaders}
                     style={{ marginLeft: 12 }}
+                    disabled={!playerName}
                   />
                 </div>
               </div>

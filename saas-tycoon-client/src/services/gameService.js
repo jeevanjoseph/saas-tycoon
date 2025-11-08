@@ -37,8 +37,9 @@ export async function fetchSessions() {
  * @param {string|number} gameId
  * @returns {Promise<Object>}
  */
-export async function fetchGame(gameId) {
-  const res = await axios.get(`${getBaseUrl()}/${gameId}`);
+export async function fetchGame(gameId,playerId,spectate) {
+  //set playerCode param when spectating, and PlayerId param when in the game session 
+  const res = await axios.get(`${getBaseUrl()}/${gameId}?${spectate ? 'playerCode='+playerId : 'playerId='+playerId}`);
   return res.data;
 }
 

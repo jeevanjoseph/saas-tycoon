@@ -19,6 +19,7 @@ function App() {
   const [playerId, setPlayerId] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [playerCode, setPlayerCode] = useState('');
+  const [playerInfo, setPlayerInfo] = useState(null);
   const [playerType, setPlayerType] = useState(null);
   const [game, setGame] = useState(null);
   const [error, setError] = useState(null);
@@ -26,7 +27,7 @@ function App() {
   const [showLeaders, setShowLeaders] = useState(false);
 
   useEffect(() => {
-    // Only fetch sessions if NOT on leaderboard page
+    // Only fetch sessions if on joinGame page
     if (!gameId && !spectateId && !showLeaders) {
       const interval = setInterval(() => {
         fetchSessions()
@@ -37,9 +38,9 @@ function App() {
           });
       }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
-    } else if (spectateId) {
+    } else if (spectateId && playerInfo) {
       const interval = setInterval(() => {
-        fetchGame(spectateId)
+        fetchGame(spectateId, playerInfo.playerCode, true)
           .then(setGame)
           .catch((err) => {
             console.error('Error fetching game data:', err)
@@ -47,9 +48,10 @@ function App() {
           });
       }, 2000 + Math.floor(Math.random() * 500));
       return () => clearInterval(interval);
-    } else if (gameId) {
+    } else if (gameId && playerId) {
+      console.log('Setting up game data fetch for gameId:', gameId, 'playerId:', playerId);
       const interval = setInterval(() => {
-        fetchGame(gameId)
+        fetchGame(gameId,playerId, false)
           .then(setGame)
           .catch((err) => {
             console.error('Error fetching game data:', err)
@@ -59,7 +61,7 @@ function App() {
       return () => clearInterval(interval);
     }
     // If showLeaders is true, do not fetch sessions or games
-  }, [gameId, spectateId, showLeaders]);
+  }, [gameId, spectateId, showLeaders, playerInfo, playerId]);
 
   const handleCreateGame = async (sessionName, playerCount) => {
     try {
@@ -77,6 +79,7 @@ function App() {
       const res = await joinGame(id, playerCode, playerType);
       setGameId(res.gameId);
       setPlayerId(res.playerId);
+      console.log('Joined game with ID:', gameId, 'as player ID:', playerId);
     } catch (err) {
       console.error('Error joining game:', err);
       setError(err.response?.data.error || err.message || 'Unknown error');
@@ -132,6 +135,8 @@ function App() {
         setPlayerCode={setPlayerCode}
         playerType={playerType}
         setPlayerType={setPlayerType}
+        playerInfo={playerInfo}
+        setPlayerInfo={setPlayerInfo}
         sessions={sessions}
         createGame={handleCreateGame}
         joinGame={handleJoinGame}

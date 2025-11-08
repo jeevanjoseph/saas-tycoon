@@ -18,6 +18,10 @@ const errorCount = meter.createCounter('game_controller_errors', {
 const requestDuration = meter.createHistogram('game_controller_duration_ms', {
   description: 'Duration of gameController functions in ms'
 });
+// added counter for player query emits
+const sessionQueryCounter = meter.createCounter('game_session_player_queries', {
+  description: 'Count of getGameSession queries; attributes: sessionId, playerName(optional), playerId(optional), playerProvided'
+});
 
 // Helper to sync in-memory and DB, with tracing
 async function syncSessionToDb(session, parentSpan) {
@@ -43,7 +47,7 @@ async function getAllSessions(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getAllSessions' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('getAllSessions', {parent: traceId}, async (span) => {
+  return tracer.startActiveSpan('getAllSessions', { parent: traceId }, async (span) => {
     try {
       const sessionList = await sessionDAO.getOngoingSessionList(span);
       // const sessions = await sessionDAO.getAllSessions(span);
@@ -68,7 +72,7 @@ async function createSession(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'createSession' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('createSession', {parent: traceId}, async (span) => {
+  return tracer.startActiveSpan('createSession', { parent: traceId }, async (span) => {
     try {
       const { playerLimit, name } = req.body;
       if (name) {
@@ -98,7 +102,7 @@ async function joinSession(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'joinSession' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('joinSession', {parent: traceId}, async (span) => {
+  return tracer.startActiveSpan('joinSession', { parent: traceId }, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -144,7 +148,7 @@ async function setPlayerReady(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'setPlayerReady' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('setPlayerReady', {parent: traceId}, async (span) => {
+  return tracer.startActiveSpan('setPlayerReady', { parent: traceId }, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -183,16 +187,57 @@ async function getGameSession(req, res) {
   const traceId = req.headers['request_X_B3_Traceid'];
   return tracer.startActiveSpan('getGameSession', { parent: traceId }, async (span) => {
     try {
-      const session = await sessionDAO.getSessionById(req.params.id, span);
-      if (!session) return res.status(404).json({ error: 'Game not found' });
-
+      const sessionIdAttr = { sessionId: req.params.id };
       const { playerId } = req.query;
-      if (playerId) {
-        const player = session.players.find(p => p.id === playerId);
-        if (!player) return res.status(404).json({ error: 'Player not found' });
-        return res.json({ player });
+      const { playerCode } = req.query;
+
+      //PlayerId or playerCode must be provided. 
+      if(!playerId && !playerCode){
+        sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'false' }));
+        return res.status(400).json({ error: 'Unidentified player' });
+      }
+      // If playerCode is provided, verify it. This is for spectators.
+      if (playerCode) {
+        playerDAO.findByCode(playerCode).then(player => {
+          if (player) {
+            sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerCode, playerName: player.playerEmail, playerFound: 'true' }));
+          } else {
+            sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerCode, playerFound: 'false' }));
+            return res.status(401).json({ error: 'Invalid Player Code' });
+          }
+        }).catch(err => {
+          console.error('Error verifying spectator player code:', err);
+        });
       }
 
+      // fetch the session, need that before we can verify player. 
+      // TODO write a more efficient query that gets session and player in one go.
+      const session = await sessionDAO.getSessionById(req.params.id, span);
+
+      if (!session) {
+        // session not found; still return 404 and record
+        span.addEvent('session_not_found');
+        return res.status(404).json({ error: 'Game not found' });
+      }
+
+      // if playerId is provided, verify that the player is part of the session
+      if (playerId) {
+        // find player
+        const player = session.players.find(p => p.id === playerId);
+        if (!player) {
+          // emit counter for attempted lookup where player not found
+          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerFound: 'false' }));
+          span.addEvent('player_not_found');
+          return res.status(401).json({ error: 'Player not authorized' });
+        } else {
+          // valid player - emit counter that includes player name
+          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerName: player.name, playerFound: 'true' }));
+        }
+      }else {
+        // no playerId provided
+        sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'false' }));
+      }
+      // return the session payload
       res.json(session);
     } catch (err) {
       console.error('Error getting game session:', err);
@@ -211,7 +256,7 @@ async function getLastEvent(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getLastEvent' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('getLastEvent', {parent:traceId}, async (span) => {
+  return tracer.startActiveSpan('getLastEvent', { parent: traceId }, async (span) => {
     try {
       const session = await sessionDAO.getSessionById(req.params.id, span);
       if (!session) return res.status(404).json({ error: 'Game not found' });
@@ -296,7 +341,7 @@ async function getTopPlayersSince(req, res) {
   const start = Date.now();
   requestCount.add(1, { function: 'getTopPlayersSince' });
   const traceId = req.headers['request_X_B3_Traceid'];
-  return tracer.startActiveSpan('getTopPlayersSince', {parent: traceId}, async (span) => {
+  return tracer.startActiveSpan('getTopPlayersSince', { parent: traceId }, async (span) => {
     try {
       const { startDate } = req.query;
       if (!startDate) {
