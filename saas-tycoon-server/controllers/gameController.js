@@ -210,32 +210,26 @@ async function getGameSession(req, res) {
         });
       }
 
-      // fetch the session, need that before we can verify player. 
-      // TODO write a more efficient query that gets session and player in one go.
+      // if the player ID is provided, verify that the player is part of the session
+      if (playerId) {
+        const players = await sessionDAO.getPlayersBySessionId(req.params.id, span);
+        const player = players.find(p => p.id === playerId);
+        if (!player) {
+          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerFound: 'false' }));
+          span.addEvent('player_not_in_session');
+          return res.status(403).json({ error: 'Player not authorized' });
+        } else {
+          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerName: player.name, playerFound: 'true' }));
+        }
+      }
+
+      // verified player.  fetch the session.
       const session = await sessionDAO.getSessionById(req.params.id, span);
 
       if (!session) {
         // session not found; still return 404 and record
         span.addEvent('session_not_found');
         return res.status(404).json({ error: 'Game not found' });
-      }
-
-      // if playerId is provided, verify that the player is part of the session
-      if (playerId) {
-        // find player
-        const player = session.players.find(p => p.id === playerId);
-        if (!player) {
-          // emit counter for attempted lookup where player not found
-          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerFound: 'false' }));
-          span.addEvent('player_not_found');
-          return res.status(401).json({ error: 'Player not authorized' });
-        } else {
-          // valid player - emit counter that includes player name
-          sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'true', playerId, playerName: player.name, playerFound: 'true' }));
-        }
-      }else {
-        // no playerId provided
-        sessionQueryCounter.add(1, Object.assign({}, sessionIdAttr, { playerProvided: 'false' }));
       }
       // return the session payload
       res.json(session);

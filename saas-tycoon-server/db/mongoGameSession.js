@@ -176,6 +176,28 @@ async function getSessionsFinishedSince(timestamp, parentSpan) {
     });
 }
 
+// returns players array for a given session id
+async function getPlayersBySessionId(sessionId, parentSpan) {
+    const start = Date.now();
+    requestCount.add(1, { function: 'getPlayersBySessionId' });
+    return tracer.startActiveSpan('mongoGameSession.getPlayersBySessionId', { parent: parentSpan }, async (span) => {
+        try {
+            const col = await connect(span);
+            // project only players field to minimize data transfer
+            const doc = await col.findOne({ id: sessionId }, { projection: { players: 1, _id: 0 } });
+            if (!doc) return [];
+            return doc.players || [];
+        } catch (err) {
+            errorCount.add(1, { function: 'getPlayersBySessionId' });
+            span.recordException(err);
+            throw new Error('Failed to fetch players for session');
+        } finally {
+            requestDuration.record(Date.now() - start, { function: 'getPlayersBySessionId' });
+            span.end();
+        }
+    });
+}
+
 module.exports = {
     saveSession,
     getSessionById,
@@ -184,4 +206,5 @@ module.exports = {
     close,
     getSessionsFinishedSince,
     getOngoingSessionList,
+    getPlayersBySessionId,
 };

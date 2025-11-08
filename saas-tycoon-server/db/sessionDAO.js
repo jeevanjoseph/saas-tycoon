@@ -195,6 +195,30 @@ class SessionDAO {
       }
     });
   }
+
+  // returns players array for a session
+  async getPlayersBySessionId(sessionId, parentSpan) {
+    const start = Date.now();
+    requestCount.add(1, { function: 'getPlayersBySessionId' });
+    return tracer.startActiveSpan('sessionDAO.getPlayersBySessionId', { parent: parentSpan }, async (span) => {
+      try {
+        if (this.mongoAvailable) {
+          // delegate to mongo implementation, passing span for trace propagation
+          return await mongoGameSession.getPlayersBySessionId(sessionId, span);
+        }
+        const session = this.sessions[sessionId];
+        return session ? (session.players || []) : [];
+      } catch (err) {
+        console.error(`Error getting players for session ${sessionId}:`, err);
+        errorCount.add(1, { function: 'getPlayersBySessionId' });
+        span.recordException(err);
+        throw err;
+      } finally {
+        requestDuration.record(Date.now() - start, { function: 'getPlayersBySessionId' });
+        span.end();
+      }
+    });
+  }
 }
 
 module.exports = new SessionDAO();
